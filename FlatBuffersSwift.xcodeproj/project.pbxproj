@@ -9,7 +9,11 @@
 /* Begin PBXBuildFile section */
 		0BA0E8491C32B62200B896B7 /* FlatBuffersSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0BA0E8501C32B62200B896B7 /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
-		0BA0E8551C32B62200B896B7 /* FlatBuffersSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E8541C32B62200B896B7 /* FlatBuffersSwiftTests.swift */; };
+		0BA0E8681C32B6A300B896B7 /* FlatBuffersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E8671C32B6A300B896B7 /* FlatBuffersTests.swift */; };
+		0BA0E86D1C32B6AD00B896B7 /* FlatBufferObjectMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E8691C32B6AD00B896B7 /* FlatBufferObjectMapper.swift */; };
+		0BA0E86E1C32B6AD00B896B7 /* FlatBufferReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */; };
+		0BA0E86F1C32B6AD00B896B7 /* FlatBufferBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86B1C32B6AD00B896B7 /* FlatBufferBuilder.swift */; };
+		0BA0E8701C32B6AD00B896B7 /* FlatBuffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,8 +31,12 @@
 		0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlatBuffersSwift.h; sourceTree = "<group>"; };
 		0BA0E84A1C32B62200B896B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0BA0E84F1C32B62200B896B7 /* FlatBuffersSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlatBuffersSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0BA0E8541C32B62200B896B7 /* FlatBuffersSwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlatBuffersSwiftTests.swift; sourceTree = "<group>"; };
 		0BA0E8561C32B62200B896B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0BA0E8671C32B6A300B896B7 /* FlatBuffersTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffersTests.swift; sourceTree = "<group>"; };
+		0BA0E8691C32B6AD00B896B7 /* FlatBufferObjectMapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBufferObjectMapper.swift; sourceTree = "<group>"; };
+		0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBufferReader.swift; sourceTree = "<group>"; };
+		0BA0E86B1C32B6AD00B896B7 /* FlatBufferBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBufferBuilder.swift; sourceTree = "<group>"; };
+		0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +79,10 @@
 		0BA0E8471C32B62200B896B7 /* FlatBuffersSwift */ = {
 			isa = PBXGroup;
 			children = (
+				0BA0E8691C32B6AD00B896B7 /* FlatBufferObjectMapper.swift */,
+				0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */,
+				0BA0E86B1C32B6AD00B896B7 /* FlatBufferBuilder.swift */,
+				0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */,
 				0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */,
 				0BA0E84A1C32B62200B896B7 /* Info.plist */,
 			);
@@ -80,7 +92,7 @@
 		0BA0E8531C32B62200B896B7 /* FlatBuffersSwiftTests */ = {
 			isa = PBXGroup;
 			children = (
-				0BA0E8541C32B62200B896B7 /* FlatBuffersSwiftTests.swift */,
+				0BA0E8671C32B6A300B896B7 /* FlatBuffersTests.swift */,
 				0BA0E8561C32B62200B896B7 /* Info.plist */,
 			);
 			path = FlatBuffersSwiftTests;
@@ -194,6 +206,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0BA0E8701C32B6AD00B896B7 /* FlatBuffers.swift in Sources */,
+				0BA0E86D1C32B6AD00B896B7 /* FlatBufferObjectMapper.swift in Sources */,
+				0BA0E86F1C32B6AD00B896B7 /* FlatBufferBuilder.swift in Sources */,
+				0BA0E86E1C32B6AD00B896B7 /* FlatBufferReader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,7 +217,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0BA0E8551C32B62200B896B7 /* FlatBuffersSwiftTests.swift in Sources */,
+				0BA0E8681C32B6A300B896B7 /* FlatBuffersTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +321,7 @@
 		0BA0E85A1C32B62200B896B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -317,12 +334,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		0BA0E85B1C32B62200B896B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -341,17 +360,20 @@
 		0BA0E85D1C32B62200B896B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = FlatBuffersSwiftTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		0BA0E85E1C32B62200B896B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = FlatBuffersSwiftTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
