@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import FlatBuffersSwift
+import Foundation
 
 class FlatBuffersTests: XCTestCase {
     
@@ -352,11 +353,12 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(b1, true)
     }
     
-    func testCreateObjectAndReadDefaultBoolFromRootObject() {
+    func testCreateObjectAndReadPropertyOutsideOfTheVTable() { // Important for backwards compatibility
         let fbb = FlatBufferBuilder()
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
+        try! fbb.addPropertyToOpenObject(2, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
         let data = try! fbb.finish(oOffset, fileIdentifier: nil)
@@ -365,12 +367,13 @@ class FlatBuffersTests: XCTestCase {
             [
                 14,  0,  0,  0,      // root object offset
                 10,  0,              // vTable length
-                9,  0,              // object data buffer length
-                8,  0,              // relative offest of first property
+                10,  0,              // object data buffer length
+                9,  0,              // relative offest of first property
                 4,  0,              // relative offest of second property
-                0,  0,              // relative offest of third property - 0,0 meaning it is not set
+                8,  0,              // relative offest of third property
                 10,  0,  0,  0,      // start of the object data buffer and vTable offset
-                5,  0,  0,  0,      // second property string offest
+                6,  0,  0,  0,      // second property string offest
+                1,                  // third property boolean value
                 1,                  // first property boolean value
                 3,  0,  0,0,        // string length
                 109, 97,120]          // string 'max'
@@ -378,8 +381,10 @@ class FlatBuffersTests: XCTestCase {
         
         let reader = FlatBufferReader(buffer: data)
         let objectOffset = reader.rootObjectOffset
-        let b2 = reader.get(objectOffset, propertyIndex: 2, defaultValue: false)
-        XCTAssertEqual(b2, false)
+        let badProperty = reader.get(objectOffset, propertyIndex: 3, defaultValue: false)
+        XCTAssertEqual(badProperty, false)
+        let thirdProperty = reader.get(objectOffset, propertyIndex: 2, defaultValue: false)
+        XCTAssertEqual(thirdProperty, true)
     }
     
     func testCreateObjectAndReadStringFromRootObject() {
@@ -517,6 +522,7 @@ class FlatBuffersTests: XCTestCase {
         let age : Int? = Person(age: 0, name: StringOffset(0)).get(reader, propertyName: "age")
         XCTAssert(age == 23)
     }
+    
 }
 
 

@@ -5,14 +5,13 @@
 //  Created by Maxim Zaks on 21.11.15.
 //  Copyright © 2015 maxim.zaks. All rights reserved.
 //
-
+import Foundation
 
 func fromByteArray<T : Scalar>(value: ArraySlice<UInt8>) -> T {
     return value.withUnsafeBufferPointer {
         return UnsafePointer<T>($0.baseAddress).memory
     }
 }
-
 
 public class FlatBufferReader {
 
@@ -33,6 +32,16 @@ public class FlatBufferReader {
             return defaultValue
         }
         let position = Int(objectOffset.value) + Int(propertyOffset)
+        return fromByteArray(buffer[position..<(position + strideof(T))])
+    }
+    
+    public func getStructProperty<T : Scalar>(objectOffset : ObjectOffset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
+        let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
+        if propertyOffset == 0 {
+            return defaultValue
+        }
+        let position = Int(objectOffset.value) + Int(propertyOffset) + structPropertyOffset
+        
         return fromByteArray(buffer[position..<(position + strideof(T))])
     }
     
@@ -80,9 +89,13 @@ public class FlatBufferReader {
     }
     
     public func getVectorOffsetElement<T : Offset>(vectorOffset : VectorOffset, index : Int) -> T? {
-        let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (index * strideof(T)))
-        let data = buffer[valueStartPosition..<(valueStartPosition + strideof(T))]
-        let offset : Int32 = fromByteArray(data) + valueStartPosition
+        let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (index * strideof(Int32)))
+        let data = buffer[valueStartPosition..<(valueStartPosition + strideof(Int32))]
+        let localOffset : Int32 = fromByteArray(data)
+        if(localOffset == 0){
+            return nil
+        }
+        let offset : Int32 = localOffset + valueStartPosition
         if(T.self == ObjectOffset.self){
             return ObjectOffset(offset) as? T
         } else if(T.self == VectorOffset.self) {
@@ -94,7 +107,12 @@ public class FlatBufferReader {
     
     private func getPropertyOffset(objectOffset : ObjectOffset, propertyIndex : Int)->Int {
         let vTableOffset : Int32 = objectOffset.value - fromByteArray( buffer[Int(objectOffset.value)..<Int(objectOffset.value+4)])
+        let vTableLength : Int16 = fromByteArray( buffer[Int(vTableOffset)..<Int(vTableOffset+2)])
+        if(vTableLength<=Int16(4 + propertyIndex * 2)) {
+            return 0
+        }
         let propertyStart = vTableOffset + 4 + (2 * propertyIndex)
+        
         let propertyOffset : Int16 = fromByteArray( buffer[Int(propertyStart)..<Int(propertyStart+2)])
         return Int(propertyOffset)
     }

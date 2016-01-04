@@ -38,7 +38,10 @@ public class FlatBufferBuilder {
         data.insertContentsOf(valueAsBuffer, at: 0)
     }
     
-    public func putOffset(offset : Offset) throws {
+    public func putOffset(offset : Offset?) throws {
+        guard let offset = offset else {
+            return put(Int32(0))
+        }
         guard offset.value <= Int32(data.count) else {
             throw FlatBufferBuilderError.ObjectIsNotClosed
         }
