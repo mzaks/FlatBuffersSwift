@@ -43,7 +43,7 @@ public class FlatBufferBuilder {
             return put(Int32(0))
         }
         guard offset.value <= Int32(data.count) else {
-            throw FlatBufferBuilderError.ObjectIsNotClosed
+            throw FlatBufferBuilderError.OffsetIsTooBig
         }
         let _offset = Int32(data.count) - offset.value + strideof(Int32);
         put(_offset)
