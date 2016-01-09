@@ -47,6 +47,10 @@ public class FlatBufferReader {
         return fromByteArray(position)
     }
     
+    public func hasProperty(objectOffset : ObjectOffset, propertyIndex : Int) -> Bool {
+        return getPropertyOffset(objectOffset, propertyIndex: propertyIndex) != 0
+    }
+    
     public func getOffset<T : Offset>(objectOffset : ObjectOffset, propertyIndex : Int) -> T?{
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -86,6 +90,11 @@ public class FlatBufferReader {
     
     public func getVectorScalarElement<T : Scalar>(vectorOffset : VectorOffset, index : Int) -> T {
         let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (index * strideof(T)))
+        return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
+    }
+    
+    public func getVectorStructElement<T : Scalar>(vectorOffset : VectorOffset, vectorIndex : Int, structSize : Int, structElementIndex : Int) -> T {
+        let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (vectorIndex * structSize) + structElementIndex)
         return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
     }
     
