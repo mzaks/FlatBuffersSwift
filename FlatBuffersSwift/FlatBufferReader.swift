@@ -69,14 +69,21 @@ public class FlatBufferReader {
         }
     }
     
+    var stringCache : [Int32:String] = [:]
+    
     public func getString(stringOffset : StringOffset?) -> String? {
         guard let stringOffset = stringOffset else {
             return nil
         }
+        if let result = stringCache[stringOffset.value]{
+            return result
+        }
         let stringPosition = Int(stringOffset.value)
         let stringLenght : Int32 = fromByteArray(stringPosition)
         let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
-        return String.init(bytesNoCopy: pointer, length: Int(stringLenght), encoding: NSUTF8StringEncoding, freeWhenDone: false)
+        let result = String.init(bytesNoCopy: pointer, length: Int(stringLenght), encoding: NSUTF8StringEncoding, freeWhenDone: false)
+        stringCache[stringOffset.value] = result
+        return result
     }
     
     public func getVectorLength(vectorOffset : VectorOffset?) -> Int {

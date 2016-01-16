@@ -14,11 +14,9 @@ class FlatBuffersTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
     
@@ -487,46 +485,4 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(reader.getString(objectOffset3), "max")
     }
     
-    func testCreateObjectFromStruct() {
-        let fbb = FlatBufferBuilder()
-        let sOffset = try! fbb.createString("max")
-        
-        let p = Person(age: 23, name: sOffset)
-        
-        try! fbb.addObject(p)
-        XCTAssertEqual(fbb.data,[
-            8, 0,
-            16, 0,
-            8, 0,
-            4, 0,
-            8, 0, 0, 0,
-            12, 0, 0, 0,
-            23, 0, 0, 0, 0, 0, 0, 0,
-            3, 0, 0, 0,109, 97, 120
-            ]
-        )
-    }
-    
-    func testGetValueFromStruct() {
-        let fbb = FlatBufferBuilder()
-        let sOffset = try! fbb.createString("max")
-        
-        let p = Person(age: 23, name: sOffset)
-        
-        let offset = try! fbb.addObject(p)
-        let data = try! fbb.finish(offset, fileIdentifier: nil)
-        
-        let reader = FlatBufferReader(buffer: data)
-        
-        
-        let age : Int? = Person(age: 0, name: StringOffset(0)).get(reader, propertyName: "age")
-        XCTAssert(age == 23)
-    }
-    
-}
-
-
-struct Person : Table {
-    var age : Int
-    var name : StringOffset
 }

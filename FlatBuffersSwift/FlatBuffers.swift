@@ -12,10 +12,10 @@ public protocol Offset {
 
 public struct StringOffset : Offset {
     let _value : Int32
-    init(_ value : Int32){
+    public init(_ value : Int32){
         _value = value
     }
-    init(_ value : Int){
+    public init(_ value : Int){
         self.init(Int32(value))
     }
     public var value : Int32 {return _value}
@@ -23,10 +23,10 @@ public struct StringOffset : Offset {
 
 public struct VectorOffset : Offset {
     let _value : Int32
-    init(_ value : Int32){
+    public init(_ value : Int32){
         _value = value
     }
-    init(_ value : Int){
+    public init(_ value : Int){
         self.init(Int32(value))
     }
     
@@ -35,10 +35,10 @@ public struct VectorOffset : Offset {
 
 public struct ObjectOffset : Offset {
     let _value : Int32
-    init(_ value : Int32){
+    public init(_ value : Int32){
         _value = value
     }
-    init(_ value : Int){
+    public init(_ value : Int){
         self.init(Int32(value))
     }
     public var value : Int32 {return _value}
