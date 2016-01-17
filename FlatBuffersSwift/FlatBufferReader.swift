@@ -23,106 +23,96 @@ public class FlatBufferReader {
         self.buffer = bytes
     }
     
-    public var rootObjectOffset : ObjectOffset {
+    public var rootObjectOffset : Offset {
         let offset : Int32 = fromByteArray(0)
-        return ObjectOffset(offset)
+        return offset
     }
     
-    public func get<T : Scalar>(objectOffset : ObjectOffset, propertyIndex : Int, defaultValue : T) -> T{
+    public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int, defaultValue : T) -> T{
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
             return defaultValue
         }
-        let position = Int(objectOffset.value) + Int(propertyOffset)
+        let position = Int(objectOffset + propertyOffset)
         return fromByteArray(position)
     }
     
-    public func getStructProperty<T : Scalar>(objectOffset : ObjectOffset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
+    public func getStructProperty<T : Scalar>(objectOffset : Offset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
             return defaultValue
         }
-        let position = Int(objectOffset.value) + Int(propertyOffset) + structPropertyOffset
+        let position = Int(objectOffset + propertyOffset) + structPropertyOffset
         
         return fromByteArray(position)
     }
     
-    public func hasProperty(objectOffset : ObjectOffset, propertyIndex : Int) -> Bool {
+    public func hasProperty(objectOffset : Offset, propertyIndex : Int) -> Bool {
         return getPropertyOffset(objectOffset, propertyIndex: propertyIndex) != 0
     }
     
-    public func getOffset<T : Offset>(objectOffset : ObjectOffset, propertyIndex : Int) -> T?{
+    public func getOffset(objectOffset : Offset, propertyIndex : Int) -> Offset?{
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
             return nil
         }
-        let position = Int(objectOffset.value) + Int(propertyOffset)
-        let localObjectOffset : Int32 = fromByteArray(position)
-        let offset = position+Int(localObjectOffset)
+        let position = objectOffset + propertyOffset
+        let localObjectOffset : Int32 = fromByteArray(Int(position))
+        let offset = position + localObjectOffset
         
-        if(T.self == ObjectOffset.self){
-            return ObjectOffset(offset) as? T
-        } else if(T.self == VectorOffset.self){
-            return VectorOffset(offset) as? T
-        } else {
-            return StringOffset(offset) as? T
+        if propertyOffset == 0 {
+            return nil
         }
+        return offset
     }
     
-    var stringCache : [Int32:String] = [:]
+//    var stringCache : [Int32:String] = [:]
     
-    public func getString(stringOffset : StringOffset?) -> String? {
+    public func getString(stringOffset : Offset?) -> String? {
         guard let stringOffset = stringOffset else {
             return nil
         }
-        if let result = stringCache[stringOffset.value]{
-            return result
-        }
-        let stringPosition = Int(stringOffset.value)
+//        if let result = stringCache[stringOffset]{
+//            return result
+//        }
+        let stringPosition = Int(stringOffset)
         let stringLenght : Int32 = fromByteArray(stringPosition)
         let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
         let result = String.init(bytesNoCopy: pointer, length: Int(stringLenght), encoding: NSUTF8StringEncoding, freeWhenDone: false)
-        stringCache[stringOffset.value] = result
+//        stringCache[stringOffset] = result
         return result
     }
     
-    public func getVectorLength(vectorOffset : VectorOffset?) -> Int {
+    public func getVectorLength(vectorOffset : Offset?) -> Int {
         guard let vectorOffset = vectorOffset else {
             return 0
         }
-        let vectorPosition = Int(vectorOffset.value)
+        let vectorPosition = Int(vectorOffset)
         let length2 : Int32 = fromByteArray(vectorPosition)
         return Int(length2)
     }
     
-    public func getVectorScalarElement<T : Scalar>(vectorOffset : VectorOffset, index : Int) -> T {
-        let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (index * strideof(T)))
+    public func getVectorScalarElement<T : Scalar>(vectorOffset : Offset, index : Int) -> T {
+        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(T)))
         return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
     }
     
-    public func getVectorStructElement<T : Scalar>(vectorOffset : VectorOffset, vectorIndex : Int, structSize : Int, structElementIndex : Int) -> T {
-        let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (vectorIndex * structSize) + structElementIndex)
+    public func getVectorStructElement<T : Scalar>(vectorOffset : Offset, vectorIndex : Int, structSize : Int, structElementIndex : Int) -> T {
+        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (vectorIndex * structSize) + structElementIndex)
         return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
     }
     
-    public func getVectorOffsetElement<T : Offset>(vectorOffset : VectorOffset, index : Int) -> T? {
-        let valueStartPosition = Int(vectorOffset.value + strideof(Int32) + (index * strideof(Int32)))
+    public func getVectorOffsetElement(vectorOffset : Offset, index : Int) -> Offset? {
+        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(Int32)))
         let localOffset : Int32 = fromByteArray(valueStartPosition)
         if(localOffset == 0){
             return nil
         }
-        let offset : Int32 = localOffset + valueStartPosition
-        if(T.self == ObjectOffset.self){
-            return ObjectOffset(offset) as? T
-        } else if(T.self == VectorOffset.self) {
-            return VectorOffset(offset) as? T
-        } else {
-            return StringOffset(offset) as? T
-        }
+        return localOffset + valueStartPosition
     }
     
-    private func getPropertyOffset(objectOffset : ObjectOffset, propertyIndex : Int)->Int {
-        let offset = Int(objectOffset.value)
+    private func getPropertyOffset(objectOffset : Offset, propertyIndex : Int)->Int {
+        let offset = Int(objectOffset)
         let localOffset : Int32 = fromByteArray(offset)
         let vTableOffset : Int = offset - Int(localOffset)
         let vTableLength : Int16 = fromByteArray(vTableOffset)

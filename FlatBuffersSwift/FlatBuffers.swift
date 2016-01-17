@@ -6,44 +6,7 @@
 //  Copyright © 2015 maxim.zaks. All rights reserved.
 //
 
-public protocol Offset {
-    var value : Int32 {get}
-}
-
-public struct StringOffset : Offset {
-    let _value : Int32
-    public init(_ value : Int32){
-        _value = value
-    }
-    public init(_ value : Int){
-        self.init(Int32(value))
-    }
-    public var value : Int32 {return _value}
-}
-
-public struct VectorOffset : Offset {
-    let _value : Int32
-    public init(_ value : Int32){
-        _value = value
-    }
-    public init(_ value : Int){
-        self.init(Int32(value))
-    }
-    
-    public var value : Int32 {return _value}
-}
-
-public struct ObjectOffset : Offset {
-    let _value : Int32
-    public init(_ value : Int32){
-        _value = value
-    }
-    public init(_ value : Int){
-        self.init(Int32(value))
-    }
-    public var value : Int32 {return _value}
-}
-
+public typealias Offset = Int32
 
 public protocol Scalar : Equatable {}
 

@@ -148,12 +148,22 @@ class FlatBuffersTests: XCTestCase {
         let fbb = FlatBufferBuilder()
         let offset = try! fbb.createString("max")
         
-        XCTAssertEqual(offset.value, 7)
+        XCTAssertEqual(offset, 7)
         XCTAssertEqual(fbb.data,
             [3,0,0,0, // lenght of the string 'max'
              109,     // 'm'
              97,      // 'a'
              120      // 'x'
+            ])
+    }
+    
+    func testCreateEmptyString() {
+        let fbb = FlatBufferBuilder()
+        let offset = try! fbb.createString("")
+        
+        XCTAssertEqual(offset, 4)
+        XCTAssertEqual(fbb.data,
+            [0,0,0,0, // lenght of the empty string
             ])
     }
     
@@ -165,7 +175,7 @@ class FlatBuffersTests: XCTestCase {
         fbb.put(false)
         let offset = fbb.endVector()
         
-        XCTAssertEqual(offset.value, 7)
+        XCTAssertEqual(offset, 7)
         XCTAssertEqual(fbb.data,
             [3,0,0,0, // lenght of the array
              0,       // last
@@ -186,7 +196,7 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(fbb.data, [5,0,0,0,1,3,0,0,0,109,97,120])
         let oOffset = try! fbb.closeObject()
         
-        XCTAssertEqual(oOffset.value, 16)
+        XCTAssertEqual(oOffset, 16)
         XCTAssertEqual(fbb.data,
             [ 10,  0,              // vTable length
                9,  0,              // object data buffer length
@@ -213,7 +223,7 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(fbb.data, [5,0,0,0,1,3,0,0,0,109,97,120])
         let oOffset = try! fbb.closeObject()
         
-        XCTAssertEqual(oOffset.value, 16)
+        XCTAssertEqual(oOffset, 16)
         XCTAssertEqual(fbb.data,
             [10,0,9,0,8,0,4,0,0,0,10,0,0,0,5,0,0,0,1,3,0,0,0,109,97,120]
         )
@@ -229,7 +239,7 @@ class FlatBuffersTests: XCTestCase {
              3,0,0,0,109,97,120]
         )
         let oOffset2 = try! fbb.closeObject()
-        XCTAssertEqual(oOffset2.value, (16/*offsetFirstObject*/ + 10/*vTableFirstObject*/ + 1/*true*/ + 4/*stringOffset*/ + 4/*vTableOffsetCurrentObject*/))
+        XCTAssertEqual(oOffset2, (16/*offsetFirstObject*/ + 10/*vTableFirstObject*/ + 1/*true*/ + 4/*stringOffset*/ + 4/*vTableOffsetCurrentObject*/))
         XCTAssertEqual(fbb.data,
             // 239,255,255,255,255,255,255,255 = start of the second object data buffer and offset where to find reused
             [
@@ -318,7 +328,7 @@ class FlatBuffersTests: XCTestCase {
         
         let reader = FlatBufferReader(buffer: data)
         let objectOffset = reader.rootObjectOffset
-        XCTAssertEqual(objectOffset.value, 14)
+        XCTAssertEqual(objectOffset, 14)
     }
     
     func testCreateObjectAndReadFirstBoolFromRootObject() {
@@ -411,7 +421,7 @@ class FlatBuffersTests: XCTestCase {
         
         let reader = FlatBufferReader(buffer: data)
         let objectOffset = reader.rootObjectOffset
-        let stringOffset : StringOffset? = reader.getOffset(objectOffset, propertyIndex: 1)
+        let stringOffset : Offset? = reader.getOffset(objectOffset, propertyIndex: 1)
         let string = reader.getString(stringOffset)
         XCTAssertEqual(string, "max")
     }
@@ -433,8 +443,8 @@ class FlatBuffersTests: XCTestCase {
         
         let reader = FlatBufferReader(buffer: data)
         let objectOffset = reader.rootObjectOffset
-        let objectOffset2 : ObjectOffset = reader.getOffset(objectOffset, propertyIndex: 1)!
-        let stringOffset : StringOffset? = reader.getOffset(objectOffset2, propertyIndex: 1)
+        let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
+        let stringOffset : Offset? = reader.getOffset(objectOffset2, propertyIndex: 1)
         let string = reader.getString(stringOffset)
         XCTAssertEqual(string, "max")
     }
@@ -455,7 +465,7 @@ class FlatBuffersTests: XCTestCase {
         
         let reader = FlatBufferReader(buffer: data)
         let objectOffset = reader.rootObjectOffset
-        let objectOffset2 : VectorOffset = reader.getOffset(objectOffset, propertyIndex: 1)!
+        let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
         let length = reader.getVectorLength(objectOffset2)
         XCTAssertEqual(length, 2)
         XCTAssertEqual(reader.getVectorScalarElement(objectOffset2, index: 0) as Int, 43)
@@ -478,10 +488,10 @@ class FlatBuffersTests: XCTestCase {
         
         let reader = FlatBufferReader(buffer: data)
         let objectOffset = reader.rootObjectOffset
-        let objectOffset2 : VectorOffset = reader.getOffset(objectOffset, propertyIndex: 1)!
+        let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
         let length = reader.getVectorLength(objectOffset2)
         XCTAssertEqual(length, 1)
-        let objectOffset3 : StringOffset? = reader.getVectorOffsetElement(objectOffset2, index: 0)
+        let objectOffset3 : Offset? = reader.getVectorOffsetElement(objectOffset2, index: 0)
         XCTAssertEqual(reader.getString(objectOffset3), "max")
     }
     

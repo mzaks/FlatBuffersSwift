@@ -21,6 +21,7 @@
 		0BA0E86E1C32B6AD00B896B7 /* FlatBufferReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */; };
 		0BA0E8701C32B6AD00B896B7 /* FlatBuffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */; };
 		0BA0E87C1C3AC27800B896B7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E87B1C3AC27800B896B7 /* main.swift */; };
+		0BBDD0A81C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BBDD0A71C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 		0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffers.swift; sourceTree = "<group>"; };
 		0BA0E8791C3AC27800B896B7 /* FlatBuffersPerformanceTestDesktop */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FlatBuffersPerformanceTestDesktop; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BA0E87B1C3AC27800B896B7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		0BBDD0A71C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffersGeneratedAPITest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,6 +150,7 @@
 				0BA0E8671C32B6A300B896B7 /* FlatBuffersTests.swift */,
 				0BA0E8561C32B62200B896B7 /* Info.plist */,
 				0B62C1EA1C3EA5EA002500FE /* LazyVectorAccessTests.swift */,
+				0BBDD0A71C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift */,
 			);
 			path = FlatBuffersSwiftTests;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				0B62C20B1C4958D9002500FE /* contactListGenerator.swift in Sources */,
 				0B62C1EB1C3EA5EA002500FE /* LazyVectorAccessTests.swift in Sources */,
 				0B62C2071C49391E002500FE /* contactList.swift in Sources */,
+				0BBDD0A81C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift in Sources */,
 				0BA0E8681C32B6A300B896B7 /* FlatBuffersTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -424,6 +428,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -445,6 +450,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -452,12 +458,14 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_VERSION = A;
+				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = FlatBuffersSwift/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
@@ -489,6 +497,7 @@
 		0BA0E87E1C3AC27800B896B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -497,8 +506,11 @@
 		0BA0E87F1C3AC27800B896B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};

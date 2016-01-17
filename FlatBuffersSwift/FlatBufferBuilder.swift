@@ -32,7 +32,7 @@ public class FlatBufferBuilder {
     var vectorNumElems : Int32 = -1;
     var vTableOffsets : [Int32] = []
     
-    public init(capacity : Int = 1){
+    public init(capacity : Int = 1){ //4_194_304
         self.capacity = capacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }
@@ -49,33 +49,40 @@ public class FlatBufferBuilder {
         
         let newData = UnsafeMutablePointer<UInt8>.alloc(capacity)
         newData.advancedBy(leftCursor).initializeFrom(_data.advancedBy(_leftCursor), count: cursor)
-        _data.destroy(_capacity)
+        _data.dealloc(_capacity)
         _data = newData
     }
     
     public func put<T : Scalar>(value : T){
-        var v = value.littleEndian
+        var v = value
+        if UInt32(CFByteOrderGetCurrent()) == CFByteOrderBigEndian.rawValue{
+            v = value.littleEndian
+        }
         let c = strideofValue(v)
         increaseCapacity(c)
         withUnsafePointer(&v){
             _data.advancedBy(leftCursor-c).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
         cursor += c
+
     }
     
     public func putOffset(offset : Offset?) throws {
         guard let offset = offset else {
             return put(Int32(0))
         }
-        guard offset.value <= Int32(cursor) else {
+        guard offset <= Int32(cursor) else {
             throw FlatBufferBuilderError.OffsetIsTooBig
         }
-        let _offset = Int32(cursor) - offset.value + strideof(Int32);
+        let _offset = Int32(cursor) - offset + strideof(Int32);
         put(_offset)
     }
     
     private func put<T : Scalar>(value : T, at index : Int){
-        var v = value.littleEndian
+        var v = value
+        if UInt32(CFByteOrderGetCurrent()) == CFByteOrderBigEndian.rawValue{
+            v = value.littleEndian
+        }
         let c = strideofValue(v)
         withUnsafePointer(&v){
             _data.advancedBy(index + leftCursor).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
@@ -96,6 +103,9 @@ public class FlatBufferBuilder {
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
             throw FlatBufferBuilderError.PropertyIndexIsInvalid
+        }
+        if(offset == 0){
+            return
         }
         try putOffset(offset)
         currentVTable[propertyIndex] = Int32(cursor)
@@ -127,12 +137,13 @@ public class FlatBufferBuilder {
         currentVTable[propertyIndex] = Int32(cursor)
     }
     
-    public func closeObject() throws -> ObjectOffset {
+    public func closeObject() throws -> Offset {
         guard objectStart > -1 else {
             throw FlatBufferBuilderError.NoOpenObject
         }
         
-        put(0 as Int32) // Will be set to vtable offset afterwards
+        increaseCapacity(4)
+        cursor += 4 // Will be set to vtable offset afterwards
         
         let vtableloc = cursor
         
@@ -182,7 +193,7 @@ public class FlatBufferBuilder {
         
         objectStart = -1
         
-        return ObjectOffset(vtableloc)
+        return Offset(vtableloc)
     }
     
     public func startVector(count : Int) throws{
@@ -192,39 +203,33 @@ public class FlatBufferBuilder {
         vectorNumElems = Int32(count)
     }
     
-    public func endVector() -> VectorOffset {
+    public func endVector() -> Offset {
         put(vectorNumElems)
         vectorNumElems = -1
-        return VectorOffset(cursor)
+        return Int32(cursor)
     }
     
-    var stringCache : [String:StringOffset] = [:]
-    
-    public func createString(value : String?) throws -> StringOffset {
+    public func createString(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBufferBuilderError.ObjectIsNotClosed
         }
         guard let value = value else {
-            return StringOffset(0)
-        }
-        if let result = stringCache[value]{
-            return result
+            return 0
         }
 
-        let buf = value.utf8
-        let length = buf.count
+        let buf = value.cStringUsingEncoding(NSUTF8StringEncoding)!
+        let length = buf.count - 1
+        
         increaseCapacity(length)
-        _data.advancedBy(leftCursor-length).initializeFrom(buf)
+        _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
         cursor += length
 
         put(Int32(length))
-        let result = StringOffset(cursor)
-        stringCache[value] = result
-        return result
+        return Offset(cursor)
     }
     
-    public func finish(offset : ObjectOffset, fileIdentifier : String?) throws -> [UInt8] {
-        guard offset.value <= Int32(cursor) else {
+    public func finish(offset : Offset, fileIdentifier : String?) throws -> [UInt8] {
+        guard offset <= Int32(cursor) else {
             throw FlatBufferBuilderError.OffsetIsTooBig
         }
         guard objectStart == -1 && vectorNumElems == -1 else {
@@ -242,7 +247,7 @@ public class FlatBufferBuilder {
             prefixLength += 4
         }
         
-        var v = (Int32(cursor + prefixLength) - offset.value).littleEndian
+        var v = (Int32(cursor + prefixLength) - offset).littleEndian
         let c = strideofValue(v)
         withUnsafePointer(&v){
             _data.advancedBy(leftCursor - prefixLength).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)

@@ -6,15 +6,20 @@ import FlatBuffersSwift
 public final class ContactList {
 	public var lastModified : Int64 = 0
 	public var entries : [Contact?] = []
+	public init(){}
+	public init(lastModified: Int64, entries: [Contact?]){
+		self.lastModified = lastModified
+		self.entries = entries
+	}
 }
 public extension ContactList {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> ContactList? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> ContactList? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
 		let _result = ContactList()
 		_result.lastModified = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
-		let offset_entries : VectorOffset? = reader.getOffset(objectOffset, propertyIndex: 1)
+		let offset_entries : Offset? = reader.getOffset(objectOffset, propertyIndex: 1)
 		let length_entries = reader.getVectorLength(offset_entries)
 		if(length_entries > 0){
 			var index = 0
@@ -42,12 +47,12 @@ public extension ContactList {
 public extension ContactList {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
+		private let _objectOffset : Offset!
 		public init(data : UnsafePointer<UInt8>){
 			_reader = FlatBufferReader(bytes: data)
 			_objectOffset = _reader.rootObjectOffset
 		}
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -59,7 +64,7 @@ public extension ContactList {
 
 		public lazy var lastModified : Int64 = self._reader.get(self._objectOffset, propertyIndex: 0, defaultValue:0)
 		public lazy var entries : LazyVector<Contact.LazyAccess> = {
-			let vectorOffset : VectorOffset? = self._reader.getOffset(self._objectOffset, propertyIndex: 1)
+			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 1)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			return LazyVector(count: vectorLength){
 				Contact.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
@@ -70,7 +75,8 @@ public extension ContactList {
 	}
 }
 public extension ContactList {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
+		var offset1 = Offset(0)
 		if entries.count > 0{
 			var offsets = [Offset?](count: entries.count, repeatedValue: nil)
 			var index = entries.count - 1
@@ -84,10 +90,8 @@ public extension ContactList {
 				try! builder.putOffset(offsets[index])
 				index -= 1
 			}
-		} else {
-			try! builder.startVector(entries.count)
+			offset1 = builder.endVector()
 		}
-		let offset1 = builder.endVector()
 		try! builder.openObject(2)
 		try! builder.addPropertyOffsetToOpenObject(1, offset: offset1)
 		try! builder.addPropertyToOpenObject(0, value : lastModified, defaultValue : 0)
@@ -109,9 +113,20 @@ public final class Contact {
 	public var currentLoccation : GeoLocation? = nil
 	public var previousLocations : [GeoLocation?] = []
 	public var moods : [Mood?] = []
+	public init(){}
+	public init(name: String?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
+		self.name = name
+		self.birthday = birthday
+		self.gender = gender
+		self.tags = tags
+		self.addressEntries = addressEntries
+		self.currentLoccation = currentLoccation
+		self.previousLocations = previousLocations
+		self.moods = moods
+	}
 }
 public extension Contact {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> Contact? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Contact? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -119,7 +134,7 @@ public extension Contact {
 		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.birthday = Date.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.gender = Gender(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
-		let offset_tags : VectorOffset? = reader.getOffset(objectOffset, propertyIndex: 3)
+		let offset_tags : Offset? = reader.getOffset(objectOffset, propertyIndex: 3)
 		let length_tags = reader.getVectorLength(offset_tags)
 		if(length_tags > 0){
 			var index = 0
@@ -128,7 +143,7 @@ public extension Contact {
 				index += 1
 			}
 		}
-		let offset_addressEntries : VectorOffset? = reader.getOffset(objectOffset, propertyIndex: 4)
+		let offset_addressEntries : Offset? = reader.getOffset(objectOffset, propertyIndex: 4)
 		let length_addressEntries = reader.getVectorLength(offset_addressEntries)
 		if(length_addressEntries > 0){
 			var index = 0
@@ -142,7 +157,7 @@ public extension Contact {
 			longitude : reader.getStructProperty(objectOffset, propertyIndex: 5, structPropertyOffset: 8, defaultValue: 0),
 			elevation : reader.getStructProperty(objectOffset, propertyIndex: 5, structPropertyOffset: 16, defaultValue: 0)
 		)
-		let offset_previousLocations : VectorOffset? = reader.getOffset(objectOffset, propertyIndex: 6)
+		let offset_previousLocations : Offset? = reader.getOffset(objectOffset, propertyIndex: 6)
 		let length_previousLocations = reader.getVectorLength(offset_previousLocations)
 		if(length_previousLocations > 0){
 			var index = 0
@@ -155,7 +170,7 @@ public extension Contact {
 				index += 1
 			}
 		}
-		let offset_moods : VectorOffset? = reader.getOffset(objectOffset, propertyIndex: 7)
+		let offset_moods : Offset? = reader.getOffset(objectOffset, propertyIndex: 7)
 		let length_moods = reader.getVectorLength(offset_moods)
 		if(length_moods > 0){
 			var index = 0
@@ -170,8 +185,8 @@ public extension Contact {
 public extension Contact {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -185,14 +200,14 @@ public extension Contact {
 		public lazy var birthday : Date.LazyAccess? = Date.LazyAccess(reader: self._reader, objectOffset : self._reader.getOffset(self._objectOffset, propertyIndex: 1))
 		public lazy var gender : Gender? = Gender(rawValue: self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:Gender.Male.rawValue))
 		public lazy var tags : LazyVector<String> = {
-			let vectorOffset : VectorOffset? = self._reader.getOffset(self._objectOffset, propertyIndex: 3)
+			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 3)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			return LazyVector(count: vectorLength){
 				self._reader.getString(self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var addressEntries : LazyVector<AddressEntry.LazyAccess> = {
-			let vectorOffset : VectorOffset? = self._reader.getOffset(self._objectOffset, propertyIndex: 4)
+			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 4)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			return LazyVector(count: vectorLength){
 				AddressEntry.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
@@ -204,7 +219,7 @@ public extension Contact {
 			elevation : self._reader.getStructProperty(self._objectOffset, propertyIndex: 5, structPropertyOffset: 16, defaultValue: 0)
 		) : nil
 		public lazy var previousLocations : LazyVector<GeoLocation> = {
-			let vectorOffset : VectorOffset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
+			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			return LazyVector(count: vectorLength){
 				GeoLocation(
@@ -215,7 +230,7 @@ public extension Contact {
 			}
 		}()
 		public lazy var moods : LazyVector<Mood> = {
-			let vectorOffset : VectorOffset? = self._reader.getOffset(self._objectOffset, propertyIndex: 7)
+			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 7)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			return LazyVector(count: vectorLength){
 				Mood(rawValue: self._reader.getVectorScalarElement(vectorOffset!, index: $0))
@@ -226,18 +241,20 @@ public extension Contact {
 	}
 }
 public extension Contact {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
-		try! builder.startVector(moods.count)
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
+		var offset7 = Offset(0)
 		if moods.count > 0{
+			try! builder.startVector(moods.count)
 			var index = moods.count - 1
 			while(index >= 0){
 				builder.put(moods[index]!.rawValue)
 				index -= 1
 			}
+			offset7 = builder.endVector()
 		}
-		let offset7 = builder.endVector()
-		try! builder.startVector(previousLocations.count)
+		var offset6 = Offset(0)
 		if previousLocations.count > 0{
+			try! builder.startVector(previousLocations.count)
 			var index = previousLocations.count - 1
 			while(index >= 0){
 				builder.put(previousLocations[index]?.elevation ?? 0)
@@ -245,8 +262,9 @@ public extension Contact {
 				builder.put(previousLocations[index]?.latitude ?? 0)
 				index -= 1
 			}
+			offset6 = builder.endVector()
 		}
-		let offset6 = builder.endVector()
+		var offset4 = Offset(0)
 		if addressEntries.count > 0{
 			var offsets = [Offset?](count: addressEntries.count, repeatedValue: nil)
 			var index = addressEntries.count - 1
@@ -260,10 +278,9 @@ public extension Contact {
 				try! builder.putOffset(offsets[index])
 				index -= 1
 			}
-		} else {
-			try! builder.startVector(addressEntries.count)
+			offset4 = builder.endVector()
 		}
-		let offset4 = builder.endVector()
+		var offset3 = Offset(0)
 		if tags.count > 0{
 			var offsets = [Offset?](count: tags.count, repeatedValue: nil)
 			var index = tags.count - 1
@@ -277,11 +294,9 @@ public extension Contact {
 				try! builder.putOffset(offsets[index])
 				index -= 1
 			}
-		} else {
-			try! builder.startVector(tags.count)
+			offset3 = builder.endVector()
 		}
-		let offset3 = builder.endVector()
-		let offset1 = birthday?.addToByteArray(builder) ?? ObjectOffset(0)
+		let offset1 = birthday?.addToByteArray(builder) ?? 0
 		let offset0 = try! builder.createString(name)
 		try! builder.openObject(8)
 		try! builder.addPropertyOffsetToOpenObject(7, offset: offset7)
@@ -304,9 +319,15 @@ public final class Date {
 	public var day : Int8 = 0
 	public var month : Int8 = 0
 	public var year : Int16 = 0
+	public init(){}
+	public init(day: Int8, month: Int8, year: Int16){
+		self.day = day
+		self.month = month
+		self.year = year
+	}
 }
 public extension Date {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> Date? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Date? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -320,8 +341,8 @@ public extension Date {
 public extension Date {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -339,7 +360,7 @@ public extension Date {
 	}
 }
 public extension Date {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		try! builder.openObject(3)
 		try! builder.addPropertyToOpenObject(2, value : year, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(1, value : month, defaultValue : 0)
@@ -355,9 +376,14 @@ public struct GeoLocation {
 public final class AddressEntry {
 	public var order : Int32 = 0
 	public var address : Address? = nil
+	public init(){}
+	public init(order: Int32, address: Address?){
+		self.order = order
+		self.address = address
+	}
 }
 public extension AddressEntry {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> AddressEntry? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> AddressEntry? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -370,8 +396,8 @@ public extension AddressEntry {
 public extension AddressEntry {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -388,7 +414,7 @@ public extension AddressEntry {
 	}
 }
 public extension AddressEntry {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		let offset1 = addToByteArray_Address(builder, union: address)
 		try! builder.openObject(3)
 		try! builder.addPropertyOffsetToOpenObject(2, offset: offset1)
@@ -402,9 +428,16 @@ public final class PostalAddress {
 	public var city : String? = nil
 	public var postalCode : Int32 = 0
 	public var streetAndNumber : String? = nil
+	public init(){}
+	public init(country: String?, city: String?, postalCode: Int32, streetAndNumber: String?){
+		self.country = country
+		self.city = city
+		self.postalCode = postalCode
+		self.streetAndNumber = streetAndNumber
+	}
 }
 public extension PostalAddress {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> PostalAddress? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> PostalAddress? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -419,8 +452,8 @@ public extension PostalAddress {
 public extension PostalAddress {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -439,7 +472,7 @@ public extension PostalAddress {
 	}
 }
 public extension PostalAddress {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		let offset3 = try! builder.createString(streetAndNumber)
 		let offset1 = try! builder.createString(city)
 		let offset0 = try! builder.createString(country)
@@ -453,9 +486,13 @@ public extension PostalAddress {
 }
 public final class EmailAddress {
 	public var mailto : String? = nil
+	public init(){}
+	public init(mailto: String?){
+		self.mailto = mailto
+	}
 }
 public extension EmailAddress {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> EmailAddress? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> EmailAddress? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -467,8 +504,8 @@ public extension EmailAddress {
 public extension EmailAddress {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -484,7 +521,7 @@ public extension EmailAddress {
 	}
 }
 public extension EmailAddress {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		let offset0 = try! builder.createString(mailto)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
@@ -493,9 +530,13 @@ public extension EmailAddress {
 }
 public final class WebAddress {
 	public var url : String? = nil
+	public init(){}
+	public init(url: String?){
+		self.url = url
+	}
 }
 public extension WebAddress {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> WebAddress? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> WebAddress? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -507,8 +548,8 @@ public extension WebAddress {
 public extension WebAddress {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -524,7 +565,7 @@ public extension WebAddress {
 	}
 }
 public extension WebAddress {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		let offset0 = try! builder.createString(url)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
@@ -533,9 +574,13 @@ public extension WebAddress {
 }
 public final class TelephoneNumber {
 	public var number : String? = nil
+	public init(){}
+	public init(number: String?){
+		self.number = number
+	}
 }
 public extension TelephoneNumber {
-	private static func create(reader : FlatBufferReader, objectOffset : ObjectOffset?) -> TelephoneNumber? {
+	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> TelephoneNumber? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -547,8 +592,8 @@ public extension TelephoneNumber {
 public extension TelephoneNumber {
 	public final class LazyAccess{
 		private let _reader : FlatBufferReader!
-		private let _objectOffset : ObjectOffset!
-		private init?(reader : FlatBufferReader, objectOffset : ObjectOffset?){
+		private let _objectOffset : Offset!
+		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
 				_reader = nil
 				_objectOffset = nil
@@ -564,7 +609,7 @@ public extension TelephoneNumber {
 	}
 }
 public extension TelephoneNumber {
-	private func addToByteArray(builder : FlatBufferBuilder) -> ObjectOffset {
+	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		let offset0 = try! builder.createString(number)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
@@ -581,12 +626,12 @@ extension WebAddress : Address {}
 extension WebAddress.LazyAccess : Address_LazyAccess {}
 extension TelephoneNumber : Address {}
 extension TelephoneNumber.LazyAccess : Address_LazyAccess {}
-private func create_Address(reader : FlatBufferReader, propertyIndex : Int, objectOffset : ObjectOffset?) -> Address? {
+private func create_Address(reader : FlatBufferReader, propertyIndex : Int, objectOffset : Offset?) -> Address? {
 	guard let objectOffset = objectOffset else {
 		return nil
 	}
 	let unionCase : Int8 = reader.get(objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
-	guard let caseObjectOffset : ObjectOffset = reader.getOffset(objectOffset, propertyIndex:propertyIndex + 1) else {
+	guard let caseObjectOffset : Offset = reader.getOffset(objectOffset, propertyIndex:propertyIndex + 1) else {
 		return nil
 	}
 	switch unionCase {
@@ -597,12 +642,12 @@ private func create_Address(reader : FlatBufferReader, propertyIndex : Int, obje
 	default : return nil
 	}
 }
-private func create_Address_LazyAccess(reader : FlatBufferReader, propertyIndex : Int, objectOffset : ObjectOffset?) -> Address_LazyAccess? {
+private func create_Address_LazyAccess(reader : FlatBufferReader, propertyIndex : Int, objectOffset : Offset?) -> Address_LazyAccess? {
 	guard let objectOffset = objectOffset else {
 		return nil
 	}
 	let unionCase : Int8 = reader.get(objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
-	guard let caseObjectOffset : ObjectOffset = reader.getOffset(objectOffset, propertyIndex:propertyIndex + 1) else {
+	guard let caseObjectOffset : Offset = reader.getOffset(objectOffset, propertyIndex:propertyIndex + 1) else {
 		return nil
 	}
 	switch unionCase {
@@ -622,12 +667,12 @@ private func unionCase_Address(union : Address?) -> Int8 {
 	default : return 0
 	}
 }
-private func addToByteArray_Address(builder : FlatBufferBuilder, union : Address?) -> ObjectOffset {
+private func addToByteArray_Address(builder : FlatBufferBuilder, union : Address?) -> Offset {
 	switch union {
 	case let u as PostalAddress : return u.addToByteArray(builder)
 	case let u as EmailAddress : return u.addToByteArray(builder)
 	case let u as WebAddress : return u.addToByteArray(builder)
 	case let u as TelephoneNumber : return u.addToByteArray(builder)
-	default : return ObjectOffset(0)
+	default : return 0
 	}
 }
