@@ -38,9 +38,9 @@ let list = List(people: [p1, p2])
 let fbData = list.toByteArray
 NSData(bytes: UnsafePointer<UInt8>(fbData), length: fbData.count).writeToFile("list.bin", atomically: true)
 ```
-Read data from file very efficiently
+Read data from file very efficiently (no parsing, lazy instantiation)
 ```swift
-let lazyList = List.LazyAccess(data: UnsafePointer((NSData(contentsOfFile: "")?.bytes)!))
+let lazyList = List.LazyAccess(data: UnsafePointer((NSData(contentsOfFile: "list.bin")?.bytes)!))
 let name = lazyList.people[0]?.firstName
 ```
 
