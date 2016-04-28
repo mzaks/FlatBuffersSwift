@@ -8,8 +8,6 @@
 
 import Foundation
 
-print("-----------------Starting Performance Test-------------")
-
 func testRandomContactListToByteArrayAndBackAgain(){
     let contactList = generateRandomContactList()
     let time1 = NSDate()
@@ -29,10 +27,6 @@ func testRandomContactListToByteArrayAndBackAgain(){
 //    NSData(bytes: UnsafePointer<UInt8>(data), length: data.count).writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList.bin", atomically: true)
 }
 
-testRandomContactListToByteArrayAndBackAgain()
-
-print("------------")
-
 func testReadingJSON(){
     let jsonData = NSData(contentsOfFile: "/Users/mzaks/dev/FlatBuffersSwift/Example/contactList_.json")!
     let time1 = NSDate()
@@ -47,4 +41,17 @@ func testReadingJSON(){
 //    newData2.writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList_.json", atomically: true)
     
 }
-testReadingJSON()
+
+print("-----------------Starting Performance Tests-------------")
+
+flatbench()
+
+print("------------")
+
+testRandomContactListToByteArrayAndBackAgain()
+
+print("------------")
+
+// testReadingJSON() temporarily commented out as the hardcoded path does not work...
+
+print("------------")
