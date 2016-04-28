@@ -34,7 +34,7 @@ public final class LazyVector<T> : SequenceType {
     public func generate() -> AnyGenerator<T> {
         var index = 0
         
-        return anyGenerator({
+        return AnyGenerator(body: {
             let value = self[index]
             index += 1
             return value
