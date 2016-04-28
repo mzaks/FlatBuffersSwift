@@ -37,6 +37,10 @@ public class FlatBufferBuilder {
         _data = UnsafeMutablePointer.alloc(capacity)
     }
     
+    deinit {
+        _data.dealloc(capacity)
+    }    
+
     private func increaseCapacity(size : Int){
         guard leftCursor <= size else {
             return
