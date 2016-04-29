@@ -60,7 +60,7 @@ public class FlatBufferReader {
         let localObjectOffset : Int32 = fromByteArray(Int(position))
         let offset = position + localObjectOffset
         
-        if propertyOffset == 0 {
+        if localObjectOffset == 0 {
             return nil
         }
         return offset

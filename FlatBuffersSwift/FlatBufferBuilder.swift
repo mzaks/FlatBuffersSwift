@@ -184,7 +184,7 @@ public class FlatBufferBuilder {
         let vtableloc = cursor
         
         // vtable is stored as relative offset for object data
-        var index = currentVTable.count
+        var index = currentVTable.count - 1
         while(index>=0) {
             // Offset relative to the start of the table.
             let off = Int16(currentVTable[index] != 0 ? Int32(vtableloc) - currentVTable[index] : 0);
