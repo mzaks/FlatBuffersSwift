@@ -24,7 +24,7 @@ table Person {
 root_type List;
 ```
 
-## 2. Generated Swfit code
+## 2. Generate Swift code
 
 `java -jar fbsCG.jar -fbs contacts.fbs -out contacts.swift -lang swift`
 

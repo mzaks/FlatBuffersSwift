@@ -39,6 +39,10 @@ public class FlatBufferBuilder {
     }
 
     
+    deinit {
+        _data.dealloc(capacity)
+    }    
+
     private func increaseCapacity(size : Int){
         guard leftCursor <= size else {
             return
@@ -251,8 +255,8 @@ public class FlatBufferBuilder {
             return 0
         }
 
-        let buf = value.cStringUsingEncoding(NSUTF8StringEncoding)!
-        let length = buf.count - 1
+        let buf = Array(value.utf8)
+        let length = buf.count
         
         increaseCapacity(length)
         _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
