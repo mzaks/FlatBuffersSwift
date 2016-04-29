@@ -6,6 +6,8 @@
 //  Copyright © 2015 maxim.zaks. All rights reserved.
 //
 
+import Foundation
+
 public typealias Offset = Int32
 
 public protocol Scalar : Equatable {}
