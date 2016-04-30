@@ -43,28 +43,10 @@ class LazyVectorAccessTests: XCTestCase {
         XCTAssert(vector.count == count)
     }
 
-    func testGeneratorFunctionIsCalledOnlyOnce() {
-        let count = 5
-        var called = [Bool](count: count, repeatedValue: false)
-        let vector = LazyVector(count: count) { (index)-> Int in
-            XCTAssert(!called[index])
-            called[index] = true
-            return 4
-        }
-        
-        XCTAssert(vector[0] == 4)
-        XCTAssert(vector[4] == 4)
-        XCTAssert(vector[0] == 4)
-        XCTAssert(vector[0] == 4)
-        XCTAssert(vector[0] == 4)
-    }
-    
-    
     func testIteratingOverLazyVector() {
         let count = 5
         var called = [Bool](count: count, repeatedValue: false)
         let vector = LazyVector(count: count) { (index)-> Int in
-            XCTAssert(!called[index])
             called[index] = true
             return 4
         }

@@ -31,6 +31,19 @@ class FlatBuffersTests: XCTestCase {
             ])
     }
     
+    func testPutBooleanValues2() {
+        let fbb = FlatBufferBuilder()
+        var a = true
+        var b = false
+        fbb.put(&a, length: strideofValue(a))
+        fbb.put(&b, length: strideofValue(b))
+        
+        XCTAssertEqual(fbb.data,
+            [0, // second bool value
+                1  // fist bool value
+            ])
+    }
+    
     func testPutIntValues() {
         let fbb = FlatBufferBuilder()
         fbb.put(27)
@@ -108,6 +121,32 @@ class FlatBuffersTests: XCTestCase {
             27,
             27, 0, 0, 0, 0, 0, 0, 0])
         
+    }
+    
+    func testPutIntValues2() {
+        let fbb = FlatBufferBuilder()
+        var a1 = 27
+        fbb.put(&a1, length: strideofValue(a1))
+        XCTAssertEqual(fbb.data,[27, 0, 0, 0, 0, 0, 0, 0])
+        var a2 : Int8 = 27
+        fbb.put(&a2, length: strideofValue(a2))
+        XCTAssertEqual(fbb.data,[
+            27,
+            27, 0, 0, 0, 0, 0, 0, 0])
+        var a3 : UInt8 = 27
+        fbb.put(&a3, length: strideofValue(a3))
+        XCTAssertEqual(fbb.data,[
+            27,
+            27,
+            27, 0, 0, 0, 0, 0, 0, 0])
+        var a4 : UInt16 = 27
+        fbb.put(&a4, length: strideofValue(a4))
+        
+        XCTAssertEqual(fbb.data,[
+            27, 0,
+            27,
+            27,
+            27, 0, 0, 0, 0, 0, 0, 0])
     }
     
     func testPutFloatValues() {
@@ -492,6 +531,42 @@ class FlatBuffersTests: XCTestCase {
         let length = reader.getVectorLength(objectOffset2)
         XCTAssertEqual(length, 1)
         let objectOffset3 : Offset? = reader.getVectorOffsetElement(objectOffset2, index: 0)
+        XCTAssertEqual(reader.getString(objectOffset3), "max")
+    }
+    
+    func testReplaceOffsetInVector() {
+        let fbb = FlatBufferBuilder()
+        let sOffset = try! fbb.createString("max")
+        
+        try! fbb.startVector(1)
+        let cursor = try! fbb.putOffset(0)
+        let vOffset = fbb.endVector()
+        
+        try! fbb.replaceOffset(sOffset, atCursor: cursor)
+        let data = try! fbb.finish(vOffset, fileIdentifier: nil)
+        
+        let reader = FlatBufferReader(buffer: data)
+        let objectOffset = reader.rootObjectOffset
+        let length = reader.getVectorLength(objectOffset)
+        XCTAssertEqual(length, 1)
+        let objectOffset3 : Offset? = reader.getVectorOffsetElement(objectOffset, index: 0)
+        XCTAssertEqual(reader.getString(objectOffset3), "max")
+    }
+    
+    func testReplaceOffsetInObject() {
+        let fbb = FlatBufferBuilder()
+        let sOffset = try! fbb.createString("max")
+        
+        try! fbb.openObject(1)
+        let cursor = try! fbb.addPropertyOffsetToOpenObject(0, offset: 0)
+        let oOffset = try! fbb.closeObject()
+        
+        try! fbb.replaceOffset(sOffset, atCursor: cursor)
+        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
+        
+        let reader = FlatBufferReader(buffer: data)
+        let objectOffset = reader.rootObjectOffset
+        let objectOffset3 : Offset? = reader.getOffset(objectOffset, propertyIndex: 0)
         XCTAssertEqual(reader.getString(objectOffset3), "max")
     }
     

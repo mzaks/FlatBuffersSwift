@@ -14,7 +14,6 @@
 		0B62C2081C49391F002500FE /* contactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C2031C493912002500FE /* contactList.swift */; };
 		0B62C20B1C4958D9002500FE /* contactListGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C2091C4958B1002500FE /* contactListGenerator.swift */; };
 		0B62C20C1C4958DA002500FE /* contactListGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C2091C4958B1002500FE /* contactListGenerator.swift */; };
-		0B62C2141C4A934A002500FE /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
 		0BA0E8491C32B62200B896B7 /* FlatBuffersSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0BA0E8501C32B62200B896B7 /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
 		0BA0E8681C32B6A300B896B7 /* FlatBuffersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E8671C32B6A300B896B7 /* FlatBuffersTests.swift */; };
@@ -98,7 +97,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0B62C2141C4A934A002500FE /* FlatBuffersSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

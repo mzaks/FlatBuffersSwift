@@ -10,31 +10,26 @@ import Foundation
 
 public final class LazyVector<T> : SequenceType {
     private let _generator : (Int)->T?
-    private var values : [T?]
+    private let _count : Int
     
     public init(count : Int, generator : (Int)->T?){
         _generator = generator
-        values = Array<T?>.init(count: count, repeatedValue: nil)
-    }
-
-    public subscript(i: Int) -> T? {
-        guard i >= 0 && i < values.count else {
-            return nil
-        }
-        if let value = values[i]{
-            return value
-        }
-        let value = _generator(i)
-        values[i] = value
-        return value
+        _count = count
     }
     
-    public var count : Int {return values.count}
+    public subscript(i: Int) -> T? {
+        guard i >= 0 && i < _count else {
+            return nil
+        }
+        return _generator(i)
+    }
+    
+    public var count : Int {return _count}
     
     public func generate() -> AnyGenerator<T> {
         var index = 0
         
-        return AnyGenerator(body: {
+        return AnyGenerator(body: { [self]
             let value = self[index]
             index += 1
             return value

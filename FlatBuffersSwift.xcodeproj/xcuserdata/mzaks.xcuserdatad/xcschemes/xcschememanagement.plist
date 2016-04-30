@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
+		<key>FlatBuffersPerformanceTestDesktopOptimized.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>FlatBuffersSwift.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -28,6 +33,11 @@
 			<true/>
 		</dict>
 		<key>0BA0E8781C3AC27800B896B7</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0BE327621CD422E90067DAC8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
