@@ -33,7 +33,7 @@ public final class FlatBufferBuilder {
     var vectorNumElems : Int32 = -1;
     var vTableOffsets : [Int32] = []
     
-    public init(capacity : Int = 1){ //4_194_304
+    public init(capacity : Int = 1024*40){ //4_194_304
         self.capacity = capacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }

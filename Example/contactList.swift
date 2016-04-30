@@ -1074,7 +1074,7 @@ public final class LazyVector<T> : SequenceType {
 }
 // MARK: Reader
 
-public class FlatBufferReader {
+public final class FlatBufferReader {
 
     let buffer : UnsafePointer<UInt8>
     
@@ -1127,7 +1127,7 @@ public class FlatBufferReader {
         let localObjectOffset : Int32 = fromByteArray(Int(position))
         let offset = position + localObjectOffset
         
-        if propertyOffset == 0 {
+        if localObjectOffset == 0 {
             return nil
         }
         return offset
@@ -1203,6 +1203,7 @@ public class FlatBufferReader {
     }
 }
 
+
 // MARK: Builder
 
 public enum FlatBufferBuilderError : ErrorType {
@@ -1215,7 +1216,7 @@ public enum FlatBufferBuilderError : ErrorType {
     case UnsupportedType
 }
 
-public class FlatBufferBuilder {
+public final class FlatBufferBuilder {
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
     var data : [UInt8] {
