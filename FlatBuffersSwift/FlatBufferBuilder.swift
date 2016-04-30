@@ -17,7 +17,7 @@ public enum FlatBufferBuilderError : ErrorType {
     case UnsupportedType
 }
 
-public class FlatBufferBuilder {
+public final class FlatBufferBuilder {
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
     var data : [UInt8] {
@@ -37,7 +37,6 @@ public class FlatBufferBuilder {
         self.capacity = capacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }
-
     
     deinit {
         _data.dealloc(capacity)

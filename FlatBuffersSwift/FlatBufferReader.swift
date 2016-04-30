@@ -7,7 +7,7 @@
 //
 import Foundation
 
-public class FlatBufferReader {
+public final class FlatBufferReader {
 
     let buffer : UnsafePointer<UInt8>
     
