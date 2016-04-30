@@ -17,7 +17,7 @@ public enum FlatBufferBuilderError : ErrorType {
     case UnsupportedType
 }
 
-public class FlatBufferBuilder {
+public final class FlatBufferBuilder {
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
     var data : [UInt8] {
