@@ -37,7 +37,6 @@ public final class FlatBufferBuilder {
         self.capacity = capacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }
-
     
     deinit {
         _data.dealloc(capacity)
