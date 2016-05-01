@@ -23,6 +23,7 @@ public final class FlatBufferBuilder {
     public var inProgress : Set<ObjectIdentifier> = []
     public var deferedBindings : [(object:Any, cursor:Int)] = []
     
+    public let config : BinaryBuildConfig
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
@@ -39,8 +40,9 @@ public final class FlatBufferBuilder {
     var vectorNumElems : Int32 = -1;
     var vTableOffsets : [Int32] = []
     
-    public init(capacity : Int = 1024*40){ //4_194_304
-        self.capacity = capacity
+    public init(config : BinaryBuildConfig){
+        self.config = config
+        self.capacity = config.initialCapacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }
     
@@ -206,28 +208,30 @@ public final class FlatBufferBuilder {
         let vtableDataLength = cursor - vtableloc
         
         var foundVTableOffset = vtableDataLength
-
-        for otherVTableOffset in vTableOffsets {
-            let start = cursor - Int(otherVTableOffset)
-            var found = true
-            for i in 0 ..< vtableDataLength {
-                let a = _data.advancedBy(leftCursor + i).memory
-                let b = _data.advancedBy(leftCursor + i + start).memory
-                if a != b {
-                    found = false
-                    break;
+        
+        if config.uniqueVTables{
+            for otherVTableOffset in vTableOffsets {
+                let start = cursor - Int(otherVTableOffset)
+                var found = true
+                for i in 0 ..< vtableDataLength {
+                    let a = _data.advancedBy(leftCursor + i).memory
+                    let b = _data.advancedBy(leftCursor + i + start).memory
+                    if a != b {
+                        found = false
+                        break;
+                    }
+                }
+                if found == true {
+                    foundVTableOffset = Int(otherVTableOffset) - vtableloc
+                    break
                 }
             }
-            if found == true {
-                foundVTableOffset = Int(otherVTableOffset) - vtableloc
-                break
+            
+            if foundVTableOffset != vtableDataLength {
+                cursor -= vtableDataLength
+            } else {
+                vTableOffsets.append(Int32(cursor))
             }
-        }
-        
-        if foundVTableOffset != vtableDataLength {
-            cursor -= vtableDataLength
-        } else {
-            vTableOffsets.append(Int32(cursor))
         }
         
         let indexLocation = cursor - vtableloc
@@ -252,12 +256,19 @@ public final class FlatBufferBuilder {
         return Int32(cursor)
     }
     
+    private var stringCache : [String:Offset] = [:]
     public func createString(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBufferBuilderError.ObjectIsNotClosed
         }
         guard let value = value else {
             return 0
+        }
+        
+        if config.uniqueStrings{
+            if let o = stringCache[value]{
+                return o
+            }
         }
 
         let buf = Array(value.utf8)
@@ -268,7 +279,12 @@ public final class FlatBufferBuilder {
         cursor += length
 
         put(Int32(length))
-        return Offset(cursor)
+        
+        let o = Offset(cursor)
+        if config.uniqueStrings {
+            stringCache[value] = o
+        }
+        return o
     }
     
     public func createString(value : UnsafeBufferPointer<UInt8>?) throws -> Offset {

@@ -11,11 +11,11 @@ import Foundation
 func testRandomContactListToByteArrayAndBackAgain(){
     let contactList = generateRandomContactList()
     let time1 = NSDate()
-    let data = contactList.toByteArray
+    let data = contactList.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024, uniqueStrings: false, uniqueTables: false, uniqueVTables: false))
     let after1 = NSDate()
     print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) mseconds for creating byte array of size \(data.count)")
     let time2 = NSDate()
-    _ = ContactList.fromByteArray(data)
+    _ = ContactList.fromByteArray(data, config: BinaryReadConfig(uniqueTables: false, uniqueStrings: false))
     let after2 = NSDate()
     print("\((after2.timeIntervalSince1970 - time2.timeIntervalSince1970) * 1000.0) mseconds for creating the list from byte array")
 

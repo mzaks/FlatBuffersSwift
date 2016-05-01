@@ -15,11 +15,15 @@ public extension ContactList {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? ContactList
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? ContactList
+			}
 		}
 		let _result = ContactList()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.lastModified = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
 		let offset_entries : Offset? = reader.getOffset(objectOffset, propertyIndex: 1)
 		let length_entries = reader.getVectorLength(offset_entries)
@@ -34,15 +38,15 @@ public extension ContactList {
 	}
 }
 public extension ContactList {
-	public static func fromByteArray(data : UnsafePointer<UInt8>) -> ContactList {
-		let reader = FlatBufferReader(bytes: data)
+	public static func fromByteArray(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> ContactList {
+		let reader = FlatBufferReader(bytes: data, config: config)
 		let objectOffset = reader.rootObjectOffset
 		return create(reader, objectOffset : objectOffset)!
 	}
 }
 public extension ContactList {
-	public var toByteArray : [UInt8] {
-		let builder = FlatBufferBuilder()
+	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
+		let builder = FlatBufferBuilder(config: config)
 		let offset = addToByteArray(builder)
 		performLateBindings(builder)
 		return try! builder.finish(offset, fileIdentifier: nil)
@@ -52,8 +56,8 @@ public extension ContactList {
 	public final class LazyAccess : Hashable {
 		private let _reader : FlatBufferReader!
 		private let _objectOffset : Offset!
-		public init(data : UnsafePointer<UInt8>){
-			_reader = FlatBufferReader(bytes: data)
+		public init(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()){
+			_reader = FlatBufferReader(bytes: data, config: config)
 			_objectOffset = _reader.rootObjectOffset
 		}
 		private init?(reader : FlatBufferReader, objectOffset : Offset?){
@@ -87,8 +91,10 @@ public func ==(t1 : ContactList.LazyAccess, t2 : ContactList.LazyAccess) -> Bool
 
 public extension ContactList {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		var offset1 = Offset(0)
 		if entries.count > 0{
@@ -112,7 +118,9 @@ public extension ContactList {
 		}
 		try! builder.addPropertyToOpenObject(0, value : lastModified, defaultValue : 0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -148,11 +156,15 @@ public extension Contact {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? Contact
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? Contact
+			}
 		}
 		let _result = Contact()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.birthday = Date.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.gender = Gender(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
@@ -271,8 +283,10 @@ public func ==(t1 : Contact.LazyAccess, t2 : Contact.LazyAccess) -> Bool {
 
 public extension Contact {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		var offset7 = Offset(0)
 		if moods.count > 0{
@@ -355,7 +369,9 @@ public extension Contact {
 		}
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -375,11 +391,15 @@ public extension Date {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? Date
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? Date
+			}
 		}
 		let _result = Date()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.day = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
 		_result.month = reader.get(objectOffset, propertyIndex: 1, defaultValue: 0)
 		_result.year = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
@@ -416,15 +436,19 @@ public func ==(t1 : Date.LazyAccess, t2 : Date.LazyAccess) -> Bool {
 
 public extension Date {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		try! builder.openObject(3)
 		try! builder.addPropertyToOpenObject(2, value : year, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(1, value : month, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(0, value : day, defaultValue : 0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -447,11 +471,15 @@ public extension AddressEntry {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? AddressEntry
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? AddressEntry
+			}
 		}
 		let _result = AddressEntry()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.order = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
 		_result.address = create_Address(reader, propertyIndex: 1, objectOffset: objectOffset)
 		return _result
@@ -486,8 +514,10 @@ public func ==(t1 : AddressEntry.LazyAccess, t2 : AddressEntry.LazyAccess) -> Bo
 
 public extension AddressEntry {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		let offset1 = addToByteArray_Address(builder, union: address)
 		try! builder.openObject(3)
@@ -497,7 +527,9 @@ public extension AddressEntry {
 		}
 		try! builder.addPropertyToOpenObject(0, value : order, defaultValue : 0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -519,11 +551,15 @@ public extension PostalAddress {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? PostalAddress
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? PostalAddress
+			}
 		}
 		let _result = PostalAddress()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.country = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.city = reader.getString(reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.postalCode = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
@@ -562,8 +598,10 @@ public func ==(t1 : PostalAddress.LazyAccess, t2 : PostalAddress.LazyAccess) -> 
 
 public extension PostalAddress {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		let offset3 = try! builder.createString(streetAndNumber)
 		let offset1 = try! builder.createString(city)
@@ -574,7 +612,9 @@ public extension PostalAddress {
 		try! builder.addPropertyOffsetToOpenObject(1, offset: offset1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -590,11 +630,15 @@ public extension EmailAddress {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? EmailAddress
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? EmailAddress
+			}
 		}
 		let _result = EmailAddress()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.mailto = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
@@ -627,14 +671,18 @@ public func ==(t1 : EmailAddress.LazyAccess, t2 : EmailAddress.LazyAccess) -> Bo
 
 public extension EmailAddress {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		let offset0 = try! builder.createString(mailto)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -650,11 +698,15 @@ public extension WebAddress {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? WebAddress
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? WebAddress
+			}
 		}
 		let _result = WebAddress()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.url = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
@@ -687,14 +739,18 @@ public func ==(t1 : WebAddress.LazyAccess, t2 : WebAddress.LazyAccess) -> Bool {
 
 public extension WebAddress {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		let offset0 = try! builder.createString(url)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -710,11 +766,15 @@ public extension TelephoneNumber {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = reader.objectPool[objectOffset]{
-			return o as? TelephoneNumber
+		if reader.config.uniqueTables {
+			if let o = reader.objectPool[objectOffset]{
+				return o as? TelephoneNumber
+			}
 		}
 		let _result = TelephoneNumber()
-		reader.objectPool[objectOffset] = _result
+		if reader.config.uniqueTables {
+			reader.objectPool[objectOffset] = _result
+		}
 		_result.number = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
@@ -747,14 +807,18 @@ public func ==(t1 : TelephoneNumber.LazyAccess, t2 : TelephoneNumber.LazyAccess)
 
 public extension TelephoneNumber {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = builder.cache[ObjectIdentifier(self)] {
-			return myOffset
+		if builder.config.uniqueTables {
+			if let myOffset = builder.cache[ObjectIdentifier(self)] {
+				return myOffset
+			}
 		}
 		let offset0 = try! builder.createString(number)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		builder.cache[ObjectIdentifier(self)] = myOffset
+		if builder.config.uniqueTables {
+			builder.cache[ObjectIdentifier(self)] = myOffset
+		}
 		return myOffset
 	}
 }
@@ -897,23 +961,39 @@ public final class LazyVector<T> : SequenceType {
         })
     }
 }
+
+public struct BinaryBuildConfig{
+    var initialCapacity = 1
+    var uniqueStrings = true
+    var uniqueTables = true
+    var uniqueVTables = true
+}
+
+public struct BinaryReadConfig {
+    var uniqueTables = true
+    var uniqueStrings = true
+}
 // MARK: Reader
 
 public final class FlatBufferReader {
 
+    public let config : BinaryReadConfig
+    
     let buffer : UnsafePointer<UInt8>
-    var objectPool : [Offset : AnyObject] = [:]
+    public var objectPool : [Offset : AnyObject] = [:]
     
     func fromByteArray<T : Scalar>(position : Int) -> T{
         return UnsafePointer<T>(buffer.advancedBy(position)).memory
     }
 
-    public init(buffer : [UInt8]){
+    public init(buffer : [UInt8], config: BinaryReadConfig){
         self.buffer = UnsafePointer<UInt8>(buffer)
+        self.config = config
     }
     
-    public init(bytes : UnsafePointer<UInt8>){
+    public init(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig){
         self.buffer = bytes
+        self.config = config
     }
     
     public var rootObjectOffset : Offset {
@@ -965,14 +1045,19 @@ public final class FlatBufferReader {
         guard let stringOffset = stringOffset else {
             return nil
         }
-        if let result = stringCache[stringOffset]{
-            return result
+        if config.uniqueStrings {
+            if let result = stringCache[stringOffset]{
+                return result
+            }
         }
+        
         let stringPosition = Int(stringOffset)
         let stringLenght : Int32 = fromByteArray(stringPosition)
         let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
         let result = String.init(bytesNoCopy: pointer, length: Int(stringLenght), encoding: NSUTF8StringEncoding, freeWhenDone: false)
-        stringCache[stringOffset] = result
+        if config.uniqueStrings {
+            stringCache[stringOffset] = result
+        }
         return result
     }
     
@@ -1030,6 +1115,7 @@ public final class FlatBufferReader {
 }
 
 
+
 // MARK: Builder
 
 public enum FlatBufferBuilderError : ErrorType {
@@ -1043,10 +1129,12 @@ public enum FlatBufferBuilderError : ErrorType {
 }
 
 public final class FlatBufferBuilder {
-
-    var cache : [ObjectIdentifier : Offset] = [:]
-    var inProgress : Set<ObjectIdentifier> = []
-    var deferedBindings : [(object:Any, cursor:Int)] = []
+    
+    public var cache : [ObjectIdentifier : Offset] = [:]
+    public var inProgress : Set<ObjectIdentifier> = []
+    public var deferedBindings : [(object:Any, cursor:Int)] = []
+    
+    public let config : BinaryBuildConfig
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
@@ -1063,11 +1151,11 @@ public final class FlatBufferBuilder {
     var vectorNumElems : Int32 = -1;
     var vTableOffsets : [Int32] = []
     
-    public init(capacity : Int = 1){ //4_194_304
-        self.capacity = capacity
+    public init(config : BinaryBuildConfig){
+        self.config = config
+        self.capacity = config.initialCapacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }
-
     
     deinit {
         _data.dealloc(capacity)
@@ -1231,28 +1319,30 @@ public final class FlatBufferBuilder {
         let vtableDataLength = cursor - vtableloc
         
         var foundVTableOffset = vtableDataLength
-
-        for otherVTableOffset in vTableOffsets {
-            let start = cursor - Int(otherVTableOffset)
-            var found = true
-            for i in 0 ..< vtableDataLength {
-                let a = _data.advancedBy(leftCursor + i).memory
-                let b = _data.advancedBy(leftCursor + i + start).memory
-                if a != b {
-                    found = false
-                    break;
+        
+        if config.uniqueVTables{
+            for otherVTableOffset in vTableOffsets {
+                let start = cursor - Int(otherVTableOffset)
+                var found = true
+                for i in 0 ..< vtableDataLength {
+                    let a = _data.advancedBy(leftCursor + i).memory
+                    let b = _data.advancedBy(leftCursor + i + start).memory
+                    if a != b {
+                        found = false
+                        break;
+                    }
+                }
+                if found == true {
+                    foundVTableOffset = Int(otherVTableOffset) - vtableloc
+                    break
                 }
             }
-            if found == true {
-                foundVTableOffset = Int(otherVTableOffset) - vtableloc
-                break
+            
+            if foundVTableOffset != vtableDataLength {
+                cursor -= vtableDataLength
+            } else {
+                vTableOffsets.append(Int32(cursor))
             }
-        }
-        
-        if foundVTableOffset != vtableDataLength {
-            cursor -= vtableDataLength
-        } else {
-            vTableOffsets.append(Int32(cursor))
         }
         
         let indexLocation = cursor - vtableloc
@@ -1277,12 +1367,19 @@ public final class FlatBufferBuilder {
         return Int32(cursor)
     }
     
+    private var stringCache : [String:Offset] = [:]
     public func createString(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBufferBuilderError.ObjectIsNotClosed
         }
         guard let value = value else {
             return 0
+        }
+        
+        if config.uniqueStrings{
+            if let o = stringCache[value]{
+                return o
+            }
         }
 
         let buf = Array(value.utf8)
@@ -1293,7 +1390,12 @@ public final class FlatBufferBuilder {
         cursor += length
 
         put(Int32(length))
-        return Offset(cursor)
+        
+        let o = Offset(cursor)
+        if config.uniqueStrings {
+            stringCache[value] = o
+        }
+        return o
     }
     
     public func createString(value : UnsafeBufferPointer<UInt8>?) throws -> Offset {

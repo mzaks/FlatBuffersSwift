@@ -21,6 +21,7 @@
 		0BA0E8701C32B6AD00B896B7 /* FlatBuffers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */; };
 		0BA0E87C1C3AC27800B896B7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E87B1C3AC27800B896B7 /* main.swift */; };
 		0BBDD0A81C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BBDD0A71C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift */; };
+		0BE327751CD5F1AA0067DAC8 /* Configs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE327741CD5F1AA0067DAC8 /* Configs.swift */; };
 		85518AD91CD21D3700EEBCAC /* bench.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85518AD81CD21D3700EEBCAC /* bench.swift */; };
 		85518ADB1CD21D4300EEBCAC /* flatbench.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85518ADA1CD21D4300EEBCAC /* flatbench.swift */; };
 /* End PBXBuildFile section */
@@ -72,6 +73,7 @@
 		0BA0E8791C3AC27800B896B7 /* FlatBuffersPerformanceTestDesktop */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FlatBuffersPerformanceTestDesktop; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BA0E87B1C3AC27800B896B7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		0BBDD0A71C4AAB2A00D955F3 /* FlatBuffersGeneratedAPITest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffersGeneratedAPITest.swift; sourceTree = "<group>"; };
+		0BE327741CD5F1AA0067DAC8 /* Configs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configs.swift; sourceTree = "<group>"; };
 		85518AD71CD21D2B00EEBCAC /* bench.fbs */ = {isa = PBXFileReference; lastKnownFileType = text; path = bench.fbs; sourceTree = "<group>"; };
 		85518AD81CD21D3700EEBCAC /* bench.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = bench.swift; sourceTree = "<group>"; };
 		85518ADA1CD21D4300EEBCAC /* flatbench.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = flatbench.swift; sourceTree = "<group>"; };
@@ -137,11 +139,12 @@
 		0BA0E8471C32B62200B896B7 /* FlatBuffersSwift */ = {
 			isa = PBXGroup;
 			children = (
-				0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */,
 				0B62C1F01C43F1CD002500FE /* FlatBufferBuilder.swift */,
+				0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */,
 				0BA0E86C1C32B6AD00B896B7 /* FlatBuffers.swift */,
 				0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */,
 				0B62C1E71C3D8ADF002500FE /* LazyVector.swift */,
+				0BE327741CD5F1AA0067DAC8 /* Configs.swift */,
 				0BA0E84A1C32B62200B896B7 /* Info.plist */,
 			);
 			path = FlatBuffersSwift;
@@ -299,6 +302,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0BE327751CD5F1AA0067DAC8 /* Configs.swift in Sources */,
 				0BA0E8701C32B6AD00B896B7 /* FlatBuffers.swift in Sources */,
 				0B62C1E81C3D8ADF002500FE /* LazyVector.swift in Sources */,
 				0BA0E86E1C32B6AD00B896B7 /* FlatBufferReader.swift in Sources */,

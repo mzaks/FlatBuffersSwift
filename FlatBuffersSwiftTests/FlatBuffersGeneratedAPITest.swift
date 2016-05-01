@@ -38,7 +38,7 @@ class FlatBuffersGeneratedAPITest: XCTestCase {
         XCTAssert(list.entries[0]?.birthday?.year == 1981)
         XCTAssert(list.entries[1]?.birthday?.year == nil)
         
-        let data = list.toByteArray
+        let data = list.toByteArray()
         
         let lazyList  = ContactList.LazyAccess(data: UnsafePointer<UInt8>(data))
         
