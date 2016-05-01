@@ -19,9 +19,9 @@ public enum FlatBufferBuilderError : ErrorType {
 
 public final class FlatBufferBuilder {
     
-    var cache : [ObjectIdentifier : Offset] = [:]
-    var inProgress : Set<ObjectIdentifier> = []
-    var deferedBindings : [(object:Any, cursor:Int)] = []
+    public var cache : [ObjectIdentifier : Offset] = [:]
+    public var inProgress : Set<ObjectIdentifier> = []
+    public var deferedBindings : [(object:Any, cursor:Int)] = []
     
     
     var capacity : Int
