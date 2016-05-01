@@ -32,17 +32,17 @@ func flatencode(inout buf:[UInt8], _ bufsize:Int)
     let location = "http://google.com/flatbuffers/"
     let foobarcontainer = FooBarContainer(list: foobars, initialized: true, fruit: Enum.Bananas, location: location)
     
-    buf = foobarcontainer.toByteArray
+    buf = foobarcontainer.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024, uniqueStrings: false, uniqueTables: false, uniqueVTables: false))
 }
 
 func flatdecode(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer
 {
-    return FooBarContainer.fromByteArray(UnsafePointer(buf))
+    return FooBarContainer.fromByteArray(UnsafePointer(buf), config: BinaryReadConfig(uniqueTables: false, uniqueStrings: false))
 }
 
 func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
 {
-    return FooBarContainer.LazyAccess(data: UnsafePointer(buf))
+    return FooBarContainer.LazyAccess(data: UnsafePointer(buf), config: BinaryReadConfig(uniqueTables: false, uniqueStrings: false))
 }
 
 func flatuse(foobarcontainer : FooBarContainer) -> Int

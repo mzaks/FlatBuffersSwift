@@ -21,7 +21,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testPutBooleanValues() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         fbb.put(true)
         fbb.put(false)
         
@@ -32,7 +32,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testPutBooleanValues2() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         var a = true
         var b = false
         fbb.put(&a, length: strideofValue(a))
@@ -45,7 +45,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testPutIntValues() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         fbb.put(27)
         XCTAssertEqual(fbb.data,[27, 0, 0, 0, 0, 0, 0, 0])
         fbb.put(Int8(27))
@@ -124,7 +124,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testPutIntValues2() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         var a1 = 27
         fbb.put(&a1, length: strideofValue(a1))
         XCTAssertEqual(fbb.data,[27, 0, 0, 0, 0, 0, 0, 0])
@@ -150,7 +150,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testPutFloatValues() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         fbb.put(27.0)
         XCTAssertEqual(fbb.data,[
             0, 0, 0, 0, 0, 0, 59, 64
@@ -184,7 +184,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateString() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let offset = try! fbb.createString("max")
         
         XCTAssertEqual(offset, 7)
@@ -197,7 +197,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateEmptyString() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let offset = try! fbb.createString("")
         
         XCTAssertEqual(offset, 4)
@@ -207,7 +207,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateVectorOffBools() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         try! fbb.startVector(3)
         fbb.put(true)
         fbb.put(true)
@@ -224,7 +224,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateObject() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         XCTAssertEqual(fbb.data, [3,0,0,0,109,97,120])
         try! fbb.openObject(3)
@@ -251,7 +251,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateTwoEqualObjectAndReuseVTable() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         XCTAssertEqual(fbb.data, [3,0,0,0,109,97,120])
         try! fbb.openObject(3)
@@ -291,7 +291,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateObjectAndFinish() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -317,7 +317,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateObjectAndFinishWithoutFileIdentifier() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -342,7 +342,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateObjectAndReadRootObjectOffset() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -365,13 +365,13 @@ class FlatBuffersTests: XCTestCase {
                 109, 97,120]          // string 'max'
         )
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 14)
     }
     
     func testCreateObjectAndReadFirstBoolFromRootObject() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -394,14 +394,14 @@ class FlatBuffersTests: XCTestCase {
                 109, 97,120]          // string 'max'
         )
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let b1 = reader.get(objectOffset, propertyIndex: 0, defaultValue: false)
         XCTAssertEqual(b1, true)
     }
     
     func testCreateObjectAndReadPropertyOutsideOfTheVTable() { // Important for backwards compatibility
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -426,7 +426,7 @@ class FlatBuffersTests: XCTestCase {
                 109, 97,120]          // string 'max'
         )
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let badProperty = reader.get(objectOffset, propertyIndex: 3, defaultValue: false)
         XCTAssertEqual(badProperty, false)
@@ -435,7 +435,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testCreateObjectAndReadStringFromRootObject() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -458,7 +458,7 @@ class FlatBuffersTests: XCTestCase {
                 109, 97,120]          // string 'max'
         )
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let stringOffset : Offset? = reader.getOffset(objectOffset, propertyIndex: 1)
         let string = reader.getString(stringOffset)
@@ -466,7 +466,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testReadStringFromNestedObject() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.openObject(3)
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
@@ -480,7 +480,7 @@ class FlatBuffersTests: XCTestCase {
         
         let data = try! fbb.finish(oOffset2, fileIdentifier: nil)
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
         let stringOffset : Offset? = reader.getOffset(objectOffset2, propertyIndex: 1)
@@ -489,7 +489,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testReadIntFromVector() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         try! fbb.startVector(2)
         fbb.put(34) // puting stuff in reversed order!!!
         fbb.put(43) // puting stuff in reversed order!!!
@@ -502,7 +502,7 @@ class FlatBuffersTests: XCTestCase {
         
         let data = try! fbb.finish(oOffset1, fileIdentifier: nil)
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
         let length = reader.getVectorLength(objectOffset2)
@@ -512,7 +512,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testReadStringFromVector() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         try! fbb.startVector(1)
         try! fbb.putOffset(sOffset)
@@ -525,7 +525,7 @@ class FlatBuffersTests: XCTestCase {
         
         let data = try! fbb.finish(oOffset1, fileIdentifier: nil)
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
         let length = reader.getVectorLength(objectOffset2)
@@ -535,7 +535,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testReplaceOffsetInVector() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         
         try! fbb.startVector(1)
@@ -545,7 +545,7 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.replaceOffset(sOffset, atCursor: cursor)
         let data = try! fbb.finish(vOffset, fileIdentifier: nil)
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let length = reader.getVectorLength(objectOffset)
         XCTAssertEqual(length, 1)
@@ -554,7 +554,7 @@ class FlatBuffersTests: XCTestCase {
     }
     
     func testReplaceOffsetInObject() {
-        let fbb = FlatBufferBuilder()
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         
         try! fbb.openObject(1)
@@ -564,7 +564,7 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.replaceOffset(sOffset, atCursor: cursor)
         let data = try! fbb.finish(oOffset, fileIdentifier: nil)
         
-        let reader = FlatBufferReader(buffer: data)
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset3 : Offset? = reader.getOffset(objectOffset, propertyIndex: 0)
         XCTAssertEqual(reader.getString(objectOffset3), "max")
