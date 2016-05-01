@@ -10,6 +10,7 @@ import Foundation
 public final class FlatBufferReader {
 
     let buffer : UnsafePointer<UInt8>
+    var objectPool : [Offset : AnyObject] = [:]
     
     func fromByteArray<T : Scalar>(position : Int) -> T{
         return UnsafePointer<T>(buffer.advancedBy(position)).memory

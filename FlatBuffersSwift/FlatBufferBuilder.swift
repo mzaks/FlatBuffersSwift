@@ -18,6 +18,12 @@ public enum FlatBufferBuilderError : ErrorType {
 }
 
 public final class FlatBufferBuilder {
+    
+    var cache : [ObjectIdentifier : Offset] = [:]
+    var inProgress : Set<ObjectIdentifier> = []
+    var deferedBindings : [(object:Any, cursor:Int)] = []
+    
+    
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
     var data : [UInt8] {
@@ -33,7 +39,7 @@ public final class FlatBufferBuilder {
     var vectorNumElems : Int32 = -1;
     var vTableOffsets : [Int32] = []
     
-    public init(capacity : Int = 1){ //4_194_304
+    public init(capacity : Int = 1024*40){ //4_194_304
         self.capacity = capacity
         _data = UnsafeMutablePointer.alloc(capacity)
     }

@@ -11,16 +11,15 @@ public final class ContactList {
 	}
 }
 public extension ContactList {
-	private static var objectPool : [Offset : ContactList] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> ContactList? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = ContactList.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? ContactList
 		}
 		let _result = ContactList()
-		ContactList.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.lastModified = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
 		let offset_entries : Offset? = reader.getOffset(objectOffset, propertyIndex: 1)
 		let length_entries = reader.getVectorLength(offset_entries)
@@ -46,7 +45,6 @@ public extension ContactList {
 		let builder = FlatBufferBuilder()
 		let offset = addToByteArray(builder)
 		performLateBindings(builder)
-		performClearCaches()
 		return try! builder.finish(offset, fileIdentifier: nil)
 	}
 }
@@ -84,50 +82,27 @@ public extension ContactList {
 }
 
 public func ==(t1 : ContactList.LazyAccess, t2 : ContactList.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension ContactList {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:ContactList, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = ContactList.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if ContactList.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		ContactList.inProgress.insert(ObjectIdentifier(self))
 		var offset1 = Offset(0)
 		if entries.count > 0{
 			var offsets = [Offset?](count: entries.count, repeatedValue: nil)
 			var index = entries.count - 1
-			var deferedBindingObjects : [Int : Contact] = [:]
 			while(index >= 0){
 				offsets[index] = entries[index]?.addToByteArray(builder)
-				if offsets[index] == 0 {
-					deferedBindingObjects[index] = entries[index]!
-				}
 				index -= 1
 			}
 			try! builder.startVector(entries.count)
 			index = entries.count - 1
-			var deferedBindingCursors : [Int : Int] = [:]
 			while(index >= 0){
-				let cursor = try! builder.putOffset(offsets[index])
-				if offsets[index] == 0 {
-					deferedBindingCursors[index] = cursor
-				}
+				try! builder.putOffset(offsets[index])
 				index -= 1
-			}
-			for key in deferedBindingObjects.keys {
-				Contact.deferedBindings.append((object: deferedBindingObjects[key]!, cursor: deferedBindingCursors[key]!))
 			}
 			offset1 = builder.endVector()
 		}
@@ -137,8 +112,7 @@ public extension ContactList {
 		}
 		try! builder.addPropertyToOpenObject(0, value : lastModified, defaultValue : 0)
 		let myOffset =  try! builder.closeObject()
-		ContactList.cache[ObjectIdentifier(self)] = myOffset
-		ContactList.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -170,16 +144,15 @@ public final class Contact {
 	}
 }
 public extension Contact {
-	private static var objectPool : [Offset : Contact] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Contact? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = Contact.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? Contact
 		}
 		let _result = Contact()
-		Contact.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.birthday = Date.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.gender = Gender(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
@@ -293,26 +266,14 @@ public extension Contact {
 }
 
 public func ==(t1 : Contact.LazyAccess, t2 : Contact.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension Contact {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:Contact, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = Contact.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if Contact.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		Contact.inProgress.insert(ObjectIdentifier(self))
 		var offset7 = Offset(0)
 		if moods.count > 0{
 			try! builder.startVector(moods.count)
@@ -339,26 +300,15 @@ public extension Contact {
 		if addressEntries.count > 0{
 			var offsets = [Offset?](count: addressEntries.count, repeatedValue: nil)
 			var index = addressEntries.count - 1
-			var deferedBindingObjects : [Int : AddressEntry] = [:]
 			while(index >= 0){
 				offsets[index] = addressEntries[index]?.addToByteArray(builder)
-				if offsets[index] == 0 {
-					deferedBindingObjects[index] = addressEntries[index]!
-				}
 				index -= 1
 			}
 			try! builder.startVector(addressEntries.count)
 			index = addressEntries.count - 1
-			var deferedBindingCursors : [Int : Int] = [:]
 			while(index >= 0){
-				let cursor = try! builder.putOffset(offsets[index])
-				if offsets[index] == 0 {
-					deferedBindingCursors[index] = cursor
-				}
+				try! builder.putOffset(offsets[index])
 				index -= 1
-			}
-			for key in deferedBindingObjects.keys {
-				AddressEntry.deferedBindings.append((object: deferedBindingObjects[key]!, cursor: deferedBindingCursors[key]!))
 			}
 			offset4 = builder.endVector()
 		}
@@ -401,15 +351,11 @@ public extension Contact {
 		}
 		try! builder.addPropertyToOpenObject(2, value : gender!.rawValue, defaultValue : 0)
 		if birthday != nil {
-			let cursor1 = try! builder.addPropertyOffsetToOpenObject(1, offset: offset1)
-			if offset1 == 0 {
-				Date.deferedBindings.append((object: birthday!, cursor: cursor1))
-			}
+			try! builder.addPropertyOffsetToOpenObject(1, offset: offset1)
 		}
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		Contact.cache[ObjectIdentifier(self)] = myOffset
-		Contact.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -425,16 +371,15 @@ public final class Date {
 	}
 }
 public extension Date {
-	private static var objectPool : [Offset : Date] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Date? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = Date.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? Date
 		}
 		let _result = Date()
-		Date.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.day = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
 		_result.month = reader.get(objectOffset, propertyIndex: 1, defaultValue: 0)
 		_result.year = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
@@ -466,33 +411,20 @@ public extension Date {
 }
 
 public func ==(t1 : Date.LazyAccess, t2 : Date.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension Date {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:Date, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = Date.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if Date.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		Date.inProgress.insert(ObjectIdentifier(self))
 		try! builder.openObject(3)
 		try! builder.addPropertyToOpenObject(2, value : year, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(1, value : month, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(0, value : day, defaultValue : 0)
 		let myOffset =  try! builder.closeObject()
-		Date.cache[ObjectIdentifier(self)] = myOffset
-		Date.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -511,16 +443,15 @@ public final class AddressEntry {
 	}
 }
 public extension AddressEntry {
-	private static var objectPool : [Offset : AddressEntry] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> AddressEntry? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = AddressEntry.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? AddressEntry
 		}
 		let _result = AddressEntry()
-		AddressEntry.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.order = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
 		_result.address = create_Address(reader, propertyIndex: 1, objectOffset: objectOffset)
 		return _result
@@ -550,39 +481,23 @@ public extension AddressEntry {
 }
 
 public func ==(t1 : AddressEntry.LazyAccess, t2 : AddressEntry.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension AddressEntry {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:AddressEntry, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = AddressEntry.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if AddressEntry.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		AddressEntry.inProgress.insert(ObjectIdentifier(self))
 		let offset1 = addToByteArray_Address(builder, union: address)
 		try! builder.openObject(3)
 		if address != nil {
-			let cursor1 = try! builder.addPropertyOffsetToOpenObject(2, offset: offset1)
-			if offset1 == 0 {
-				Address_DeferedBindings.append((object: address!, cursor: cursor1))
-			}
+			try! builder.addPropertyOffsetToOpenObject(2, offset: offset1)
 			try! builder.addPropertyToOpenObject(1, value : unionCase_Address(address), defaultValue : 0)
 		}
 		try! builder.addPropertyToOpenObject(0, value : order, defaultValue : 0)
 		let myOffset =  try! builder.closeObject()
-		AddressEntry.cache[ObjectIdentifier(self)] = myOffset
-		AddressEntry.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -600,16 +515,15 @@ public final class PostalAddress {
 	}
 }
 public extension PostalAddress {
-	private static var objectPool : [Offset : PostalAddress] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> PostalAddress? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = PostalAddress.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? PostalAddress
 		}
 		let _result = PostalAddress()
-		PostalAddress.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.country = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.city = reader.getString(reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.postalCode = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
@@ -643,26 +557,14 @@ public extension PostalAddress {
 }
 
 public func ==(t1 : PostalAddress.LazyAccess, t2 : PostalAddress.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension PostalAddress {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:PostalAddress, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = PostalAddress.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if PostalAddress.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		PostalAddress.inProgress.insert(ObjectIdentifier(self))
 		let offset3 = try! builder.createString(streetAndNumber)
 		let offset1 = try! builder.createString(city)
 		let offset0 = try! builder.createString(country)
@@ -672,8 +574,7 @@ public extension PostalAddress {
 		try! builder.addPropertyOffsetToOpenObject(1, offset: offset1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		PostalAddress.cache[ObjectIdentifier(self)] = myOffset
-		PostalAddress.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -685,16 +586,15 @@ public final class EmailAddress {
 	}
 }
 public extension EmailAddress {
-	private static var objectPool : [Offset : EmailAddress] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> EmailAddress? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = EmailAddress.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? EmailAddress
 		}
 		let _result = EmailAddress()
-		EmailAddress.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.mailto = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
@@ -722,32 +622,19 @@ public extension EmailAddress {
 }
 
 public func ==(t1 : EmailAddress.LazyAccess, t2 : EmailAddress.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension EmailAddress {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:EmailAddress, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = EmailAddress.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if EmailAddress.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		EmailAddress.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try! builder.createString(mailto)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		EmailAddress.cache[ObjectIdentifier(self)] = myOffset
-		EmailAddress.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -759,16 +646,15 @@ public final class WebAddress {
 	}
 }
 public extension WebAddress {
-	private static var objectPool : [Offset : WebAddress] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> WebAddress? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = WebAddress.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? WebAddress
 		}
 		let _result = WebAddress()
-		WebAddress.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.url = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
@@ -796,32 +682,19 @@ public extension WebAddress {
 }
 
 public func ==(t1 : WebAddress.LazyAccess, t2 : WebAddress.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension WebAddress {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:WebAddress, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = WebAddress.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if WebAddress.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		WebAddress.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try! builder.createString(url)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		WebAddress.cache[ObjectIdentifier(self)] = myOffset
-		WebAddress.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -833,16 +706,15 @@ public final class TelephoneNumber {
 	}
 }
 public extension TelephoneNumber {
-	private static var objectPool : [Offset : TelephoneNumber] = [:]
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> TelephoneNumber? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
-		if let o = TelephoneNumber.objectPool[objectOffset]{
-			return o
+		if let o = reader.objectPool[objectOffset]{
+			return o as? TelephoneNumber
 		}
 		let _result = TelephoneNumber()
-		TelephoneNumber.objectPool[objectOffset] = _result
+		reader.objectPool[objectOffset] = _result
 		_result.number = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
@@ -870,32 +742,19 @@ public extension TelephoneNumber {
 }
 
 public func ==(t1 : TelephoneNumber.LazyAccess, t2 : TelephoneNumber.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset
+	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
 public extension TelephoneNumber {
-	private static var cache : [ObjectIdentifier : Offset] = [:]
-	private static var inProgress : Set<ObjectIdentifier> = []
-	private static var deferedBindings : [(object:TelephoneNumber, cursor:Int)] = []
-	static func clearCaches(){
-		cache.removeAll()
-		inProgress.removeAll()
-		deferedBindings.removeAll()
-	}
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if let myOffset = TelephoneNumber.cache[ObjectIdentifier(self)] {
+		if let myOffset = builder.cache[ObjectIdentifier(self)] {
 			return myOffset
 		}
-		if TelephoneNumber.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		TelephoneNumber.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try! builder.createString(number)
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
-		TelephoneNumber.cache[ObjectIdentifier(self)] = myOffset
-		TelephoneNumber.inProgress.remove(ObjectIdentifier(self))
+		builder.cache[ObjectIdentifier(self)] = myOffset
 		return myOffset
 	}
 }
@@ -909,7 +768,6 @@ extension WebAddress : Address {}
 extension WebAddress.LazyAccess : Address_LazyAccess {}
 extension TelephoneNumber : Address {}
 extension TelephoneNumber.LazyAccess : Address_LazyAccess {}
-private var Address_DeferedBindings : [(object:Address, cursor:Int)] = []
 private func create_Address(reader : FlatBufferReader, propertyIndex : Int, objectOffset : Offset?) -> Address? {
 	guard let objectOffset = objectOffset else {
 		return nil
@@ -960,53 +818,20 @@ private func addToByteArray_Address(builder : FlatBufferBuilder, union : Address
 	default : return 0
 	}
 }
-private func performLateBindings_Address(builder : FlatBufferBuilder) {
-	for binding in Address_DeferedBindings {
+private func performLateBindings(builder : FlatBufferBuilder) {
+	for binding in builder.deferedBindings {
 		switch binding.object {
-		case let u as PostalAddress : try! builder.replaceOffset(u.addToByteArray(builder), atCursor: binding.cursor)
-		case let u as EmailAddress : try! builder.replaceOffset(u.addToByteArray(builder), atCursor: binding.cursor)
-		case let u as WebAddress : try! builder.replaceOffset(u.addToByteArray(builder), atCursor: binding.cursor)
-		case let u as TelephoneNumber : try! builder.replaceOffset(u.addToByteArray(builder), atCursor: binding.cursor)
-		default : continue
+		case let object as ContactList: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as Contact: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as Date: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as AddressEntry: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as PostalAddress: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as EmailAddress: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as WebAddress: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as TelephoneNumber: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
+		default: continue
 		}
 	}
-}
-private func performLateBindings(builder : FlatBufferBuilder) {
-	for binding in ContactList.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	performLateBindings_Address(builder)
-	for binding in Contact.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	for binding in Date.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	for binding in AddressEntry.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	for binding in PostalAddress.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	for binding in EmailAddress.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	for binding in WebAddress.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-	for binding in TelephoneNumber.deferedBindings {
-		try! builder.replaceOffset(binding.object.addToByteArray(builder), atCursor: binding.cursor)
-	}
-}
-private func performClearCaches() {
-	ContactList.clearCaches()
-	Contact.clearCaches()
-	Date.clearCaches()
-	AddressEntry.clearCaches()
-	PostalAddress.clearCaches()
-	EmailAddress.clearCaches()
-	WebAddress.clearCaches()
-	TelephoneNumber.clearCaches()
 }
 // MARK: Generic Type Definitions
 import Foundation
@@ -1074,9 +899,10 @@ public final class LazyVector<T> : SequenceType {
 }
 // MARK: Reader
 
-public class FlatBufferReader {
+public final class FlatBufferReader {
 
     let buffer : UnsafePointer<UInt8>
+    var objectPool : [Offset : AnyObject] = [:]
     
     func fromByteArray<T : Scalar>(position : Int) -> T{
         return UnsafePointer<T>(buffer.advancedBy(position)).memory
@@ -1127,7 +953,7 @@ public class FlatBufferReader {
         let localObjectOffset : Int32 = fromByteArray(Int(position))
         let offset = position + localObjectOffset
         
-        if propertyOffset == 0 {
+        if localObjectOffset == 0 {
             return nil
         }
         return offset
@@ -1203,6 +1029,7 @@ public class FlatBufferReader {
     }
 }
 
+
 // MARK: Builder
 
 public enum FlatBufferBuilderError : ErrorType {
@@ -1215,7 +1042,12 @@ public enum FlatBufferBuilderError : ErrorType {
     case UnsupportedType
 }
 
-public class FlatBufferBuilder {
+public final class FlatBufferBuilder {
+
+    var cache : [ObjectIdentifier : Offset] = [:]
+    var inProgress : Set<ObjectIdentifier> = []
+    var deferedBindings : [(object:Any, cursor:Int)] = []
+    
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
     var data : [UInt8] {
