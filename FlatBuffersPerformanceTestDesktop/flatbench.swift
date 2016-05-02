@@ -18,15 +18,15 @@ var buf = [UInt8](count: bufsize, repeatedValue: 0)
 func flatencode(inout buf:[UInt8], _ bufsize:Int)
 {
     let veclen = 3
-    var foobars : [FooBar?] = []
-  
+    var foobars : [FooBar?] = Array(count: veclen, repeatedValue:nil)
+
     for i in 0..<veclen { // 0xABADCAFEABADCAFE will overflow in usage
         let ident : UInt64 = 0xABADCAFE + UInt64(i)
         let foo = Foo(id: ident, count: 10000 + i, prefix: 64 + i, length: UInt32(1000000 + i))
         let bar = Bar(parent: foo, time: 123456 + i, ratio: 3.14159 + Float(i), size: UInt16(10000 + i))
         let name = "Hello, World!"
         let foobar = FooBar(sibling: bar, name: name, rating: 3.1415432432445543543+Double(i), postfix: UInt8(33 + i))
-        foobars.append(foobar)
+        foobars[i] = foobar
     }
     
     let location = "http://google.com/flatbuffers/"
@@ -50,6 +50,7 @@ func flatuse(foobarcontainer : FooBarContainer) -> Int
     var sum:Int = 1
     sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
+    sum = sum + Int(foobarcontainer.initialized)
     
     for i in 0..<foobarcontainer.list.count {
         let foobar = foobarcontainer.list[i]!
@@ -78,6 +79,7 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
     var sum:Int = 1
     sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
+    sum = sum + Int(foobarcontainer.initialized)
     
     for i in 0..<foobarcontainer.list.count {
         let foobar = foobarcontainer.list[i]!
@@ -154,7 +156,7 @@ func runbench(lazyrun: BooleanType)
             {
                 result = flatuse(results[index])
             }
-            assert(result == 8644311666)
+            assert(result == 8644311667)
             total = total + UInt64(result)
         }
         let time6 = NSDate()
