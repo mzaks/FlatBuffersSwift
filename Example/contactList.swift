@@ -934,33 +934,6 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
-// String extension from Mike Ash for conveniently creating native Swift strings from UTF8 sequences
-// https://www.mikeash.com/pyblog/friday-qa-2015-11-06-why-is-swifts-string-api-so-hard.html
-
-extension String {
-    init?<Seq: SequenceType where Seq.Generator.Element == UInt16>(utf16: Seq) {
-        self.init()
-        
-        guard transcode(UTF16.self,
-                        UTF32.self,
-                        utf16.generate(),
-                        { self.append(UnicodeScalar($0)) },
-                        stopOnError: true)
-            == false else { return nil }
-    }
-    
-    init?<Seq: SequenceType where Seq.Generator.Element == UInt8>(utf8: Seq) {
-        self.init()
-        
-        guard transcode(UTF8.self,
-                        UTF32.self,
-                        utf8.generate(),
-                        { self.append(UnicodeScalar($0)) },
-                        stopOnError: true)
-            == false else { return nil }
-    }
-}
-
 public final class LazyVector<T> : SequenceType {
     private let _generator : (Int)->T?
     private let _count : Int
@@ -1088,7 +1061,6 @@ public final class FlatBufferReader {
     }
     
     var stringCache : [Int32:String] = [:]
-    var stringBuffer : [UInt8] = []
     
     public func getString(stringOffset : Offset?) -> String? {
         guard let stringOffset = stringOffset else {
@@ -1102,17 +1074,10 @@ public final class FlatBufferReader {
         
         let stringPosition = Int(stringOffset)
         let stringLength : Int32 = fromByteArray(stringPosition)
-
-        // This slightly convoluted way makes sure we construct a native Swift string instead of a bridged NSString
-
-        stringBuffer.reserveCapacity(Int(stringLength))
-        for i in 0..<stringLength {
-            let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32) + Int(i)))
-            stringBuffer.append(pointer.memory)
-        }
-        let result = String(utf8: stringBuffer)
-        stringBuffer.removeAll(keepCapacity: true)
-
+        
+        let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
+        let result = String.init(bytesNoCopy: pointer, length: Int(stringLength), encoding: NSUTF8StringEncoding, freeWhenDone: false)
+        
         if config.uniqueStrings {
             stringCache[stringOffset] = result
         }
@@ -1242,7 +1207,6 @@ public final class FlatBufferBuilder {
         withUnsafePointer(&v){
             _data.advancedBy(leftCursor-c).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
-//        memcpy(_data.advancedBy(leftCursor-c), &v, c)
         cursor += c
 
     }
@@ -1288,7 +1252,6 @@ public final class FlatBufferBuilder {
         withUnsafePointer(&v){
             _data.advancedBy((capacity - jumpCursor)).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
-//        memcpy(_data.advancedBy(capacity - jumpCursor), &v, c)
     }
     
     private func put<T : Scalar>(value : T, at index : Int){
@@ -1300,7 +1263,6 @@ public final class FlatBufferBuilder {
         withUnsafePointer(&v){
             _data.advancedBy(index + leftCursor).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
-//        memcpy(_data.advancedBy(index + leftCursor), &v, c)
     }
     
     public func openObject(numOfProperties : Int) throws {
@@ -1491,7 +1453,7 @@ public final class FlatBufferBuilder {
         let length = value.byteSize
         
         increaseCapacity(length)
-        _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
+        _data.advancedBy(leftCursor-length).assignFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
         cursor += length
         
         put(Int32(length))
@@ -1520,9 +1482,8 @@ public final class FlatBufferBuilder {
         var v = (Int32(cursor + prefixLength) - offset).littleEndian
         let c = strideofValue(v)
         withUnsafePointer(&v){
-            _data.advancedBy(leftCursor - prefixLength).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+            _data.advancedBy(leftCursor - prefixLength).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
-//        memcpy(_data.advancedBy(leftCursor - prefixLength), &v, c)
         
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
     }
