@@ -90,7 +90,7 @@ private func generateTel() -> TelephoneNumber {
 }
 
 private func generateLocation() -> GeoLocation {
-    return GeoLocation(latitude: 2.5, longitude: 3.5, elevation: 7.5)
+    return GeoLocation(latitude: 2.5, longitude: 3.5, elevation: 7.5, s: S1(i:12))
 }
 
 private func generateLocations() -> [GeoLocation?] {
