@@ -11,7 +11,7 @@ import Foundation
 func testRandomContactListToByteArrayAndBackAgain(){
     let contactList = generateRandomContactList()
     let time1 = NSDate()
-    let data = contactList.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024, uniqueStrings: false, uniqueTables: false, uniqueVTables: true))
+    let data = contactList.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024*3, uniqueStrings: false, uniqueTables: false, uniqueVTables: true))
     let after1 = NSDate()
     print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) ms encoding to byte array of size \(data.count)")
     let time2 = NSDate()
@@ -32,13 +32,13 @@ func testReadingJSON(){
     let time1 = NSDate()
     let o = try! NSJSONSerialization.JSONObjectWithData(jsonData, options: NSJSONReadingOptions.MutableContainers)
     let after1 = NSDate()
-    print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) mseconds for parsing JSON and creating JSON objects")
+    print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) ms for parsing JSON")
 
     let time2 = NSDate()
     let newData2 : NSData = try!NSJSONSerialization.dataWithJSONObject(o, options: NSJSONWritingOptions(rawValue: 0))
     let after2 = NSDate()
-    print("\((after2.timeIntervalSince1970 - time2.timeIntervalSince1970) * 1000.0) mseconds for creating JSON Data again, size \(newData2.length)")
-//    newData2.writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList_.json", atomically: true)
+    print("\((after2.timeIntervalSince1970 - time2.timeIntervalSince1970) * 1000.0) ms for creating JSON, size \(newData2.length)")
+    newData2.writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList_.json", atomically: true)
     
 }
 

@@ -1239,17 +1239,17 @@ public final class FlatBufferBuilder {
         }
         let c = strideofValue(v)
         increaseCapacity(c)
-//        withUnsafePointer(&v){
-//            _data.advancedBy(leftCursor-c).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-//        }
-        memcpy(_data.advancedBy(leftCursor-c), &v, c)
+        withUnsafePointer(&v){
+            _data.advancedBy(leftCursor-c).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
+//        memcpy(_data.advancedBy(leftCursor-c), &v, c)
         cursor += c
 
     }
     
     public func put<T : Scalar>(value : UnsafePointer<T>, length : Int){
         increaseCapacity(length)
-        _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(value), count: length)
+        _data.advancedBy(leftCursor-length).assignFrom(UnsafeMutablePointer<UInt8>(value), count: length)
         cursor += length
     }
     
@@ -1285,10 +1285,10 @@ public final class FlatBufferBuilder {
             v = _offset.littleEndian
         }
         let c = strideofValue(v)
-//        withUnsafePointer(&v){
-//            _data.advancedBy((capacity - jumpCursor)).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-//        }
-        memcpy(_data.advancedBy(capacity - jumpCursor), &v, c)
+        withUnsafePointer(&v){
+            _data.advancedBy((capacity - jumpCursor)).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
+//        memcpy(_data.advancedBy(capacity - jumpCursor), &v, c)
     }
     
     private func put<T : Scalar>(value : T, at index : Int){
@@ -1297,10 +1297,10 @@ public final class FlatBufferBuilder {
             v = value.littleEndian
         }
         let c = strideofValue(v)
-//        withUnsafePointer(&v){
-//            _data.advancedBy(index + leftCursor).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-//        }
-        memcpy(_data.advancedBy(index + leftCursor), &v, c)
+        withUnsafePointer(&v){
+            _data.advancedBy(index + leftCursor).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
+//        memcpy(_data.advancedBy(index + leftCursor), &v, c)
     }
     
     public func openObject(numOfProperties : Int) throws {
@@ -1519,10 +1519,10 @@ public final class FlatBufferBuilder {
         
         var v = (Int32(cursor + prefixLength) - offset).littleEndian
         let c = strideofValue(v)
-//        withUnsafePointer(&v){
-//            _data.advancedBy(leftCursor - prefixLength).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-//        }
-        memcpy(_data.advancedBy(leftCursor - prefixLength), &v, c)
+        withUnsafePointer(&v){
+            _data.advancedBy(leftCursor - prefixLength).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
+//        memcpy(_data.advancedBy(leftCursor - prefixLength), &v, c)
         
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
     }
