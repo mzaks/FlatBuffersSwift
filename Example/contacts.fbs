@@ -26,10 +26,15 @@ table Date {
 	year : short;
 }
 
+struct S1 {
+    i : int;
+}
+
 struct GeoLocation {
 	latitude : double;
 	longitude : double;
 	elevation : float;
+    s : S1;
 }
 
 table AddressEntry{

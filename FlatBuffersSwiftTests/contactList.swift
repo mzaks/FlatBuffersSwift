@@ -444,13 +444,20 @@ public extension Date {
 		return myOffset
 	}
 }
+public struct S1 : Scalar {
+	public var i : Int32
+}
+public func ==(v1:S1, v2:S1) -> Bool {
+	return  v1.i==v2.i
+}
 public struct GeoLocation : Scalar {
 	public var latitude : Float64
 	public var longitude : Float64
 	public var elevation : Float32
+	public var s : S1
 }
 public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
-	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation
+	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
 	public var order : Int32 = 0
