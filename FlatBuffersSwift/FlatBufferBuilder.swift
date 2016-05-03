@@ -19,11 +19,13 @@ public enum FlatBufferBuilderError : ErrorType {
 
 public final class FlatBufferBuilder {
     
+    static var builderPool : [FlatBufferBuilder] = []
+    
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
     public var deferedBindings : [(object:Any, cursor:Int)] = []
     
-    public let config : BinaryBuildConfig
+    public var config : BinaryBuildConfig
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
@@ -138,7 +140,11 @@ public final class FlatBufferBuilder {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBufferBuilderError.ObjectIsNotClosed
         }
-        currentVTable = Array<Int32>(count: numOfProperties, repeatedValue: 0)
+        currentVTable.removeAll(keepCapacity: true)
+        currentVTable.reserveCapacity(numOfProperties)
+        for _ in 0..<numOfProperties {
+            currentVTable.append(0)
+        }
         objectStart = Int32(cursor)
     }
     
@@ -356,4 +362,46 @@ public final class FlatBufferBuilder {
         
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
     }
+}
+
+// Pooling
+public extension FlatBufferBuilder {
+    
+    public func reset ()
+    {
+        cursor = 0
+        objectStart = -1
+        vectorNumElems = -1;
+        vTableOffsets.removeAll(keepCapacity: true)
+        currentVTable.removeAll(keepCapacity: true)
+        cache.removeAll(keepCapacity: true)
+        inProgress.removeAll(keepCapacity: true)
+        deferedBindings.removeAll(keepCapacity: true)
+        stringCache.removeAll(keepCapacity: true)
+    }
+    
+    public static func create(config: BinaryBuildConfig) -> FlatBufferBuilder {
+        if (builderPool.count > 0)
+        {
+            let builder = builderPool.removeLast()
+            builder.config = config
+            if (config.initialCapacity > builder.capacity) {
+                builder._data.dealloc(builder.capacity)
+                builder.capacity = config.initialCapacity
+                builder._data = UnsafeMutablePointer.alloc(builder.capacity)
+            }
+            return builder
+        }
+        
+        return FlatBufferBuilder(config: config)
+    }
+    
+    public static func reuse(builder : FlatBufferBuilder) {
+        if (builderPool.count < 100) // max pool size
+        {
+            builder.reset()
+            builderPool.append(builder)
+        }
+    }
+    
 }
