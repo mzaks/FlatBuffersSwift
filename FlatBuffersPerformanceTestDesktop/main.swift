@@ -11,18 +11,18 @@ import Foundation
 func testRandomContactListToByteArrayAndBackAgain(){
     let contactList = generateRandomContactList()
     let time1 = NSDate()
-    let data = contactList.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024, uniqueStrings: false, uniqueTables: false, uniqueVTables: false))
+    let data = contactList.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024, uniqueStrings: false, uniqueTables: false, uniqueVTables: true))
     let after1 = NSDate()
-    print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) mseconds for creating byte array of size \(data.count)")
+    print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) ms encoding to byte array of size \(data.count)")
     let time2 = NSDate()
-    _ = ContactList.fromByteArray(data, config: BinaryReadConfig(uniqueTables: false, uniqueStrings: false))
+    _ = ContactList.fromByteArray(data, config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
     let after2 = NSDate()
-    print("\((after2.timeIntervalSince1970 - time2.timeIntervalSince1970) * 1000.0) mseconds for creating the list from byte array")
+    print("\((after2.timeIntervalSince1970 - time2.timeIntervalSince1970) * 1000.0) ms decoding")
 
     let time3 = NSDate()
     _ = ContactList.LazyAccess(data: data)
     let after3 = NSDate()
-    print("\((after3.timeIntervalSince1970 - time3.timeIntervalSince1970) * 1000.0) mseconds for creating lazy accessor to the list from byte array")
+    print("\((after3.timeIntervalSince1970 - time3.timeIntervalSince1970) * 1000.0) ms lazy accessor")
     
 //    NSData(bytes: UnsafePointer<UInt8>(data), length: data.count).writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList.bin", atomically: true)
 }

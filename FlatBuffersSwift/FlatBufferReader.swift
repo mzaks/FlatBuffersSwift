@@ -42,6 +42,15 @@ public final class FlatBufferReader {
         return fromByteArray(position)
     }
     
+    public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int) -> T?{
+        let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
+        if propertyOffset == 0 {
+            return nil
+        }
+        let position = Int(objectOffset + propertyOffset)
+        return fromByteArray(position) as T
+    }
+    
     public func getStructProperty<T : Scalar>(objectOffset : Offset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
