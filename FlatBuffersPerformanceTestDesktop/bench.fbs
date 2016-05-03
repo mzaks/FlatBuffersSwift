@@ -22,15 +22,15 @@ namespace benchfb;
 enum Enum : short { Apples, Pears, Bananas }
 
 // should be struct but not currently supported
-table Foo {
-  id:ulong;
+struct Foo {
+  i_d:ulong;
   count:short;
   prefix:byte;
   length:uint;
 }
 
 // should be struct but not currently supported
-table Bar {
+struct Bar {
   parent:Foo;
   time:int;
   ratio:float;

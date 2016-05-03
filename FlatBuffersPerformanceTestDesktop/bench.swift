@@ -4,172 +4,23 @@
 public enum Enum : Int16 {
 	case Apples, Pears, Bananas
 }
-public final class Foo {
-	public var id : UInt64 = 0
-	public var count : Int16 = 0
-	public var prefix : Int8 = 0
-	public var length : UInt32 = 0
-	public init(){}
-	public init(id: UInt64, count: Int16, prefix: Int8, length: UInt32){
-		self.id = id
-		self.count = count
-		self.prefix = prefix
-		self.length = length
-	}
+public struct Foo : Scalar {
+	public var i_d : UInt64
+	public var count : Int16
+	public var prefix : Int8
+	public var length : UInt32
 }
-public extension Foo {
-	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Foo? {
-		guard let objectOffset = objectOffset else {
-			return nil
-		}
-		if reader.config.uniqueTables {
-			if let o = reader.objectPool[objectOffset]{
-				return o as? Foo
-			}
-		}
-		let _result = Foo()
-		if reader.config.uniqueTables {
-			reader.objectPool[objectOffset] = _result
-		}
-		_result.id = reader.get(objectOffset, propertyIndex: 0, defaultValue: 0)
-		_result.count = reader.get(objectOffset, propertyIndex: 1, defaultValue: 0)
-		_result.prefix = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
-		_result.length = reader.get(objectOffset, propertyIndex: 3, defaultValue: 0)
-		return _result
-	}
+public func ==(v1:Foo, v2:Foo) -> Bool {
+	return  v1.i_d==v2.i_d &&  v1.count==v2.count &&  v1.prefix==v2.prefix &&  v1.length==v2.length
 }
-public extension Foo {
-	public final class LazyAccess : Hashable {
-		private let _reader : FlatBufferReader!
-		private let _objectOffset : Offset!
-		private init?(reader : FlatBufferReader, objectOffset : Offset?){
-			guard let objectOffset = objectOffset else {
-				_reader = nil
-				_objectOffset = nil
-				return nil
-			}
-			_reader = reader
-			_objectOffset = objectOffset
-		}
-
-		public lazy var id : UInt64 = self._reader.get(self._objectOffset, propertyIndex: 0, defaultValue:0)
-		public lazy var count : Int16 = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:0)
-		public lazy var prefix : Int8 = self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:0)
-		public lazy var length : UInt32 = self._reader.get(self._objectOffset, propertyIndex: 3, defaultValue:0)
-
-		public lazy var createEagerVersion : Foo? = Foo.create(self._reader, objectOffset: self._objectOffset)
-		
-		public var hashValue: Int { return Int(_objectOffset) }
-	}
+public struct Bar : Scalar {
+	public var parent : Foo
+	public var time : Int32
+	public var ratio : Float32
+	public var size : UInt16
 }
-
-public func ==(t1 : Foo.LazyAccess, t2 : Foo.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
-}
-
-public extension Foo {
-	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if builder.config.uniqueTables {
-			if let myOffset = builder.cache[ObjectIdentifier(self)] {
-				return myOffset
-			}
-		}
-		try! builder.openObject(4)
-		try! builder.addPropertyToOpenObject(3, value : length, defaultValue : 0)
-		try! builder.addPropertyToOpenObject(2, value : prefix, defaultValue : 0)
-		try! builder.addPropertyToOpenObject(1, value : count, defaultValue : 0)
-		try! builder.addPropertyToOpenObject(0, value : id, defaultValue : 0)
-		let myOffset =  try! builder.closeObject()
-		if builder.config.uniqueTables {
-			builder.cache[ObjectIdentifier(self)] = myOffset
-		}
-		return myOffset
-	}
-}
-public final class Bar {
-	public var parent : Foo? = nil
-	public var time : Int32 = 0
-	public var ratio : Float32 = 0
-	public var size : UInt16 = 0
-	public init(){}
-	public init(parent: Foo?, time: Int32, ratio: Float32, size: UInt16){
-		self.parent = parent
-		self.time = time
-		self.ratio = ratio
-		self.size = size
-	}
-}
-public extension Bar {
-	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Bar? {
-		guard let objectOffset = objectOffset else {
-			return nil
-		}
-		if reader.config.uniqueTables {
-			if let o = reader.objectPool[objectOffset]{
-				return o as? Bar
-			}
-		}
-		let _result = Bar()
-		if reader.config.uniqueTables {
-			reader.objectPool[objectOffset] = _result
-		}
-		_result.parent = Foo.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 0))
-		_result.time = reader.get(objectOffset, propertyIndex: 1, defaultValue: 0)
-		_result.ratio = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
-		_result.size = reader.get(objectOffset, propertyIndex: 3, defaultValue: 0)
-		return _result
-	}
-}
-public extension Bar {
-	public final class LazyAccess : Hashable {
-		private let _reader : FlatBufferReader!
-		private let _objectOffset : Offset!
-		private init?(reader : FlatBufferReader, objectOffset : Offset?){
-			guard let objectOffset = objectOffset else {
-				_reader = nil
-				_objectOffset = nil
-				return nil
-			}
-			_reader = reader
-			_objectOffset = objectOffset
-		}
-
-		public lazy var parent : Foo.LazyAccess? = Foo.LazyAccess(reader: self._reader, objectOffset : self._reader.getOffset(self._objectOffset, propertyIndex: 0))
-		public lazy var time : Int32 = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:0)
-		public lazy var ratio : Float32 = self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:0)
-		public lazy var size : UInt16 = self._reader.get(self._objectOffset, propertyIndex: 3, defaultValue:0)
-
-		public lazy var createEagerVersion : Bar? = Bar.create(self._reader, objectOffset: self._objectOffset)
-		
-		public var hashValue: Int { return Int(_objectOffset) }
-	}
-}
-
-public func ==(t1 : Bar.LazyAccess, t2 : Bar.LazyAccess) -> Bool {
-	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
-}
-
-public extension Bar {
-	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
-		if builder.config.uniqueTables {
-			if let myOffset = builder.cache[ObjectIdentifier(self)] {
-				return myOffset
-			}
-		}
-		let offset0 = parent?.addToByteArray(builder) ?? 0
-		try! builder.openObject(4)
-		try! builder.addPropertyToOpenObject(3, value : size, defaultValue : 0)
-		try! builder.addPropertyToOpenObject(2, value : ratio, defaultValue : 0)
-		try! builder.addPropertyToOpenObject(1, value : time, defaultValue : 0)
-		if parent != nil {
-			try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
-		}
-		let myOffset =  try! builder.closeObject()
-		if builder.config.uniqueTables {
-			builder.cache[ObjectIdentifier(self)] = myOffset
-		}
-		return myOffset
-	}
+public func ==(v1:Bar, v2:Bar) -> Bool {
+	return  v1.parent==v2.parent &&  v1.time==v2.time &&  v1.ratio==v2.ratio &&  v1.size==v2.size
 }
 public final class FooBar {
 	public var sibling : Bar? = nil
@@ -198,7 +49,7 @@ public extension FooBar {
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
-		_result.sibling = Bar.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 0))
+		_result.sibling = reader.get(objectOffset, propertyIndex: 0)
 		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.rating = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
 		_result.postfix = reader.get(objectOffset, propertyIndex: 3, defaultValue: 0)
@@ -219,7 +70,7 @@ public extension FooBar {
 			_objectOffset = objectOffset
 		}
 
-		public lazy var sibling : Bar.LazyAccess? = Bar.LazyAccess(reader: self._reader, objectOffset : self._reader.getOffset(self._objectOffset, propertyIndex: 0))
+		public lazy var sibling : Bar? = self._reader.get(self._objectOffset, propertyIndex: 0)
 		public lazy var name : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 1))
 		public lazy var rating : Float64 = self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:0)
 		public lazy var postfix : UInt8 = self._reader.get(self._objectOffset, propertyIndex: 3, defaultValue:0)
@@ -242,13 +93,13 @@ public extension FooBar {
 			}
 		}
 		let offset1 = try! builder.createString(name)
-		let offset0 = sibling?.addToByteArray(builder) ?? 0
 		try! builder.openObject(4)
 		try! builder.addPropertyToOpenObject(3, value : postfix, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(2, value : rating, defaultValue : 0)
 		try! builder.addPropertyOffsetToOpenObject(1, offset: offset1)
-		if sibling != nil {
-			try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
+		if let sibling = sibling {
+			builder.put(sibling)
+			try! builder.addCurrentOffsetAsPropertyToOpenObject(0)
 		}
 		let myOffset =  try! builder.closeObject()
 		if builder.config.uniqueTables {
@@ -396,8 +247,6 @@ public extension FooBarContainer {
 private func performLateBindings(builder : FlatBufferBuilder) {
 	for binding in builder.deferedBindings {
 		switch binding.object {
-		case let object as Foo: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Bar: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
 		case let object as FooBar: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
 		case let object as FooBarContainer: try! builder.replaceOffset(object.addToByteArray(builder), atCursor: binding.cursor)
 		default: continue
