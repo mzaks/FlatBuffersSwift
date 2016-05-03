@@ -78,8 +78,9 @@ public extension ContactList {
 		public lazy var entries : LazyVector<Contact.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 1)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				Contact.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				Contact.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 
@@ -237,30 +238,34 @@ public extension Contact {
 		public lazy var tags : LazyVector<String> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 3)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				self._reader.getString(self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				reader.getString(reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var addressEntries : LazyVector<AddressEntry.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 4)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				AddressEntry.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				AddressEntry.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var currentLoccation : GeoLocation? = self._reader.get(self._objectOffset, propertyIndex: 5)
 		public lazy var previousLocations : LazyVector<GeoLocation> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				return self._reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				return reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
 			}
 		}()
 		public lazy var moods : LazyVector<Mood> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 7)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				Mood(rawValue: self._reader.getVectorScalarElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				Mood(rawValue: reader.getVectorScalarElement(vectorOffset!, index: $0))
 			}
 		}()
 

@@ -189,8 +189,9 @@ public extension FooBarContainer {
 		public lazy var list : LazyVector<FooBar.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 0)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				FooBar.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				FooBar.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var initialized : Bool = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:false)
