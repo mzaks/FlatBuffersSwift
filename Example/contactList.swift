@@ -927,6 +927,33 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
+// String extension from Mike Ash for conveniently creating native Swift strings from UTF8 sequences
+// https://www.mikeash.com/pyblog/friday-qa-2015-11-06-why-is-swifts-string-api-so-hard.html
+
+extension String {
+    init?<Seq: SequenceType where Seq.Generator.Element == UInt16>(utf16: Seq) {
+        self.init()
+        
+        guard transcode(UTF16.self,
+                        UTF32.self,
+                        utf16.generate(),
+                        { self.append(UnicodeScalar($0)) },
+                        stopOnError: true)
+            == false else { return nil }
+    }
+    
+    init?<Seq: SequenceType where Seq.Generator.Element == UInt8>(utf8: Seq) {
+        self.init()
+        
+        guard transcode(UTF8.self,
+                        UTF32.self,
+                        utf8.generate(),
+                        { self.append(UnicodeScalar($0)) },
+                        stopOnError: true)
+            == false else { return nil }
+    }
+}
+
 public final class LazyVector<T> : SequenceType {
     private let _generator : (Int)->T?
     private let _count : Int
@@ -1054,6 +1081,7 @@ public final class FlatBufferReader {
     }
     
     var stringCache : [Int32:String] = [:]
+    var stringBuffer : [UInt8] = []
     
     public func getString(stringOffset : Offset?) -> String? {
         guard let stringOffset = stringOffset else {
@@ -1066,9 +1094,18 @@ public final class FlatBufferReader {
         }
         
         let stringPosition = Int(stringOffset)
-        let stringLenght : Int32 = fromByteArray(stringPosition)
-        let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
-        let result = String.init(bytesNoCopy: pointer, length: Int(stringLenght), encoding: NSUTF8StringEncoding, freeWhenDone: false)
+        let stringLength : Int32 = fromByteArray(stringPosition)
+
+        // This slightly convoluted way makes sure we construct a native Swift string instead of a bridged NSString
+
+        stringBuffer.reserveCapacity(Int(stringLength))
+        for i in 0..<stringLength {
+            let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32) + Int(i)))
+            stringBuffer.append(pointer.memory)
+        }
+        let result = String(utf8: stringBuffer)
+        stringBuffer.removeAll(keepCapacity: true)
+
         if config.uniqueStrings {
             stringCache[stringOffset] = result
         }
@@ -1080,9 +1117,9 @@ public final class FlatBufferReader {
             return nil
         }
         let stringPosition = Int(stringOffset)
-        let stringLenght : Int32 = fromByteArray(stringPosition)
+        let stringLength : Int32 = fromByteArray(stringPosition)
         let pointer = UnsafePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
-        return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(stringLenght))
+        return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(stringLength))
     }
     
     public func getVectorLength(vectorOffset : Offset?) -> Int {
@@ -1127,6 +1164,7 @@ public final class FlatBufferReader {
         return Int(propertyOffset)
     }
 }
+
 // MARK: Builder
 public enum FlatBufferBuilderError : ErrorType {
     case ObjectIsNotClosed
@@ -1395,11 +1433,19 @@ public final class FlatBufferBuilder {
             }
         }
 
-        let buf = Array(value.utf8)
-        let length = buf.count
+        let length = value.utf8.count
         
         increaseCapacity(length)
-        _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
+        
+        let p = UnsafeMutablePointer<UInt8>(_data.advancedBy(leftCursor-length))
+        var charofs = 0
+        for c in value.utf8
+        {
+            assert(charofs < length)
+            p.advancedBy(charofs).memory = c
+            charofs = charofs + 1
+        }
+        
         cursor += length
 
         put(Int32(length))
