@@ -22,7 +22,7 @@ func flatencode(inout buf:[UInt8], _ bufsize:Int)
 
     for i in 0..<veclen { // 0xABADCAFEABADCAFE will overflow in usage
         let ident : UInt64 = 0xABADCAFE + UInt64(i)
-        let foo = Foo(id: ident, count: 10000 + i, prefix: 64 + i, length: UInt32(1000000 + i))
+        let foo = Foo(i_d: ident, count: 10000 + i, prefix: 64 + i, length: UInt32(1000000 + i))
         let bar = Bar(parent: foo, time: 123456 + i, ratio: 3.14159 + Float(i), size: UInt16(10000 + i))
         let name = "Hello, World!"
         let foobar = FooBar(sibling: bar, name: name, rating: 3.1415432432445543543+Double(i), postfix: UInt8(33 + i))
@@ -64,9 +64,9 @@ func flatuse(foobarcontainer : FooBarContainer) -> Int
         sum = sum + Int(bar.size)
         sum = sum + Int(bar.time)
         
-        let foo = bar.parent!
+        let foo = bar.parent
         sum = sum + Int(foo.count)
-        sum = sum + Int(foo.id)
+        sum = sum + Int(foo.i_d)
         sum = sum + Int(foo.length)
         sum = sum + Int(foo.prefix)
     }
@@ -93,9 +93,9 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
         sum = sum + Int(bar.size)
         sum = sum + Int(bar.time)
         
-        let foo = bar.parent!
+        let foo = bar.parent
         sum = sum + Int(foo.count)
-        sum = sum + Int(foo.id)
+        sum = sum + Int(foo.i_d)
         sum = sum + Int(foo.length)
         sum = sum + Int(foo.prefix)
     }
