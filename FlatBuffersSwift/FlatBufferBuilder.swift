@@ -271,11 +271,19 @@ public final class FlatBufferBuilder {
             }
         }
 
-        let buf = Array(value.utf8)
-        let length = buf.count
+        let length = value.utf8.count
         
         increaseCapacity(length)
-        _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
+        
+        let p = UnsafeMutablePointer<UInt8>(_data.advancedBy(leftCursor-length))
+        var charofs = 0
+        for c in value.utf8
+        {
+            assert(charofs < length)
+            p.advancedBy(charofs).memory = c
+            charofs = charofs + 1
+        }
+        
         cursor += length
 
         put(Int32(length))
