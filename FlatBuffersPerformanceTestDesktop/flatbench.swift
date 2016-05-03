@@ -12,8 +12,9 @@ import Foundation
 
 let iterations = 1000
 let inner_loop_iterations = 1000
-let bufsize = 10000
+let bufsize = 4096
 var buf = [UInt8](count: bufsize, repeatedValue: 0)
+var encodedsize = 0
 
 func flatencode(inout buf:[UInt8], _ bufsize:Int)
 {
@@ -32,7 +33,7 @@ func flatencode(inout buf:[UInt8], _ bufsize:Int)
     let location = "http://google.com/flatbuffers/"
     let foobarcontainer = FooBarContainer(list: foobars, initialized: true, fruit: Enum.Bananas, location: location)
     
-    buf = foobarcontainer.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024, uniqueStrings: false, uniqueTables: false, uniqueVTables: false))
+    buf = foobarcontainer.toByteArray(BinaryBuildConfig(initialCapacity: 512, uniqueStrings: false, uniqueTables: false, uniqueVTables: false))
 }
 
 func flatdecode(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer
@@ -134,6 +135,8 @@ func runbench(lazyrun: BooleanType)
         }
         let time2 = NSDate()
         
+        encodedsize = buf.count
+        
         let time3 = NSDate()
         for _ in 0..<iterations {
             if lazyrun {
@@ -180,6 +183,7 @@ func runbench(lazyrun: BooleanType)
     print("\(((decode+use+dealloc) * 1000).string(0)) ms decode+use+dealloc")
     print("=================================")
     print("Total counter is \(total)") // just to make sure we dont get optimized out
+    print("Encoded size is \(encodedsize) bytes, should be 344 if not using unique strings") // 344 is with proper padding https://google.github.io/flatbuffers/flatbuffers_benchmarks.html
     print("=================================")
     print("")
 }
