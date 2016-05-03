@@ -81,7 +81,6 @@ public final class FlatBufferReader {
     }
     
     var stringCache : [Int32:String] = [:]
-    var stringBuffer : [UInt8] = []
     
     public func getString(stringOffset : Offset?) -> String? {
         guard let stringOffset = stringOffset else {
@@ -95,17 +94,10 @@ public final class FlatBufferReader {
         
         let stringPosition = Int(stringOffset)
         let stringLength : Int32 = fromByteArray(stringPosition)
-
-        // This slightly convoluted way makes sure we construct a native Swift string instead of a bridged NSString
-
-        stringBuffer.reserveCapacity(Int(stringLength))
-        for i in 0..<stringLength {
-            let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32) + Int(i)))
-            stringBuffer.append(pointer.memory)
-        }
-        let result = String(utf8: stringBuffer)
-        stringBuffer.removeAll(keepCapacity: true)
-
+        
+        let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
+        let result = String.init(bytesNoCopy: pointer, length: Int(stringLength), encoding: NSUTF8StringEncoding, freeWhenDone: false)
+        
         if config.uniqueStrings {
             stringCache[stringOffset] = result
         }
