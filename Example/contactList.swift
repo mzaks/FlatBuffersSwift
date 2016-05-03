@@ -29,6 +29,7 @@ public extension ContactList {
 		let length_entries = reader.getVectorLength(offset_entries)
 		if(length_entries > 0){
 			var index = 0
+			_result.entries.reserveCapacity(length_entries)
 			while index < length_entries {
 				_result.entries.append(Contact.create(reader, objectOffset: reader.getVectorOffsetElement(offset_entries!, index: index)))
 				index += 1
@@ -74,8 +75,9 @@ public extension ContactList {
 		public lazy var entries : LazyVector<Contact.LazyAccess> = {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 1)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				Contact.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let this = self
+			return LazyVector(count: vectorLength){ [this] in
+				Contact.LazyAccess(reader: this._reader, objectOffset : this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 
@@ -172,6 +174,7 @@ public extension Contact {
 		let length_tags = reader.getVectorLength(offset_tags)
 		if(length_tags > 0){
 			var index = 0
+			_result.tags.reserveCapacity(length_tags)
 			while index < length_tags {
 				_result.tags.append(reader.getString(reader.getVectorOffsetElement(offset_tags!, index: index)))
 				index += 1
@@ -181,26 +184,21 @@ public extension Contact {
 		let length_addressEntries = reader.getVectorLength(offset_addressEntries)
 		if(length_addressEntries > 0){
 			var index = 0
+			_result.addressEntries.reserveCapacity(length_addressEntries)
 			while index < length_addressEntries {
 				_result.addressEntries.append(AddressEntry.create(reader, objectOffset: reader.getVectorOffsetElement(offset_addressEntries!, index: index)))
 				index += 1
 			}
 		}
-		_result.currentLoccation = GeoLocation(
-			latitude : reader.getStructProperty(objectOffset, propertyIndex: 5, structPropertyOffset: 0, defaultValue: 0),
-			longitude : reader.getStructProperty(objectOffset, propertyIndex: 5, structPropertyOffset: 8, defaultValue: 0),
-			elevation : reader.getStructProperty(objectOffset, propertyIndex: 5, structPropertyOffset: 16, defaultValue: 0)
-		)
+		_result.currentLoccation = reader.get(objectOffset, propertyIndex: 5)
 		let offset_previousLocations : Offset? = reader.getOffset(objectOffset, propertyIndex: 6)
 		let length_previousLocations = reader.getVectorLength(offset_previousLocations)
 		if(length_previousLocations > 0){
 			var index = 0
+			_result.previousLocations.reserveCapacity(length_previousLocations)
 			while index < length_previousLocations {
-				_result.previousLocations.append(GeoLocation(
-					latitude : reader.getVectorStructElement(offset_previousLocations!, vectorIndex: index, structSize: 20, structElementIndex: 0),
-					longitude : reader.getVectorStructElement(offset_previousLocations!, vectorIndex: index, structSize: 20, structElementIndex: 8),
-					elevation : reader.getVectorStructElement(offset_previousLocations!, vectorIndex: index, structSize: 20, structElementIndex: 16)
-				))
+				_result.previousLocations.append(reader.getVectorScalarElement(offset_previousLocations!, index: index) as GeoLocation
+				)
 				index += 1
 			}
 		}
@@ -208,6 +206,7 @@ public extension Contact {
 		let length_moods = reader.getVectorLength(offset_moods)
 		if(length_moods > 0){
 			var index = 0
+			_result.moods.reserveCapacity(length_moods)
 			while index < length_moods {
 				_result.moods.append(Mood(rawValue: reader.getVectorScalarElement(offset_moods!, index: index)))
 				index += 1
@@ -236,38 +235,34 @@ public extension Contact {
 		public lazy var tags : LazyVector<String> = {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 3)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				self._reader.getString(self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let this = self
+			return LazyVector(count: vectorLength){ [this] in
+				this._reader.getString(this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var addressEntries : LazyVector<AddressEntry.LazyAccess> = {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 4)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				AddressEntry.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let this = self
+			return LazyVector(count: vectorLength){ [this] in
+				AddressEntry.LazyAccess(reader: this._reader, objectOffset : this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
-		public lazy var currentLoccation : GeoLocation? = self._reader.hasProperty(self._objectOffset, propertyIndex: 5) ? GeoLocation(
-			latitude : self._reader.getStructProperty(self._objectOffset, propertyIndex: 5, structPropertyOffset: 0, defaultValue: 0),
-			longitude : self._reader.getStructProperty(self._objectOffset, propertyIndex: 5, structPropertyOffset: 8, defaultValue: 0),
-			elevation : self._reader.getStructProperty(self._objectOffset, propertyIndex: 5, structPropertyOffset: 16, defaultValue: 0)
-		) : nil
+		public lazy var currentLoccation : GeoLocation? = self._reader.get(self._objectOffset, propertyIndex: 5)
 		public lazy var previousLocations : LazyVector<GeoLocation> = {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				GeoLocation(
-					latitude : self._reader.getVectorStructElement(vectorOffset!, vectorIndex: $0, structSize: 20, structElementIndex: 0),
-					longitude : self._reader.getVectorStructElement(vectorOffset!, vectorIndex: $0, structSize: 20, structElementIndex: 8),
-					elevation : self._reader.getVectorStructElement(vectorOffset!, vectorIndex: $0, structSize: 20, structElementIndex: 16)
-				)
+			let this = self
+			return LazyVector(count: vectorLength){ [this] in
+				return this._reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
 			}
 		}()
 		public lazy var moods : LazyVector<Mood> = {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 7)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				Mood(rawValue: self._reader.getVectorScalarElement(vectorOffset!, index: $0))
+			let this = self
+			return LazyVector(count: vectorLength){ [this] in
+				Mood(rawValue: this._reader.getVectorScalarElement(vectorOffset!, index: $0))
 			}
 		}()
 
@@ -303,9 +298,7 @@ public extension Contact {
 			try! builder.startVector(previousLocations.count)
 			var index = previousLocations.count - 1
 			while(index >= 0){
-				builder.put(previousLocations[index]?.elevation ?? 0)
-				builder.put(previousLocations[index]?.longitude ?? 0)
-				builder.put(previousLocations[index]?.latitude ?? 0)
+				builder.put(previousLocations[index]!)
 				index -= 1
 			}
 			offset6 = builder.endVector()
@@ -352,9 +345,7 @@ public extension Contact {
 			try! builder.addPropertyOffsetToOpenObject(6, offset: offset6)
 		}
 		if let currentLoccation = currentLoccation {
-			builder.put(currentLoccation.elevation)
-			builder.put(currentLoccation.longitude)
-			builder.put(currentLoccation.latitude)
+			builder.put(currentLoccation)
 			try! builder.addCurrentOffsetAsPropertyToOpenObject(5)
 		}
 		if addressEntries.count > 0 {
@@ -452,10 +443,13 @@ public extension Date {
 		return myOffset
 	}
 }
-public struct GeoLocation {
+public struct GeoLocation : Scalar {
 	public var latitude : Float64
 	public var longitude : Float64
 	public var elevation : Float32
+}
+public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
+	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation
 }
 public final class AddressEntry {
 	public var order : Int32 = 0
@@ -933,6 +927,33 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
+// String extension from Mike Ash for conveniently creating native Swift strings from UTF8 sequences
+// https://www.mikeash.com/pyblog/friday-qa-2015-11-06-why-is-swifts-string-api-so-hard.html
+
+extension String {
+    init?<Seq: SequenceType where Seq.Generator.Element == UInt16>(utf16: Seq) {
+        self.init()
+        
+        guard transcode(UTF16.self,
+                        UTF32.self,
+                        utf16.generate(),
+                        { self.append(UnicodeScalar($0)) },
+                        stopOnError: true)
+            == false else { return nil }
+    }
+    
+    init?<Seq: SequenceType where Seq.Generator.Element == UInt8>(utf8: Seq) {
+        self.init()
+        
+        guard transcode(UTF8.self,
+                        UTF32.self,
+                        utf8.generate(),
+                        { self.append(UnicodeScalar($0)) },
+                        stopOnError: true)
+            == false else { return nil }
+    }
+}
+
 public final class LazyVector<T> : SequenceType {
     private let _generator : (Int)->T?
     private let _count : Int
@@ -963,18 +984,29 @@ public final class LazyVector<T> : SequenceType {
 }
 
 public struct BinaryBuildConfig{
-    var initialCapacity = 1
-    var uniqueStrings = true
-    var uniqueTables = true
-    var uniqueVTables = true
+    public var initialCapacity = 1
+    public var uniqueStrings = true
+    public var uniqueTables = true
+    public var uniqueVTables = true
+    public init() {}
+    public init(initialCapacity : Int, uniqueStrings : Bool, uniqueTables : Bool, uniqueVTables : Bool) {
+        self.initialCapacity = initialCapacity
+        self.uniqueStrings = uniqueStrings
+        self.uniqueTables = uniqueTables
+        self.uniqueVTables = uniqueVTables
+    }
 }
 
 public struct BinaryReadConfig {
-    var uniqueTables = true
-    var uniqueStrings = true
+    public var uniqueTables = true
+    public var uniqueStrings = true
+    public init() {}
+    public init(uniqueStrings : Bool, uniqueTables : Bool) {
+        self.uniqueStrings = uniqueStrings
+        self.uniqueTables = uniqueTables
+    }
 }
 // MARK: Reader
-
 public final class FlatBufferReader {
 
     public let config : BinaryReadConfig
@@ -1010,6 +1042,15 @@ public final class FlatBufferReader {
         return fromByteArray(position)
     }
     
+    public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int) -> T?{
+        let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
+        if propertyOffset == 0 {
+            return nil
+        }
+        let position = Int(objectOffset + propertyOffset)
+        return fromByteArray(position) as T
+    }
+    
     public func getStructProperty<T : Scalar>(objectOffset : Offset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -1040,6 +1081,7 @@ public final class FlatBufferReader {
     }
     
     var stringCache : [Int32:String] = [:]
+    var stringBuffer : [UInt8] = []
     
     public func getString(stringOffset : Offset?) -> String? {
         guard let stringOffset = stringOffset else {
@@ -1052,9 +1094,18 @@ public final class FlatBufferReader {
         }
         
         let stringPosition = Int(stringOffset)
-        let stringLenght : Int32 = fromByteArray(stringPosition)
-        let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
-        let result = String.init(bytesNoCopy: pointer, length: Int(stringLenght), encoding: NSUTF8StringEncoding, freeWhenDone: false)
+        let stringLength : Int32 = fromByteArray(stringPosition)
+
+        // This slightly convoluted way makes sure we construct a native Swift string instead of a bridged NSString
+
+        stringBuffer.reserveCapacity(Int(stringLength))
+        for i in 0..<stringLength {
+            let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32) + Int(i)))
+            stringBuffer.append(pointer.memory)
+        }
+        let result = String(utf8: stringBuffer)
+        stringBuffer.removeAll(keepCapacity: true)
+
         if config.uniqueStrings {
             stringCache[stringOffset] = result
         }
@@ -1066,9 +1117,9 @@ public final class FlatBufferReader {
             return nil
         }
         let stringPosition = Int(stringOffset)
-        let stringLenght : Int32 = fromByteArray(stringPosition)
+        let stringLength : Int32 = fromByteArray(stringPosition)
         let pointer = UnsafePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
-        return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(stringLenght))
+        return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(stringLength))
     }
     
     public func getVectorLength(vectorOffset : Offset?) -> Int {
@@ -1114,10 +1165,7 @@ public final class FlatBufferReader {
     }
 }
 
-
-
 // MARK: Builder
-
 public enum FlatBufferBuilderError : ErrorType {
     case ObjectIsNotClosed
     case NoOpenObject
@@ -1184,9 +1232,10 @@ public final class FlatBufferBuilder {
         }
         let c = strideofValue(v)
         increaseCapacity(c)
-        withUnsafePointer(&v){
-            _data.advancedBy(leftCursor-c).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-        }
+//        withUnsafePointer(&v){
+//            _data.advancedBy(leftCursor-c).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+//        }
+        memcpy(_data.advancedBy(leftCursor-c), &v, c)
         cursor += c
 
     }
@@ -1229,9 +1278,10 @@ public final class FlatBufferBuilder {
             v = _offset.littleEndian
         }
         let c = strideofValue(v)
-        withUnsafePointer(&v){
-            _data.advancedBy((capacity - jumpCursor)).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-        }
+//        withUnsafePointer(&v){
+//            _data.advancedBy((capacity - jumpCursor)).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+//        }
+        memcpy(_data.advancedBy(capacity - jumpCursor), &v, c)
     }
     
     private func put<T : Scalar>(value : T, at index : Int){
@@ -1240,9 +1290,10 @@ public final class FlatBufferBuilder {
             v = value.littleEndian
         }
         let c = strideofValue(v)
-        withUnsafePointer(&v){
-            _data.advancedBy(index + leftCursor).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-        }
+//        withUnsafePointer(&v){
+//            _data.advancedBy(index + leftCursor).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+//        }
+        memcpy(_data.advancedBy(index + leftCursor), &v, c)
     }
     
     public func openObject(numOfProperties : Int) throws {
@@ -1382,11 +1433,19 @@ public final class FlatBufferBuilder {
             }
         }
 
-        let buf = Array(value.utf8)
-        let length = buf.count
+        let length = value.utf8.count
         
         increaseCapacity(length)
-        _data.advancedBy(leftCursor-length).initializeFrom(UnsafeMutablePointer<UInt8>(buf), count: length)
+        
+        let p = UnsafeMutablePointer<UInt8>(_data.advancedBy(leftCursor-length))
+        var charofs = 0
+        for c in value.utf8
+        {
+            assert(charofs < length)
+            p.advancedBy(charofs).memory = c
+            charofs = charofs + 1
+        }
+        
         cursor += length
 
         put(Int32(length))
@@ -1453,9 +1512,10 @@ public final class FlatBufferBuilder {
         
         var v = (Int32(cursor + prefixLength) - offset).littleEndian
         let c = strideofValue(v)
-        withUnsafePointer(&v){
-            _data.advancedBy(leftCursor - prefixLength).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
-        }
+//        withUnsafePointer(&v){
+//            _data.advancedBy(leftCursor - prefixLength).initializeFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+//        }
+        memcpy(_data.advancedBy(leftCursor - prefixLength), &v, c)
         
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
     }

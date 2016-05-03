@@ -288,6 +288,7 @@ public extension FooBarContainer {
 		let length_list = reader.getVectorLength(offset_list)
 		if(length_list > 0){
 			var index = 0
+			_result.list.reserveCapacity(length_list)
 			while index < length_list {
 				_result.list.append(FooBar.create(reader, objectOffset: reader.getVectorOffsetElement(offset_list!, index: index)))
 				index += 1
@@ -335,8 +336,9 @@ public extension FooBarContainer {
 		public lazy var list : LazyVector<FooBar.LazyAccess> = {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 0)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			return LazyVector(count: vectorLength){ [unowned self] in
-				FooBar.LazyAccess(reader: self._reader, objectOffset : self._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let this = self
+			return LazyVector(count: vectorLength){ [this] in
+				FooBar.LazyAccess(reader: this._reader, objectOffset : this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var initialized : Bool = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:false)

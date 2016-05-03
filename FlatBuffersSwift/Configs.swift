@@ -9,13 +9,25 @@
 import Foundation
 
 public struct BinaryBuildConfig{
-    var initialCapacity = 1
-    var uniqueStrings = true
-    var uniqueTables = true
-    var uniqueVTables = true
+    public var initialCapacity = 1
+    public var uniqueStrings = true
+    public var uniqueTables = true
+    public var uniqueVTables = true
+    public init() {}
+    public init(initialCapacity : Int, uniqueStrings : Bool, uniqueTables : Bool, uniqueVTables : Bool) {
+        self.initialCapacity = initialCapacity
+        self.uniqueStrings = uniqueStrings
+        self.uniqueTables = uniqueTables
+        self.uniqueVTables = uniqueVTables
+    }
 }
 
 public struct BinaryReadConfig {
-    var uniqueTables = true
-    var uniqueStrings = true
+    public var uniqueTables = true
+    public var uniqueStrings = true
+    public init() {}
+    public init(uniqueStrings : Bool, uniqueTables : Bool) {
+        self.uniqueStrings = uniqueStrings
+        self.uniqueTables = uniqueTables
+    }
 }
