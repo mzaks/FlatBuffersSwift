@@ -59,4 +59,28 @@ class LazyVectorAccessTests: XCTestCase {
         }
     }
     
+    func testReplaceLazyVector() {
+        var data = [5, 4, 3]
+        let vector = LazyVector(count: data.count, { index in
+            return data[index]
+        }, {
+            data[$0] = $1
+        })
+        
+        XCTAssert(vector[-1] == nil)
+        XCTAssert(vector[0] == 5)
+        XCTAssert(vector[1] == 4)
+        XCTAssert(vector[2] == 3)
+        
+        vector[-1] = 25
+        vector[0] = 12
+        vector[1] = 13
+        vector[2] = nil
+        vector[5] = 100
+        XCTAssert(vector[-1] == nil)
+        XCTAssert(vector[0] == 12)
+        XCTAssert(vector[1] == 13)
+        XCTAssert(vector[2] == 3)
+        XCTAssert(vector[5] == nil)
+    }
 }
