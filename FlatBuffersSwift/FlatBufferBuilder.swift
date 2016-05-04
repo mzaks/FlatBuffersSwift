@@ -19,6 +19,7 @@ public enum FlatBufferBuilderError : ErrorType {
 
 public final class FlatBufferBuilder {
     
+    public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
     static var builderPool : [FlatBufferBuilder] = []
     
     public var cache : [ObjectIdentifier : Offset] = [:]
@@ -397,7 +398,7 @@ public extension FlatBufferBuilder {
     }
     
     public static func reuse(builder : FlatBufferBuilder) {
-        if (builderPool.count < 100) // max pool size
+        if (UInt(builderPool.count) < maxInstanceCacheSize) 
         {
             builder.reset()
             builderPool.append(builder)

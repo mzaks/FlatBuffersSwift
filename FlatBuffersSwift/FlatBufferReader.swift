@@ -13,6 +13,7 @@ public enum FlatBufferReaderError : ErrorType {
 
 public final class FlatBufferReader {
 
+    public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
     static var instancePool : [FlatBufferReader] = []
     
     public var config : BinaryReadConfig
@@ -208,7 +209,7 @@ public extension FlatBufferReader {
     }
     
     public static func reuse(reader : FlatBufferReader) {
-        if (instancePool.count < 100) // max pool size
+        if (UInt(instancePool.count) < maxInstanceCacheSize)
         {
             reader.reset()
             instancePool.append(reader)
