@@ -41,9 +41,11 @@ public extension ContactList {
 }
 public extension ContactList {
 	public static func fromByteArray(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> ContactList {
-		let reader = FlatBufferReader(bytes: data, config: config)
+		let reader = FlatBufferReader.create(data, config: config)
 		let objectOffset = reader.rootObjectOffset
-		return create(reader, objectOffset : objectOffset)!
+		let result = create(reader, objectOffset : objectOffset)!
+		FlatBufferReader.reuse(reader)
+		return result
 	}
 }
 public extension ContactList {
@@ -61,8 +63,11 @@ public extension ContactList {
 		private let _reader : FlatBufferReader!
 		private let _objectOffset : Offset!
 		public init(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()){
-			_reader = FlatBufferReader(bytes: data, config: config)
+			_reader = FlatBufferReader.create(data, config: config)
 			_objectOffset = _reader.rootObjectOffset
+		}
+		deinit{
+			FlatBufferReader.reuse(_reader)
 		}
 		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
