@@ -15,12 +15,12 @@ func testRandomContactListToByteArrayAndBackAgain(){
     let after1 = NSDate()
     print("\((after1.timeIntervalSince1970 - time1.timeIntervalSince1970) * 1000.0) ms encoding to byte array of size \(data.count)")
     let time2 = NSDate()
-    _ = ContactList.fromByteArray(data, config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
+    _ = ContactList.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
     let after2 = NSDate()
     print("\((after2.timeIntervalSince1970 - time2.timeIntervalSince1970) * 1000.0) ms decoding")
 
     let time3 = NSDate()
-    _ = ContactList.LazyAccess(data: data)
+    _ = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
     let after3 = NSDate()
     print("\((after3.timeIntervalSince1970 - time3.timeIntervalSince1970) * 1000.0) ms lazy accessor")
     

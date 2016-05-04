@@ -39,7 +39,7 @@ public extension ContactList {
 	}
 }
 public extension ContactList {
-	public static func fromByteArray(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> ContactList {
+	public static func fromByteArray(data : UnsafeBufferPointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> ContactList {
 		let reader = FlatBufferReader.create(data, config: config)
 		let objectOffset = reader.rootObjectOffset
 		let result = create(reader, objectOffset : objectOffset)!
@@ -61,12 +61,15 @@ public extension ContactList {
 	public final class LazyAccess : Hashable {
 		private let _reader : FlatBufferReader!
 		private let _objectOffset : Offset!
-		public init(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()){
+		public init(data : UnsafeBufferPointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()){
 			_reader = FlatBufferReader.create(data, config: config)
 			_objectOffset = _reader.rootObjectOffset
 		}
 		deinit{
 			FlatBufferReader.reuse(_reader)
+		}
+		public var data : [UInt8] {
+			return _reader.data
 		}
 		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
@@ -78,7 +81,10 @@ public extension ContactList {
 			_objectOffset = objectOffset
 		}
 
-		public lazy var lastModified : Int64 = self._reader.get(self._objectOffset, propertyIndex: 0, defaultValue:0)
+		public var lastModified : Int64 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 0, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 0, value: newValue)}
+		}
 		public lazy var entries : LazyVector<Contact.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 1)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
@@ -88,7 +94,7 @@ public extension ContactList {
 			}
 		}()
 
-		public lazy var createEagerVersion : ContactList? = ContactList.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : ContactList? { return ContactList.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -134,7 +140,7 @@ public extension ContactList {
 	}
 }
 public enum Gender : Int8 {
-	case Male, Female
+	case None, Male, Female
 }
 public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
@@ -142,7 +148,7 @@ public enum Mood : Int8 {
 public final class Contact {
 	public var name : String? = nil
 	public var birthday : Date? = nil
-	public var gender : Gender? = Gender.Male
+	public var gender : Gender? = Gender.None
 	public var tags : [String?] = []
 	public var addressEntries : [AddressEntry?] = []
 	public var currentLoccation : GeoLocation? = nil
@@ -176,7 +182,7 @@ public extension Contact {
 		}
 		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.birthday = Date.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 1))
-		_result.gender = Gender(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
+		_result.gender = Gender(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Gender.None.rawValue))
 		let offset_tags : Offset? = reader.getOffset(objectOffset, propertyIndex: 3)
 		let length_tags = reader.getVectorLength(offset_tags)
 		if(length_tags > 0){
@@ -238,7 +244,14 @@ public extension Contact {
 
 		public lazy var name : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 0))
 		public lazy var birthday : Date.LazyAccess? = Date.LazyAccess(reader: self._reader, objectOffset : self._reader.getOffset(self._objectOffset, propertyIndex: 1))
-		public lazy var gender : Gender? = Gender(rawValue: self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:Gender.Male.rawValue))
+		public var gender : Gender? { 
+			get { return Gender(rawValue: _reader.get(self._objectOffset, propertyIndex: 2, defaultValue:Gender.None.rawValue))}
+			set { 
+				if let value = newValue{
+					try!_reader.set(_objectOffset, propertyIndex: 2, value: value.rawValue)
+				}
+			}
+		}
 		public lazy var tags : LazyVector<String> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 3)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
@@ -255,7 +268,14 @@ public extension Contact {
 				AddressEntry.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
-		public lazy var currentLoccation : GeoLocation? = self._reader.get(self._objectOffset, propertyIndex: 5)
+		public var currentLoccation : GeoLocation? { 
+			get { return self._reader.get(_objectOffset, propertyIndex: 5)}
+			set {
+				if let value = newValue{
+					try!_reader.set(_objectOffset, propertyIndex: 5, value: value)
+				}
+			}
+		}
 		public lazy var previousLocations : LazyVector<GeoLocation> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
@@ -273,7 +293,7 @@ public extension Contact {
 			}
 		}()
 
-		public lazy var createEagerVersion : Contact? = Contact.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : Contact? { return Contact.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -418,11 +438,20 @@ public extension Date {
 			_objectOffset = objectOffset
 		}
 
-		public lazy var day : Int8 = self._reader.get(self._objectOffset, propertyIndex: 0, defaultValue:0)
-		public lazy var month : Int8 = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:0)
-		public lazy var year : Int16 = self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:0)
+		public var day : Int8 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 0, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 0, value: newValue)}
+		}
+		public var month : Int8 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 1, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 1, value: newValue)}
+		}
+		public var year : Int16 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 2, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 2, value: newValue)}
+		}
 
-		public lazy var createEagerVersion : Date? = Date.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : Date? { return Date.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -507,10 +536,13 @@ public extension AddressEntry {
 			_objectOffset = objectOffset
 		}
 
-		public lazy var order : Int32 = self._reader.get(self._objectOffset, propertyIndex: 0, defaultValue:0)
+		public var order : Int32 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 0, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 0, value: newValue)}
+		}
 		public lazy var address : Address_LazyAccess? = create_Address_LazyAccess(self._reader, propertyIndex: 1, objectOffset: self._objectOffset)
 
-		public lazy var createEagerVersion : AddressEntry? = AddressEntry.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : AddressEntry? { return AddressEntry.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -591,10 +623,13 @@ public extension PostalAddress {
 
 		public lazy var country : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 0))
 		public lazy var city : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 1))
-		public lazy var postalCode : Int32 = self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:0)
+		public var postalCode : Int32 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 2, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 2, value: newValue)}
+		}
 		public lazy var streetAndNumber : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 3))
 
-		public lazy var createEagerVersion : PostalAddress? = PostalAddress.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : PostalAddress? { return PostalAddress.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -667,7 +702,7 @@ public extension EmailAddress {
 
 		public lazy var mailto : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 0))
 
-		public lazy var createEagerVersion : EmailAddress? = EmailAddress.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : EmailAddress? { return EmailAddress.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -735,7 +770,7 @@ public extension WebAddress {
 
 		public lazy var url : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 0))
 
-		public lazy var createEagerVersion : WebAddress? = WebAddress.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : WebAddress? { return WebAddress.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -803,7 +838,7 @@ public extension TelephoneNumber {
 
 		public lazy var number : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 0))
 
-		public lazy var createEagerVersion : TelephoneNumber? = TelephoneNumber.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : TelephoneNumber? { return TelephoneNumber.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -1011,15 +1046,22 @@ public final class FlatBufferReader {
     func fromByteArray<T : Scalar>(position : Int) -> T{
         return UnsafePointer<T>(buffer.advancedBy(position)).memory
     }
+    
+    private var length : Int
+    public var data : [UInt8] {
+        return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(buffer), count: length))
+    }
 
     public init(buffer : [UInt8], config: BinaryReadConfig){
         self.buffer = UnsafeMutablePointer<UInt8>(buffer)
         self.config = config
+        length = buffer.count
     }
     
-    public init(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig){
-        self.buffer = UnsafeMutablePointer(bytes)
+    public init(bytes : UnsafeBufferPointer<UInt8>, config: BinaryReadConfig){
+        self.buffer = UnsafeMutablePointer<UInt8>(bytes.baseAddress)
         self.config = config
+        length = bytes.count
     }
     
     public var rootObjectOffset : Offset {
@@ -1165,6 +1207,7 @@ public extension FlatBufferReader {
         buffer = nil
         objectPool.removeAll(keepCapacity: true)
         stringCache.removeAll(keepCapacity: true)
+        length = 0
     }
     
     public static func create(buffer : [UInt8], config: BinaryReadConfig) -> FlatBufferReader {
@@ -1174,6 +1217,7 @@ public extension FlatBufferReader {
             
             reader.buffer = UnsafeMutablePointer<UInt8>(buffer)
             reader.config = config
+            reader.length = buffer.count
             
             return reader
         }
@@ -1181,13 +1225,14 @@ public extension FlatBufferReader {
         return FlatBufferReader(buffer: buffer, config: config)
     }
     
-    public static func create(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
+    public static func create(bytes : UnsafeBufferPointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
             
-            reader.buffer = UnsafeMutablePointer(bytes)
+            reader.buffer = UnsafeMutablePointer(bytes.baseAddress)
             reader.config = config
+            reader.length = bytes.count
             
             return reader
         }
@@ -1203,8 +1248,6 @@ public extension FlatBufferReader {
         }
     }
 }
-
-
 // MARK: Builder
 public enum FlatBufferBuilderError : ErrorType {
     case ObjectIsNotClosed

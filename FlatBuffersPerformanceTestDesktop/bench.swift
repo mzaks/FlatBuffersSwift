@@ -70,12 +70,25 @@ public extension FooBar {
 			_objectOffset = objectOffset
 		}
 
-		public lazy var sibling : Bar? = self._reader.get(self._objectOffset, propertyIndex: 0)
+		public var sibling : Bar? { 
+			get { return self._reader.get(_objectOffset, propertyIndex: 0)}
+			set {
+				if let value = newValue{
+					try!_reader.set(_objectOffset, propertyIndex: 0, value: value)
+				}
+			}
+		}
 		public lazy var name : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 1))
-		public lazy var rating : Float64 = self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:0)
-		public lazy var postfix : UInt8 = self._reader.get(self._objectOffset, propertyIndex: 3, defaultValue:0)
+		public var rating : Float64 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 2, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 2, value: newValue)}
+		}
+		public var postfix : UInt8 { 
+			get { return _reader.get(_objectOffset, propertyIndex: 3, defaultValue:0)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 3, value: newValue)}
+		}
 
-		public lazy var createEagerVersion : FooBar? = FooBar.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : FooBar? { return FooBar.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}
@@ -152,7 +165,7 @@ public extension FooBarContainer {
 	}
 }
 public extension FooBarContainer {
-	public static func fromByteArray(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> FooBarContainer {
+	public static func fromByteArray(data : UnsafeBufferPointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> FooBarContainer {
 		let reader = FlatBufferReader.create(data, config: config)
 		let objectOffset = reader.rootObjectOffset
 		let result = create(reader, objectOffset : objectOffset)!
@@ -174,12 +187,15 @@ public extension FooBarContainer {
 	public final class LazyAccess : Hashable {
 		private let _reader : FlatBufferReader!
 		private let _objectOffset : Offset!
-		public init(data : UnsafePointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()){
+		public init(data : UnsafeBufferPointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()){
 			_reader = FlatBufferReader.create(data, config: config)
 			_objectOffset = _reader.rootObjectOffset
 		}
 		deinit{
 			FlatBufferReader.reuse(_reader)
+		}
+		public var data : [UInt8] {
+			return _reader.data
 		}
 		private init?(reader : FlatBufferReader, objectOffset : Offset?){
 			guard let objectOffset = objectOffset else {
@@ -199,11 +215,21 @@ public extension FooBarContainer {
 				FooBar.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
-		public lazy var initialized : Bool = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:false)
-		public lazy var fruit : Enum? = Enum(rawValue: self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:Enum.Apples.rawValue))
+		public var initialized : Bool { 
+			get { return _reader.get(_objectOffset, propertyIndex: 1, defaultValue:false)}
+			set { try!_reader.set(_objectOffset, propertyIndex: 1, value: newValue)}
+		}
+		public var fruit : Enum? { 
+			get { return Enum(rawValue: _reader.get(self._objectOffset, propertyIndex: 2, defaultValue:Enum.Apples.rawValue))}
+			set { 
+				if let value = newValue{
+					try!_reader.set(_objectOffset, propertyIndex: 2, value: value.rawValue)
+				}
+			}
+		}
 		public lazy var location : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 3))
 
-		public lazy var createEagerVersion : FooBarContainer? = FooBarContainer.create(self._reader, objectOffset: self._objectOffset)
+		public var createEagerVersion : FooBarContainer? { return FooBarContainer.create(_reader, objectOffset: _objectOffset) }
 		
 		public var hashValue: Int { return Int(_objectOffset) }
 	}

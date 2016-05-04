@@ -24,15 +24,22 @@ public final class FlatBufferReader {
     func fromByteArray<T : Scalar>(position : Int) -> T{
         return UnsafePointer<T>(buffer.advancedBy(position)).memory
     }
+    
+    private var length : Int
+    public var data : [UInt8] {
+        return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(buffer), count: length))
+    }
 
     public init(buffer : [UInt8], config: BinaryReadConfig){
         self.buffer = UnsafeMutablePointer<UInt8>(buffer)
         self.config = config
+        length = buffer.count
     }
     
-    public init(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig){
-        self.buffer = UnsafeMutablePointer(bytes)
+    public init(bytes : UnsafeBufferPointer<UInt8>, config: BinaryReadConfig){
+        self.buffer = UnsafeMutablePointer<UInt8>(bytes.baseAddress)
         self.config = config
+        length = bytes.count
     }
     
     public var rootObjectOffset : Offset {
@@ -178,6 +185,7 @@ public extension FlatBufferReader {
         buffer = nil
         objectPool.removeAll(keepCapacity: true)
         stringCache.removeAll(keepCapacity: true)
+        length = 0
     }
     
     public static func create(buffer : [UInt8], config: BinaryReadConfig) -> FlatBufferReader {
@@ -187,6 +195,7 @@ public extension FlatBufferReader {
             
             reader.buffer = UnsafeMutablePointer<UInt8>(buffer)
             reader.config = config
+            reader.length = buffer.count
             
             return reader
         }
@@ -194,13 +203,14 @@ public extension FlatBufferReader {
         return FlatBufferReader(buffer: buffer, config: config)
     }
     
-    public static func create(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
+    public static func create(bytes : UnsafeBufferPointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
             
-            reader.buffer = UnsafeMutablePointer(bytes)
+            reader.buffer = UnsafeMutablePointer(bytes.baseAddress)
             reader.config = config
+            reader.length = bytes.count
             
             return reader
         }
