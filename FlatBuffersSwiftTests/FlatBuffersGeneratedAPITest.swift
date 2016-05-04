@@ -87,4 +87,26 @@ class FlatBuffersGeneratedAPITest: XCTestCase {
         XCTAssert(eagerList.entries[0]?.birthday?.day == 15)
     }
     
+    func testReplacingVectorValuesInLazyInstances(){
+        let list = ContactList()
+        let p1 = Contact()
+        p1.name = "Max"
+        p1.gender = .Male
+        p1.moods = [Mood.Angry, Mood.Funny]
+        p1.previousLocations = [GeoLocation(latitude: 1.5, longitude: 2.5, elevation: 3.5, s: S1(i:2))]
+        
+        list.entries = [p1]
+        
+        let data = list.toByteArray()
+        
+        let lazyList  = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
+        lazyList.entries[0]?.moods[0] = Mood.Serious
+        lazyList.entries[0]?.previousLocations[0] = GeoLocation(latitude: 5.5, longitude: 6.5, elevation: 7.5, s: S1(i:13))
+        
+        let eagerList  = ContactList.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(lazyList.data), count: lazyList.data.count))
+        
+        XCTAssert(eagerList.entries[0]?.previousLocations[0] == GeoLocation(latitude: 5.5, longitude: 6.5, elevation: 7.5, s: S1(i:13)))
+        XCTAssert(eagerList.entries[0]?.moods[0] == Mood.Serious)
+        XCTAssert(eagerList.entries[0]?.moods[1] == Mood.Funny)
+    }
 }

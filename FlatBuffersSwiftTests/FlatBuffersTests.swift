@@ -623,4 +623,24 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(v1, 5)
     }
     
+    func testCreateObjectWithIgnoredDefault() {
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig(forceDefaults:true))
+        try! fbb.openObject(2)
+        try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
+        try! fbb.addPropertyToOpenObject(1, value: false, defaultValue: false)
+        let oOffset = try! fbb.closeObject()
+        
+        XCTAssertEqual(oOffset, 6)
+        XCTAssertEqual(fbb.data,
+                       [8,  0,              // vTable length
+                        6,  0,              // object data buffer length
+                        5,  0,              // relative offest of first property
+                        4,  0,              // relative offest of second property
+                        8,  0,  0,  0,      // start of the object data buffer and vTable offset
+                        0,                  // second property string offest
+                        1,                  // first property boolean value
+                        ]
+        )
+    }
+    
 }

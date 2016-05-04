@@ -9,24 +9,24 @@
 import Foundation
 
 public struct BinaryBuildConfig{
-    public var initialCapacity = 1
-    public var uniqueStrings = true
-    public var uniqueTables = true
-    public var uniqueVTables = true
-    public init() {}
-    public init(initialCapacity : Int, uniqueStrings : Bool, uniqueTables : Bool, uniqueVTables : Bool) {
+    public let initialCapacity : Int
+    public let uniqueStrings : Bool
+    public let uniqueTables : Bool
+    public let uniqueVTables : Bool
+    public let forceDefaults : Bool
+    public init(initialCapacity : Int = 1, uniqueStrings : Bool = true, uniqueTables : Bool = true, uniqueVTables : Bool = true, forceDefaults : Bool = false) {
         self.initialCapacity = initialCapacity
         self.uniqueStrings = uniqueStrings
         self.uniqueTables = uniqueTables
         self.uniqueVTables = uniqueVTables
+        self.forceDefaults = forceDefaults
     }
 }
 
 public struct BinaryReadConfig {
-    public var uniqueTables = true
-    public var uniqueStrings = true
-    public init() {}
-    public init(uniqueStrings : Bool, uniqueTables : Bool) {
+    public let uniqueTables : Bool
+    public let uniqueStrings : Bool
+    public init(uniqueStrings : Bool = true, uniqueTables : Bool = true) {
         self.uniqueStrings = uniqueStrings
         self.uniqueTables = uniqueTables
     }
