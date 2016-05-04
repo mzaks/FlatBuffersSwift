@@ -11,12 +11,13 @@ public enum FlatBufferReaderError : ErrorType {
     case CanOnlySetNonDefaultProperty
 }
 
-
 public final class FlatBufferReader {
 
-    public let config : BinaryReadConfig
+    static var instancePool : [FlatBufferReader] = []
     
-    let buffer : UnsafeMutablePointer<UInt8>
+    public var config : BinaryReadConfig
+    
+    var buffer : UnsafeMutablePointer<UInt8> = nil
     public var objectPool : [Offset : AnyObject] = [:]
     
     func fromByteArray<T : Scalar>(position : Int) -> T{
@@ -166,5 +167,51 @@ public final class FlatBufferReader {
         
         let propertyOffset : Int16 = fromByteArray(propertyStart)
         return Int(propertyOffset)
+    }
+}
+
+public extension FlatBufferReader {
+    
+    public func reset ()
+    {
+        buffer = nil
+        objectPool.removeAll(keepCapacity: true)
+        stringCache.removeAll(keepCapacity: true)
+    }
+    
+    public static func create(buffer : [UInt8], config: BinaryReadConfig) -> FlatBufferReader {
+        if (instancePool.count > 0)
+        {
+            let reader = instancePool.removeLast()
+            
+            reader.buffer = UnsafeMutablePointer<UInt8>(buffer)
+            reader.config = config
+            
+            return reader
+        }
+        
+        return FlatBufferReader(buffer: buffer, config: config)
+    }
+    
+    public static func create(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
+        if (instancePool.count > 0)
+        {
+            let reader = instancePool.removeLast()
+            
+            reader.buffer = UnsafeMutablePointer(bytes)
+            reader.config = config
+            
+            return reader
+        }
+        
+        return FlatBufferReader(bytes: bytes, config: config)
+    }
+    
+    public static func reuse(reader : FlatBufferReader) {
+        if (instancePool.count < 100) // max pool size
+        {
+            reader.reset()
+            instancePool.append(reader)
+        }
     }
 }
