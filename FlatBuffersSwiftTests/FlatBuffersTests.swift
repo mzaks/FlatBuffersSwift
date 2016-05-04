@@ -570,4 +570,57 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(reader.getString(objectOffset3), "max")
     }
     
+    func testReplaceScalarThrouhgReader() {
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
+        
+        try! fbb.openObject(2)
+        try! fbb.addPropertyToOpenObject(1, value: 25, defaultValue: 0)
+        try! fbb.addPropertyToOpenObject(0, value: 2.5, defaultValue: 0)
+        let oOffset = try! fbb.closeObject()
+        
+        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
+        
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
+        let objectOffset = reader.rootObjectOffset
+        var v1 : Double = reader.get(objectOffset, propertyIndex: 0)!
+        var v2 : Int = reader.get(objectOffset, propertyIndex: 1)!
+        XCTAssertEqual(v1, 2.5)
+        XCTAssertEqual(v2, 25)
+        
+        try!reader.set(objectOffset, propertyIndex: 0, value: 3.2)
+        try!reader.set(objectOffset, propertyIndex: 1, value: 45)
+        
+        v1 = reader.get(objectOffset, propertyIndex: 0)!
+        v2 = reader.get(objectOffset, propertyIndex: 1)!
+        XCTAssertEqual(v1, 3.2)
+        XCTAssertEqual(v2, 45)
+    }
+    
+    func testReplaceScalarInVectorThrouhgReader() {
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
+        
+        try! fbb.startVector(3)
+        fbb.put(1)
+        fbb.put(2)
+        fbb.put(3)
+        let offset = fbb.endVector()
+        
+        try! fbb.openObject(1)
+        try! fbb.addPropertyOffsetToOpenObject(0, offset: offset)
+        let oOffset = try! fbb.closeObject()
+        
+        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
+        
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
+        let objectOffset = reader.rootObjectOffset
+        let v_o = reader.getOffset(objectOffset, propertyIndex: 0)!
+        var v1 : Int = reader.getVectorScalarElement(v_o, index: 1)
+        XCTAssertEqual(v1, 2)
+        
+        reader.setVectorScalarElement(v_o, index: 1, value: 5)
+        
+        v1 = reader.getVectorScalarElement(v_o, index: 1)
+        XCTAssertEqual(v1, 5)
+    }
+    
 }

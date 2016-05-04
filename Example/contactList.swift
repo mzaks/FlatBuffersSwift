@@ -47,10 +47,12 @@ public extension ContactList {
 }
 public extension ContactList {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
-		let builder = FlatBufferBuilder(config: config)
+		let builder = FlatBufferBuilder.create(config)
 		let offset = addToByteArray(builder)
 		performLateBindings(builder)
-		return try! builder.finish(offset, fileIdentifier: nil)
+		let result = try! builder.finish(offset, fileIdentifier: nil)
+		FlatBufferBuilder.reuse(builder)
+		return result
 	}
 }
 public extension ContactList {
@@ -72,12 +74,12 @@ public extension ContactList {
 		}
 
 		public lazy var lastModified : Int64 = self._reader.get(self._objectOffset, propertyIndex: 0, defaultValue:0)
-		public lazy var entries : LazyVector<Contact.LazyAccess> = {
+		public lazy var entries : LazyVector<Contact.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 1)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			let this = self
-			return LazyVector(count: vectorLength){ [this] in
-				Contact.LazyAccess(reader: this._reader, objectOffset : this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				Contact.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 
@@ -232,37 +234,37 @@ public extension Contact {
 		public lazy var name : String? = self._reader.getString(self._reader.getOffset(self._objectOffset, propertyIndex: 0))
 		public lazy var birthday : Date.LazyAccess? = Date.LazyAccess(reader: self._reader, objectOffset : self._reader.getOffset(self._objectOffset, propertyIndex: 1))
 		public lazy var gender : Gender? = Gender(rawValue: self._reader.get(self._objectOffset, propertyIndex: 2, defaultValue:Gender.Male.rawValue))
-		public lazy var tags : LazyVector<String> = {
+		public lazy var tags : LazyVector<String> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 3)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			let this = self
-			return LazyVector(count: vectorLength){ [this] in
-				this._reader.getString(this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				reader.getString(reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
-		public lazy var addressEntries : LazyVector<AddressEntry.LazyAccess> = {
+		public lazy var addressEntries : LazyVector<AddressEntry.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 4)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			let this = self
-			return LazyVector(count: vectorLength){ [this] in
-				AddressEntry.LazyAccess(reader: this._reader, objectOffset : this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				AddressEntry.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var currentLoccation : GeoLocation? = self._reader.get(self._objectOffset, propertyIndex: 5)
-		public lazy var previousLocations : LazyVector<GeoLocation> = {
+		public lazy var previousLocations : LazyVector<GeoLocation> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			let this = self
-			return LazyVector(count: vectorLength){ [this] in
-				return this._reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				return reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
 			}
 		}()
-		public lazy var moods : LazyVector<Mood> = {
+		public lazy var moods : LazyVector<Mood> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 7)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			let this = self
-			return LazyVector(count: vectorLength){ [this] in
-				Mood(rawValue: this._reader.getVectorScalarElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				Mood(rawValue: reader.getVectorScalarElement(vectorOffset!, index: $0))
 			}
 		}()
 
@@ -987,11 +989,16 @@ public struct BinaryReadConfig {
     }
 }
 // MARK: Reader
+public enum FlatBufferReaderError : ErrorType {
+    case CanOnlySetNonDefaultProperty
+}
+
+
 public final class FlatBufferReader {
 
     public let config : BinaryReadConfig
     
-    let buffer : UnsafePointer<UInt8>
+    let buffer : UnsafeMutablePointer<UInt8>
     public var objectPool : [Offset : AnyObject] = [:]
     
     func fromByteArray<T : Scalar>(position : Int) -> T{
@@ -999,12 +1006,12 @@ public final class FlatBufferReader {
     }
 
     public init(buffer : [UInt8], config: BinaryReadConfig){
-        self.buffer = UnsafePointer<UInt8>(buffer)
+        self.buffer = UnsafeMutablePointer<UInt8>(buffer)
         self.config = config
     }
     
     public init(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig){
-        self.buffer = bytes
+        self.buffer = UnsafeMutablePointer(bytes)
         self.config = config
     }
     
@@ -1031,14 +1038,17 @@ public final class FlatBufferReader {
         return fromByteArray(position) as T
     }
     
-    public func getStructProperty<T : Scalar>(objectOffset : Offset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
+    public func set<T : Scalar>(objectOffset : Offset, propertyIndex : Int, value : T) throws {
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
-            return defaultValue
+            throw FlatBufferReaderError.CanOnlySetNonDefaultProperty
         }
-        let position = Int(objectOffset + propertyOffset) + structPropertyOffset
-        
-        return fromByteArray(position)
+        var v = value
+        let position = Int(objectOffset + propertyOffset)
+        let c = strideofValue(v)
+        withUnsafePointer(&v){
+            buffer.advancedBy(position).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
     }
     
     public func hasProperty(objectOffset : Offset, propertyIndex : Int) -> Bool {
@@ -1108,9 +1118,13 @@ public final class FlatBufferReader {
         return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
     }
     
-    public func getVectorStructElement<T : Scalar>(vectorOffset : Offset, vectorIndex : Int, structSize : Int, structElementIndex : Int) -> T {
-        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (vectorIndex * structSize) + structElementIndex)
-        return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
+    public func setVectorScalarElement<T : Scalar>(vectorOffset : Offset, index : Int, value : T) {
+        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(T)))
+        var v = value
+        let c = strideofValue(v)
+        withUnsafePointer(&v){
+            buffer.advancedBy(valueStartPosition).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
     }
     
     public func getVectorOffsetElement(vectorOffset : Offset, index : Int) -> Offset? {
@@ -1150,11 +1164,13 @@ public enum FlatBufferBuilderError : ErrorType {
 
 public final class FlatBufferBuilder {
     
+    static var builderPool : [FlatBufferBuilder] = []
+    
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
     public var deferedBindings : [(object:Any, cursor:Int)] = []
     
-    public let config : BinaryBuildConfig
+    public var config : BinaryBuildConfig
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
@@ -1269,7 +1285,11 @@ public final class FlatBufferBuilder {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBufferBuilderError.ObjectIsNotClosed
         }
-        currentVTable = Array<Int32>(count: numOfProperties, repeatedValue: 0)
+        currentVTable.removeAll(keepCapacity: true)
+        currentVTable.reserveCapacity(numOfProperties)
+        for _ in 0..<numOfProperties {
+            currentVTable.append(0)
+        }
         objectStart = Int32(cursor)
     }
     
@@ -1487,4 +1507,46 @@ public final class FlatBufferBuilder {
         
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
     }
+}
+
+// Pooling
+public extension FlatBufferBuilder {
+    
+    public func reset ()
+    {
+        cursor = 0
+        objectStart = -1
+        vectorNumElems = -1;
+        vTableOffsets.removeAll(keepCapacity: true)
+        currentVTable.removeAll(keepCapacity: true)
+        cache.removeAll(keepCapacity: true)
+        inProgress.removeAll(keepCapacity: true)
+        deferedBindings.removeAll(keepCapacity: true)
+        stringCache.removeAll(keepCapacity: true)
+    }
+    
+    public static func create(config: BinaryBuildConfig) -> FlatBufferBuilder {
+        if (builderPool.count > 0)
+        {
+            let builder = builderPool.removeLast()
+            builder.config = config
+            if (config.initialCapacity > builder.capacity) {
+                builder._data.dealloc(builder.capacity)
+                builder.capacity = config.initialCapacity
+                builder._data = UnsafeMutablePointer.alloc(builder.capacity)
+            }
+            return builder
+        }
+        
+        return FlatBufferBuilder(config: config)
+    }
+    
+    public static func reuse(builder : FlatBufferBuilder) {
+        if (builderPool.count < 100) // max pool size
+        {
+            builder.reset()
+            builderPool.append(builder)
+        }
+    }
+    
 }

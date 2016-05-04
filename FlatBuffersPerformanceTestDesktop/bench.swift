@@ -160,10 +160,12 @@ public extension FooBarContainer {
 }
 public extension FooBarContainer {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
-		let builder = FlatBufferBuilder(config: config)
+		let builder = FlatBufferBuilder.create(config)
 		let offset = addToByteArray(builder)
 		performLateBindings(builder)
-		return try! builder.finish(offset, fileIdentifier: nil)
+		let result = try! builder.finish(offset, fileIdentifier: nil)
+		FlatBufferBuilder.reuse(builder)
+		return result
 	}
 }
 public extension FooBarContainer {
@@ -184,12 +186,12 @@ public extension FooBarContainer {
 			_objectOffset = objectOffset
 		}
 
-		public lazy var list : LazyVector<FooBar.LazyAccess> = {
+		public lazy var list : LazyVector<FooBar.LazyAccess> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 0)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
-			let this = self
-			return LazyVector(count: vectorLength){ [this] in
-				FooBar.LazyAccess(reader: this._reader, objectOffset : this._reader.getVectorOffsetElement(vectorOffset!, index: $0))
+			let reader = self._reader
+			return LazyVector(count: vectorLength){ [reader] in
+				FooBar.LazyAccess(reader: reader, objectOffset : reader.getVectorOffsetElement(vectorOffset!, index: $0))
 			}
 		}()
 		public lazy var initialized : Bool = self._reader.get(self._objectOffset, propertyIndex: 1, defaultValue:false)

@@ -7,11 +7,16 @@
 //
 import Foundation
 
+public enum FlatBufferReaderError : ErrorType {
+    case CanOnlySetNonDefaultProperty
+}
+
+
 public final class FlatBufferReader {
 
     public let config : BinaryReadConfig
     
-    let buffer : UnsafePointer<UInt8>
+    let buffer : UnsafeMutablePointer<UInt8>
     public var objectPool : [Offset : AnyObject] = [:]
     
     func fromByteArray<T : Scalar>(position : Int) -> T{
@@ -19,12 +24,12 @@ public final class FlatBufferReader {
     }
 
     public init(buffer : [UInt8], config: BinaryReadConfig){
-        self.buffer = UnsafePointer<UInt8>(buffer)
+        self.buffer = UnsafeMutablePointer<UInt8>(buffer)
         self.config = config
     }
     
     public init(bytes : UnsafePointer<UInt8>, config: BinaryReadConfig){
-        self.buffer = bytes
+        self.buffer = UnsafeMutablePointer(bytes)
         self.config = config
     }
     
@@ -51,14 +56,17 @@ public final class FlatBufferReader {
         return fromByteArray(position) as T
     }
     
-    public func getStructProperty<T : Scalar>(objectOffset : Offset, propertyIndex : Int, structPropertyOffset : Int, defaultValue : T) -> T {
+    public func set<T : Scalar>(objectOffset : Offset, propertyIndex : Int, value : T) throws {
         let propertyOffset = getPropertyOffset(objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
-            return defaultValue
+            throw FlatBufferReaderError.CanOnlySetNonDefaultProperty
         }
-        let position = Int(objectOffset + propertyOffset) + structPropertyOffset
-        
-        return fromByteArray(position)
+        var v = value
+        let position = Int(objectOffset + propertyOffset)
+        let c = strideofValue(v)
+        withUnsafePointer(&v){
+            buffer.advancedBy(position).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
     }
     
     public func hasProperty(objectOffset : Offset, propertyIndex : Int) -> Bool {
@@ -128,9 +136,13 @@ public final class FlatBufferReader {
         return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
     }
     
-    public func getVectorStructElement<T : Scalar>(vectorOffset : Offset, vectorIndex : Int, structSize : Int, structElementIndex : Int) -> T {
-        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (vectorIndex * structSize) + structElementIndex)
-        return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
+    public func setVectorScalarElement<T : Scalar>(vectorOffset : Offset, index : Int, value : T) {
+        let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(T)))
+        var v = value
+        let c = strideofValue(v)
+        withUnsafePointer(&v){
+            buffer.advancedBy(valueStartPosition).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
+        }
     }
     
     public func getVectorOffsetElement(vectorOffset : Offset, index : Int) -> Offset? {
