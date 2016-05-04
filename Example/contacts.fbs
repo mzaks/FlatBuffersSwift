@@ -3,7 +3,7 @@ table ContactList {
 	entries : [Contact];
 }
 
-enum Gender : byte {Male, Female}
+enum Gender : byte {None, Male, Female}
 
 enum Mood : byte {Funny, Serious, Angry, Humble}
 

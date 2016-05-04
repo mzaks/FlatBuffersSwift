@@ -38,12 +38,12 @@ func flatencode(inout buf:[UInt8], _ bufsize:Int)
 
 func flatdecode(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer
 {
-    return FooBarContainer.fromByteArray(UnsafePointer(buf), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
+    return FooBarContainer.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(buf), count: buf.count), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
 }
 
 func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
 {
-    return FooBarContainer.LazyAccess(data: UnsafePointer(buf), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
+    return FooBarContainer.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(buf), count: buf.count), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
 }
 
 func flatuse(foobarcontainer : FooBarContainer) -> Int

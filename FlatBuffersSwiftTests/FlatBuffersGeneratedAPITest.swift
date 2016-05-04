@@ -43,7 +43,7 @@ class FlatBuffersGeneratedAPITest: XCTestCase {
         
         let data = list.toByteArray()
         
-        let lazyList  = ContactList.LazyAccess(data: UnsafePointer<UInt8>(data))
+        let lazyList  = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
         
         XCTAssert(lazyList.entries[0]?.name == "Max")
         XCTAssert(lazyList.entries[0]?.birthday?.year == 1981)
@@ -51,7 +51,7 @@ class FlatBuffersGeneratedAPITest: XCTestCase {
         XCTAssert(lazyList.entries[0]?.previousLocations[1] == GeoLocation(latitude: 5.5, longitude: 6.5, elevation: 7.5, s: S1(i:12)))
         XCTAssert(lazyList.entries[1]?.birthday?.year == nil)
         
-        let eagerList  = ContactList.fromByteArray(UnsafePointer<UInt8>(data))
+        let eagerList  = ContactList.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
         
         XCTAssert(eagerList.entries[0]?.name == "Max")
         XCTAssert(eagerList.entries[0]?.birthday?.year == 1981)
@@ -59,5 +59,32 @@ class FlatBuffersGeneratedAPITest: XCTestCase {
         XCTAssert(eagerList.entries[0]?.previousLocations[1] == GeoLocation(latitude: 5.5, longitude: 6.5, elevation: 7.5, s: S1(i:12)))
         XCTAssert(eagerList.entries[1]?.birthday?.year == nil)
     }
-
+    
+    func testReplacingValuesInLazyInstances(){
+        let list = ContactList()
+        let p1 = Contact()
+        p1.name = "Max"
+        p1.gender = .Male
+        p1.birthday = Date()
+        p1.birthday?.day = 12
+        p1.birthday?.month = 6
+        p1.birthday?.year = 1981
+        p1.currentLoccation = GeoLocation(latitude: 2.5, longitude: 3.5, elevation: 4.5, s: S1(i:12))
+        
+        list.entries = [p1]
+        
+        let data = list.toByteArray()
+        
+        let lazyList  = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
+        lazyList.entries[0]?.gender = .Female
+        lazyList.entries[0]?.birthday?.day = 15
+        lazyList.entries[0]?.currentLoccation = GeoLocation(latitude: 5.5, longitude: 6.5, elevation: 7.5, s: S1(i:13))
+        
+        let eagerList  = ContactList.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(lazyList.data), count: lazyList.data.count))
+        
+        XCTAssert(eagerList.entries[0]?.currentLoccation == GeoLocation(latitude: 5.5, longitude: 6.5, elevation: 7.5, s: S1(i:13)))
+        XCTAssert(eagerList.entries[0]?.gender == .Female)
+        XCTAssert(eagerList.entries[0]?.birthday?.day == 15)
+    }
+    
 }
