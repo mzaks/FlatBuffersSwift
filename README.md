@@ -1,6 +1,6 @@
 # FlatBuffersSwift
 
-[![Join the chat at https://gitter.im/mzaks/FlatBuffersSwift](https://badges.gitter.im/mzaks/FlatBuffersSwift.svg)](https://gitter.im/mzaks/FlatBuffersSwift?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/mzaks/FlatBuffersSwift](https://badges.gitter.im/mzaks/FlatBuffersSwift.svg)](https://gitter.im/mzaks/FlatBuffersSwift?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/mzaks/FlatBuffersSwift.svg?branch=master)](https://travis-ci.org/mzaks/FlatBuffersSwift)
 
 # Motivation
 This project brings [FlatBuffers](https://google.github.io/flatbuffers/) (an efficient cross platform serialization library) to Swift.

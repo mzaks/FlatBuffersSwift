@@ -280,16 +280,20 @@ public extension Contact {
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 6)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			let reader = self._reader
-			return LazyVector(count: vectorLength){ [reader] in
-				return reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
+			return LazyVector(count: vectorLength, { [reader] in
+				reader.getVectorScalarElement(vectorOffset!, index: $0) as GeoLocation
+			}) { [reader] in
+				reader.setVectorScalarElement(vectorOffset!, index: $0, value: $1)
 			}
 		}()
 		public lazy var moods : LazyVector<Mood> = { [self]
 			let vectorOffset : Offset? = self._reader.getOffset(self._objectOffset, propertyIndex: 7)
 			let vectorLength = self._reader.getVectorLength(vectorOffset)
 			let reader = self._reader
-			return LazyVector(count: vectorLength){ [reader] in
+			return LazyVector(count: vectorLength, { [reader] in
 				Mood(rawValue: reader.getVectorScalarElement(vectorOffset!, index: $0))
+			}) { [reader] in
+				reader.setVectorScalarElement(vectorOffset!, index: $0, value: $1.rawValue)
 			}
 		}()
 
@@ -480,16 +484,16 @@ public extension Date {
 	}
 }
 public struct S1 : Scalar {
-	public var i : Int32
+	public let i : Int32
 }
 public func ==(v1:S1, v2:S1) -> Bool {
 	return  v1.i==v2.i
 }
 public struct GeoLocation : Scalar {
-	public var latitude : Float64
-	public var longitude : Float64
-	public var elevation : Float32
-	public var s : S1
+	public let latitude : Float64
+	public let longitude : Float64
+	public let elevation : Float32
+	public let s : S1
 }
 public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
@@ -977,19 +981,39 @@ extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
 public final class LazyVector<T> : SequenceType {
+    
     private let _generator : (Int)->T?
+    private let _replacer : ((Int, T)->())?
     private let _count : Int
     
-    public init(count : Int, generator : (Int)->T?){
+    public init(count : Int, _ generator : (Int)->T?){
         _generator = generator
         _count = count
+        _replacer = nil
+    }
+    
+    public init(count : Int, _ generator : (Int)->T?, _ replacer: ((Int, T)->())? = nil){
+        _generator = generator
+        _count = count
+        _replacer = replacer
     }
     
     public subscript(i: Int) -> T? {
-        guard i >= 0 && i < _count else {
-            return nil
+        get {
+            guard i >= 0 && i < _count else {
+                return nil
+            }
+            return _generator(i)
         }
-        return _generator(i)
+        set {
+            guard let replacer = _replacer, let value = newValue else {
+                return
+            }
+            guard i >= 0 && i < _count else {
+                return
+            }
+            replacer(i, value)
+        }
     }
     
     public var count : Int {return _count}
@@ -1006,28 +1030,29 @@ public final class LazyVector<T> : SequenceType {
 }
 
 public struct BinaryBuildConfig{
-    public var initialCapacity = 1
-    public var uniqueStrings = true
-    public var uniqueTables = true
-    public var uniqueVTables = true
-    public init() {}
-    public init(initialCapacity : Int, uniqueStrings : Bool, uniqueTables : Bool, uniqueVTables : Bool) {
+    public let initialCapacity : Int
+    public let uniqueStrings : Bool
+    public let uniqueTables : Bool
+    public let uniqueVTables : Bool
+    public let forceDefaults : Bool
+    public init(initialCapacity : Int = 1, uniqueStrings : Bool = true, uniqueTables : Bool = true, uniqueVTables : Bool = true, forceDefaults : Bool = false) {
         self.initialCapacity = initialCapacity
         self.uniqueStrings = uniqueStrings
         self.uniqueTables = uniqueTables
         self.uniqueVTables = uniqueVTables
+        self.forceDefaults = forceDefaults
     }
 }
 
 public struct BinaryReadConfig {
-    public var uniqueTables = true
-    public var uniqueStrings = true
-    public init() {}
-    public init(uniqueStrings : Bool, uniqueTables : Bool) {
+    public let uniqueTables : Bool
+    public let uniqueStrings : Bool
+    public init(uniqueStrings : Bool = true, uniqueTables : Bool = true) {
         self.uniqueStrings = uniqueStrings
         self.uniqueTables = uniqueTables
     }
 }
+
 // MARK: Reader
 public enum FlatBufferReaderError : ErrorType {
     case CanOnlySetNonDefaultProperty
@@ -1261,6 +1286,7 @@ public enum FlatBufferBuilderError : ErrorType {
 
 public final class FlatBufferBuilder {
     
+    public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
     static var builderPool : [FlatBufferBuilder] = []
     
     public var cache : [ObjectIdentifier : Offset] = [:]
@@ -1410,7 +1436,7 @@ public final class FlatBufferBuilder {
             throw FlatBufferBuilderError.PropertyIndexIsInvalid
         }
         
-        if(value == defaultValue) {
+        if(config.forceDefaults == false && value == defaultValue) {
             return
         }
         
@@ -1639,7 +1665,7 @@ public extension FlatBufferBuilder {
     }
     
     public static func reuse(builder : FlatBufferBuilder) {
-        if (builderPool.count < 100) // max pool size
+        if (UInt(builderPool.count) < maxInstanceCacheSize) 
         {
             builder.reset()
             builderPool.append(builder)
@@ -1647,3 +1673,4 @@ public extension FlatBufferBuilder {
     }
     
 }
+

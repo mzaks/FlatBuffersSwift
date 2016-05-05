@@ -169,7 +169,7 @@ public final class FlatBufferBuilder {
             throw FlatBufferBuilderError.PropertyIndexIsInvalid
         }
         
-        if(value == defaultValue) {
+        if(config.forceDefaults == false && value == defaultValue) {
             return
         }
         

@@ -5,19 +5,19 @@ public enum Enum : Int16 {
 	case Apples, Pears, Bananas
 }
 public struct Foo : Scalar {
-	public var i_d : UInt64
-	public var count : Int16
-	public var prefix : Int8
-	public var length : UInt32
+	public let i_d : UInt64
+	public let count : Int16
+	public let prefix : Int8
+	public let length : UInt32
 }
 public func ==(v1:Foo, v2:Foo) -> Bool {
 	return  v1.i_d==v2.i_d &&  v1.count==v2.count &&  v1.prefix==v2.prefix &&  v1.length==v2.length
 }
 public struct Bar : Scalar {
-	public var parent : Foo
-	public var time : Int32
-	public var ratio : Float32
-	public var size : UInt16
+	public let parent : Foo
+	public let time : Int32
+	public let ratio : Float32
+	public let size : UInt16
 }
 public func ==(v1:Bar, v2:Bar) -> Bool {
 	return  v1.parent==v2.parent &&  v1.time==v2.time &&  v1.ratio==v2.ratio &&  v1.size==v2.size
