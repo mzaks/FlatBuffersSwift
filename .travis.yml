@@ -1,7 +1,13 @@
 language: objective-c
 osx_image: xcode7.3
 script:
+  - echo -en "travis_fold:start:generate\r"
   - sh generate.sh
+  - echo -en "travis_fold:end:generate\r"
+  - echo -en "travis_fold:start:unit_test\r"
   - xcodebuild test -project FlatBuffersSwift.xcodeproj -scheme FlatBuffersSwift ONLY_ACTIVE_ARCH=NO
+  - echo -en "travis_fold:end:unit_test\r"
+  - echo -en "travis_fold:start:build_perf_test\r"
   - xcodebuild -project FlatBuffersSwift.xcodeproj -scheme FlatBuffersPerformanceTestDesktopOptimized ONLY_ACTIVE_ARCH=NO -derivedDataPath result/
+  - echo -en "travis_fold:end:build_perf_test\r"
   - ./result/Build/Products/Release/FlatBuffersPerformanceTestDesktop
