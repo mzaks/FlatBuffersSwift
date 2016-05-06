@@ -1,4 +1,7 @@
 language: objective-c
 osx_image: xcode7.3
 script:
+  - sh generate.sh
   - xcodebuild test -project FlatBuffersSwift.xcodeproj -scheme FlatBuffersSwift ONLY_ACTIVE_ARCH=NO
+  - xcodebuild -project FlatBuffersSwift.xcodeproj -scheme FlatBuffersPerformanceTestDesktopOptimized ONLY_ACTIVE_ARCH=NO -derivedDataPath result/
+  - ./result/Build/Products/Release/FlatBuffersPerformanceTestDesktop
