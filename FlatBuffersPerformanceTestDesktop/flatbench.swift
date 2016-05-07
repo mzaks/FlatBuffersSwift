@@ -13,10 +13,11 @@ import Foundation
 let iterations = 1000
 let inner_loop_iterations = 1000
 let bufsize = 4096
-var buf = [UInt8](count: bufsize, repeatedValue: 0)
 var encodedsize = 0
+let readConfiguration = BinaryReadConfig(uniqueStrings: false, uniqueTables: false)
+let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrings: false, uniqueTables: false, uniqueVTables: false)
 
-func flatencode(inout buf:[UInt8], _ bufsize:Int)
+func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<UInt8>, inout _ outputDataCount:Int)
 {
     let veclen = 3
     var foobars : [FooBar?] = Array(count: veclen, repeatedValue:nil)
@@ -33,17 +34,24 @@ func flatencode(inout buf:[UInt8], _ bufsize:Int)
     let location = "http://google.com/flatbuffers/"
     let foobarcontainer = FooBarContainer(list: foobars, initialized: true, fruit: Enum.Bananas, location: location)
     
-    buf = foobarcontainer.toByteArray(BinaryBuildConfig(initialCapacity: 512, uniqueStrings: false, uniqueTables: false, uniqueVTables: false))
+    assert(builder._dataCount <= bufsize)
+    foobarcontainer.toFlatBufferBuilder(builder)
+    outputData.initializeFrom(builder._dataStart, count: builder._dataCount)
+    outputDataCount = builder._dataCount
 }
 
 func flatdecode(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer
 {
-    return FooBarContainer.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(buf), count: buf.count), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
+    return buf.withUnsafeBufferPointer {
+        FooBarContainer.fromByteArray(($0), config: readConfiguration)
+    }
 }
 
 func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
 {
-    return FooBarContainer.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(buf), count: buf.count), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
+    return buf.withUnsafeBufferPointer {
+        FooBarContainer.LazyAccess(data:($0), config: readConfiguration)
+    }
 }
 
 func flatuse(foobarcontainer : FooBarContainer) -> Int
@@ -123,19 +131,26 @@ func runbench(lazyrun: BooleanType)
     var total:UInt64 = 0
     var results : [FooBarContainer] = []
     var lazyresults : [FooBarContainer.LazyAccess] = []
+    let builder = FlatBufferBuilder.create(buildConfiguration)
+    var outputData : UnsafeMutablePointer<UInt8> = nil
+    var outputDataCount = 0
+    var buf = [UInt8](count: bufsize, repeatedValue: 0)
     
     results.reserveCapacity(iterations)
     lazyresults.reserveCapacity(iterations)
+    outputData = UnsafeMutablePointer.alloc(bufsize)
     
     for _ in 0..<inner_loop_iterations {
         
         let time1 = NSDate()
         for _ in 0..<iterations {
-            flatencode(&buf, bufsize)
+            flatencode(builder, outputData: outputData, &outputDataCount)
+            builder.reset()
         }
         let time2 = NSDate()
+        buf = Array(UnsafeBufferPointer(start: outputData, count: outputDataCount))
         
-        encodedsize = buf.count
+        encodedsize = outputDataCount
         
         let time3 = NSDate()
         for _ in 0..<iterations {
@@ -174,6 +189,8 @@ func runbench(lazyrun: BooleanType)
         use = use + (time6.timeIntervalSince1970 - time5.timeIntervalSince1970)
         dealloc = dealloc + (time8.timeIntervalSince1970 - time7.timeIntervalSince1970)
     }
+    
+    outputData.dealloc(bufsize)
     
     print("=================================")
     print("\(((encode) * 1000).string(0)) ms encode")
