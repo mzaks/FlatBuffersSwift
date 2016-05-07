@@ -78,6 +78,8 @@
 		85518AD71CD21D2B00EEBCAC /* bench.fbs */ = {isa = PBXFileReference; lastKnownFileType = text; path = bench.fbs; sourceTree = "<group>"; };
 		85518AD81CD21D3700EEBCAC /* bench.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = bench.swift; sourceTree = "<group>"; };
 		85518ADA1CD21D4300EEBCAC /* flatbench.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = flatbench.swift; sourceTree = "<group>"; };
+		85EE88611CDE83E00030231F /* generate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = generate.sh; sourceTree = SOURCE_ROOT; };
+		85EE88621CDE84640030231F /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +125,7 @@
 				0BA0E8471C32B62200B896B7 /* FlatBuffersSwift */,
 				0BA0E8531C32B62200B896B7 /* FlatBuffersSwiftTests */,
 				0BA0E87A1C3AC27800B896B7 /* FlatBuffersPerformanceTestDesktop */,
+				85EE885C1CDE830A0030231F /* Resources */,
 				0BA0E8461C32B62200B896B7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -172,6 +175,16 @@
 				85518AD81CD21D3700EEBCAC /* bench.swift */,
 			);
 			path = FlatBuffersPerformanceTestDesktop;
+			sourceTree = "<group>";
+		};
+		85EE885C1CDE830A0030231F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				85EE88611CDE83E00030231F /* generate.sh */,
+				85EE88621CDE84640030231F /* .travis.yml */,
+			);
+			name = Resources;
+			path = Example;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
