@@ -30,9 +30,9 @@ public final class FlatBufferBuilder {
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
-    var _dataCount : Int { return cursor } // count of bytes in unsafe buffer
-    var _dataStart : UnsafeMutablePointer<UInt8> { return _data.advancedBy(leftCursor) } // start of actual raw unsafe buffer data
-    var data : [UInt8] {
+    public var _dataCount : Int { return cursor } // count of bytes in unsafe buffer
+    public var _dataStart : UnsafeMutablePointer<UInt8> { return _data.advancedBy(leftCursor) } // start of actual raw unsafe buffer data
+    public var data : [UInt8] {
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor), count: cursor))
     }
     var cursor = 0

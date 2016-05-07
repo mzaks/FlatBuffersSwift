@@ -53,10 +53,20 @@ public extension ContactList {
 		let builder = FlatBufferBuilder.create(config)
 		let offset = addToByteArray(builder)
 		performLateBindings(builder)
-		let result = try! builder.finish(offset, fileIdentifier: nil)
+		try! builder.finish(offset, fileIdentifier: nil)
+		let result = builder.data
 		FlatBufferBuilder.reuse(builder)
 		return result
 	}
+}
+
+public extension ContactList {
+    public func toFlatBufferBuilder (builder : FlatBufferBuilder) -> Void {
+        let offset = addToByteArray(builder)
+        performLateBindings(builder)
+        try! builder.finish(offset, fileIdentifier: nil)
+        return
+    }
 }
 public extension ContactList {
 	public final class LazyAccess : Hashable {
