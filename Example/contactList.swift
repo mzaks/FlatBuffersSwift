@@ -52,11 +52,22 @@ public extension ContactList {
 		let builder = FlatBufferBuilder.create(config)
 		let offset = addToByteArray(builder)
 		performLateBindings(builder)
-		let result = try! builder.finish(offset, fileIdentifier: nil)
+		try! builder.finish(offset, fileIdentifier: nil)
+		let result = builder.data
 		FlatBufferBuilder.reuse(builder)
 		return result
 	}
 }
+
+public extension ContactList {
+    public func toFlatBufferBuilder (builder : FlatBufferBuilder) -> Void {
+        let offset = addToByteArray(builder)
+        performLateBindings(builder)
+        try! builder.finish(offset, fileIdentifier: nil)
+        return
+    }
+}
+
 public extension ContactList {
 	public final class LazyAccess : Hashable {
 		private let _reader : FlatBufferReader!
@@ -1603,7 +1614,7 @@ public final class FlatBufferBuilder {
         return Offset(cursor)
     }
     
-    public func finish(offset : Offset, fileIdentifier : String?) throws -> [UInt8] {
+    public func finish(offset : Offset, fileIdentifier : String?) throws -> Void {
         guard offset <= Int32(cursor) else {
             throw FlatBufferBuilderError.OffsetIsTooBig
         }
@@ -1627,8 +1638,7 @@ public final class FlatBufferBuilder {
         withUnsafePointer(&v){
             _data.advancedBy(leftCursor - prefixLength).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
-        
-        return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
+        cursor += prefixLength
     }
 }
 
@@ -1665,7 +1675,7 @@ public extension FlatBufferBuilder {
     }
     
     public static func reuse(builder : FlatBufferBuilder) {
-        if (UInt(builderPool.count) < maxInstanceCacheSize) 
+        if (UInt(builderPool.count) < maxInstanceCacheSize)
         {
             builder.reset()
             builderPool.append(builder)
