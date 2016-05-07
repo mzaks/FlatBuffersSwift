@@ -60,12 +60,11 @@ public extension ContactList {
 }
 
 public extension ContactList {
-    public func toFlatBufferBuilder (builder : FlatBufferBuilder) -> Void {
-        let offset = addToByteArray(builder)
-        performLateBindings(builder)
-        try! builder.finish(offset, fileIdentifier: nil)
-        return
-    }
+	public func toFlatBufferBuilder (builder : FlatBufferBuilder) -> Void {
+		let offset = addToByteArray(builder)
+		performLateBindings(builder)
+		try! builder.finish(offset, fileIdentifier: nil)
+	}
 }
 
 public extension ContactList {
@@ -1308,9 +1307,9 @@ public final class FlatBufferBuilder {
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
-    var _dataCount : Int { return cursor } // count of bytes in unsafe buffer
-    var _dataStart : UnsafeMutablePointer<UInt8> { return _data.advancedBy(leftCursor) } // start of actual raw unsafe buffer data
-    var data : [UInt8] {
+    public var _dataCount : Int { return cursor } // count of bytes in unsafe buffer
+    public var _dataStart : UnsafeMutablePointer<UInt8> { return _data.advancedBy(leftCursor) } // start of actual raw unsafe buffer data
+    public var data : [UInt8] {
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor), count: cursor))
     }
     var cursor = 0
@@ -1677,7 +1676,7 @@ public extension FlatBufferBuilder {
     }
     
     public static func reuse(builder : FlatBufferBuilder) {
-        if (UInt(builderPool.count) < maxInstanceCacheSize)
+        if (UInt(builderPool.count) < maxInstanceCacheSize) 
         {
             builder.reset()
             builderPool.append(builder)
