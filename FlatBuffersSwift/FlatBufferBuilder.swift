@@ -30,7 +30,9 @@ public final class FlatBufferBuilder {
     
     var capacity : Int
     private var _data : UnsafeMutablePointer<UInt8>
-    var data : [UInt8] {
+    public var _dataCount : Int { return cursor } // count of bytes in unsafe buffer
+    public var _dataStart : UnsafeMutablePointer<UInt8> { return _data.advancedBy(leftCursor) } // start of actual raw unsafe buffer data
+    public var data : [UInt8] {
         return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor), count: cursor))
     }
     var cursor = 0
@@ -336,7 +338,7 @@ public final class FlatBufferBuilder {
         return Offset(cursor)
     }
     
-    public func finish(offset : Offset, fileIdentifier : String?) throws -> [UInt8] {
+    public func finish(offset : Offset, fileIdentifier : String?) throws -> Void {
         guard offset <= Int32(cursor) else {
             throw FlatBufferBuilderError.OffsetIsTooBig
         }
@@ -360,8 +362,7 @@ public final class FlatBufferBuilder {
         withUnsafePointer(&v){
             _data.advancedBy(leftCursor - prefixLength).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
-        
-        return Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(_data).advancedBy(leftCursor - prefixLength), count: cursor+prefixLength))
+        cursor += prefixLength
     }
 }
 

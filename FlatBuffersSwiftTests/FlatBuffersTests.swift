@@ -297,7 +297,8 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
-        let data = try! fbb.finish(oOffset, fileIdentifier: "test")
+        try! fbb.finish(oOffset, fileIdentifier: "test")
+        let data = fbb.data
         
         XCTAssertEqual(data,
             [
@@ -323,7 +324,8 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
         
         XCTAssertEqual(data,
             [
@@ -348,7 +350,8 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
         
         XCTAssertEqual(data,
             [
@@ -377,7 +380,8 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
         
         XCTAssertEqual(data,
             [
@@ -408,8 +412,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(2, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
+
         XCTAssertEqual(data,
             [
                 14,  0,  0,  0,      // root object offset
@@ -441,8 +446,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
+
         XCTAssertEqual(data,
             [
                 14,  0,  0,  0,      // root object offset
@@ -478,8 +484,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyOffsetToOpenObject(1, offset: oOffset1)
         let oOffset2 = try! fbb.closeObject()
         
-        let data = try! fbb.finish(oOffset2, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset2, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
@@ -500,8 +507,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
         let oOffset1 = try! fbb.closeObject()
         
-        let data = try! fbb.finish(oOffset1, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset1, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
@@ -523,8 +531,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyOffsetToOpenObject(1, offset: vOffset)
         let oOffset1 = try! fbb.closeObject()
         
-        let data = try! fbb.finish(oOffset1, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset1, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
@@ -543,8 +552,9 @@ class FlatBuffersTests: XCTestCase {
         let vOffset = fbb.endVector()
         
         try! fbb.replaceOffset(sOffset, atCursor: cursor)
-        let data = try! fbb.finish(vOffset, fileIdentifier: nil)
-        
+        try! fbb.finish(vOffset, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let length = reader.getVectorLength(objectOffset)
@@ -562,8 +572,9 @@ class FlatBuffersTests: XCTestCase {
         let oOffset = try! fbb.closeObject()
         
         try! fbb.replaceOffset(sOffset, atCursor: cursor)
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let objectOffset3 : Offset? = reader.getOffset(objectOffset, propertyIndex: 0)
@@ -578,8 +589,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyToOpenObject(0, value: 2.5, defaultValue: 0)
         let oOffset = try! fbb.closeObject()
         
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         var v1 : Double = reader.get(objectOffset, propertyIndex: 0)!
@@ -609,8 +621,9 @@ class FlatBuffersTests: XCTestCase {
         try! fbb.addPropertyOffsetToOpenObject(0, offset: offset)
         let oOffset = try! fbb.closeObject()
         
-        let data = try! fbb.finish(oOffset, fileIdentifier: nil)
-        
+        try! fbb.finish(oOffset, fileIdentifier: nil)
+        let data = fbb.data
+
         let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
         let objectOffset = reader.rootObjectOffset
         let v_o = reader.getOffset(objectOffset, propertyIndex: 0)!
