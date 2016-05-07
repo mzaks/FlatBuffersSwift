@@ -9,6 +9,7 @@
 //  based on the implementation from https://github.com/google/flatbuffers/tree/benchmarks/benchmarks/cpp
 
 import Foundation
+import Quartz
 
 let iterations = 1000
 let inner_loop_iterations = 1000
@@ -142,17 +143,17 @@ func runbench(lazyrun: BooleanType)
     
     for _ in 0..<inner_loop_iterations {
         
-        let time1 = NSDate()
+        let time1 = CACurrentMediaTime()
         for _ in 0..<iterations {
             flatencode(builder, outputData: outputData, &outputDataCount)
             builder.reset()
         }
-        let time2 = NSDate()
+        let time2 = CACurrentMediaTime()
         buf = Array(UnsafeBufferPointer(start: outputData, count: outputDataCount))
         
         encodedsize = outputDataCount
         
-        let time3 = NSDate()
+        let time3 = CACurrentMediaTime()
         for _ in 0..<iterations {
             if lazyrun {
                 lazyresults.append(flatdecodelazy(&buf, bufsize))
@@ -162,9 +163,9 @@ func runbench(lazyrun: BooleanType)
                 results.append(flatdecode(&buf, bufsize))
             }
         }
-        let time4 = NSDate()
+        let time4 = CACurrentMediaTime()
         
-        let time5 = NSDate()
+        let time5 = CACurrentMediaTime()
         for index in 0..<iterations {
             var result = 0
             if lazyrun {
@@ -177,17 +178,17 @@ func runbench(lazyrun: BooleanType)
             assert(result == 8644311667)
             total = total + UInt64(result)
         }
-        let time6 = NSDate()
+        let time6 = CACurrentMediaTime()
         
-        let time7 = NSDate()
+        let time7 = CACurrentMediaTime()
         results.removeAll(keepCapacity:true)
         lazyresults.removeAll(keepCapacity:true)
-        let time8 = NSDate()
+        let time8 = CACurrentMediaTime()
         
-        encode = encode + (time2.timeIntervalSince1970 - time1.timeIntervalSince1970)
-        decode = decode + (time4.timeIntervalSince1970 - time3.timeIntervalSince1970)
-        use = use + (time6.timeIntervalSince1970 - time5.timeIntervalSince1970)
-        dealloc = dealloc + (time8.timeIntervalSince1970 - time7.timeIntervalSince1970)
+        encode = encode + (time2 - time1)
+        decode = decode + (time4 - time3)
+        use = use + (time6 - time5)
+        dealloc = dealloc + (time8 - time7)
     }
     
     outputData.dealloc(bufsize)
