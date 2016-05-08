@@ -41,3 +41,41 @@ extension Int : Scalar {}
 extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
+
+public protocol PoolableInstances : AnyObject {
+    static var maxInstanceCacheSize : Int { get set }
+    static var instancePool : [Self] { get set }
+    init()
+    func reset()
+}
+
+public extension PoolableInstances {
+    
+    // Optional preheat of instance pool
+    public static func fillInstancePool(initialPoolSize : Int) -> Void {
+        while ((instancePool.count < initialPoolSize) && (instancePool.count < maxInstanceCacheSize))
+        {
+            instancePool.append(Self())
+        }
+    }
+    
+    public static func createInstance() -> Self {
+        if (instancePool.count > 0)
+        {
+            let instance = instancePool.removeLast()
+            return instance
+        }
+        return Self()
+    }
+    
+    // reuseInstance can be called when we believe we are about to zero out
+    // the final strong reference we hold ourselves to put the instance in for reuse
+    public static func reuseInstance(inout instance : Self) {
+        
+        if (isUniquelyReferencedNonObjC(&instance) && (instancePool.count < maxInstanceCacheSize))
+        {
+            instance.reset()
+            instancePool.append(instance)
+        }
+    }
+}

@@ -41,11 +41,9 @@ func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<U
     outputDataCount = builder._dataCount
 }
 
-func flatdecode(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer
+func flatdecode(data : UnsafeMutablePointer<UInt8>, _ dataCount:Int) -> FooBarContainer
 {
-    return buf.withUnsafeBufferPointer {
-        FooBarContainer.fromByteArray(($0), config: readConfiguration)
-    }
+    return FooBarContainer.fromRawMemory(data, count: dataCount, config: readConfiguration)
 }
 
 func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
@@ -140,7 +138,13 @@ func runbench(lazyrun: BooleanType)
     results.reserveCapacity(iterations)
     lazyresults.reserveCapacity(iterations)
     outputData = UnsafeMutablePointer.alloc(bufsize)
+    // doing optional preload of instance cache
+    FooBarContainer.maxInstanceCacheSize = 1000
+    FooBar.maxInstanceCacheSize = 10000
     
+    FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize)
+    FooBar.fillInstancePool(FooBar.maxInstanceCacheSize)
+
     for _ in 0..<inner_loop_iterations {
         
         let time1 = CACurrentMediaTime()
@@ -160,7 +164,7 @@ func runbench(lazyrun: BooleanType)
             }
             else
             {
-                results.append(flatdecode(&buf, bufsize))
+                results.append(flatdecode(outputData, outputDataCount))
             }
         }
         let time4 = CACurrentMediaTime()
@@ -181,7 +185,12 @@ func runbench(lazyrun: BooleanType)
         let time6 = CACurrentMediaTime()
         
         let time7 = CACurrentMediaTime()
-        results.removeAll(keepCapacity:true)
+        // Try to return objects to instance pool
+        while (results.count > 0)
+        {
+            var x = results.removeLast()
+            FooBarContainer.reuseInstance(&x)
+        }
         lazyresults.removeAll(keepCapacity:true)
         let time8 = CACurrentMediaTime()
         

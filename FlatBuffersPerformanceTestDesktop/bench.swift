@@ -23,6 +23,8 @@ public func ==(v1:Bar, v2:Bar) -> Bool {
 	return  v1.parent==v2.parent &&  v1.time==v2.time &&  v1.ratio==v2.ratio &&  v1.size==v2.size
 }
 public final class FooBar {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [FooBar] = []
 	public var sibling : Bar? = nil
 	public var name : String? = nil
 	public var rating : Float64 = 0
@@ -35,6 +37,17 @@ public final class FooBar {
 		self.postfix = postfix
 	}
 }
+
+extension FooBar : PoolableInstances
+{
+    public func reset() { // should reset any references here
+        self.name = nil
+        self.sibling = nil
+        self.rating = 0
+        self.postfix = 0
+    }
+}
+
 public extension FooBar {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> FooBar? {
 		guard let objectOffset = objectOffset else {
@@ -45,7 +58,7 @@ public extension FooBar {
 				return o as? FooBar
 			}
 		}
-		let _result = FooBar()
+		let _result = FooBar.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -122,6 +135,8 @@ public extension FooBar {
 	}
 }
 public final class FooBarContainer {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [FooBarContainer] = []
 	public var list : [FooBar?] = []
 	public var initialized : Bool = false
 	public var fruit : Enum? = Enum.Apples
@@ -134,6 +149,21 @@ public final class FooBarContainer {
 		self.location = location
 	}
 }
+
+extension FooBarContainer : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        while (list.count > 0)
+        {
+            var x = list.removeLast()!
+            FooBar.reuseInstance(&x)
+        }
+        initialized = false
+        fruit = Enum.Apples
+        location = nil
+    }
+}
+
 public extension FooBarContainer {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> FooBarContainer? {
 		guard let objectOffset = objectOffset else {
@@ -144,7 +174,7 @@ public extension FooBarContainer {
 				return o as? FooBarContainer
 			}
 		}
-		let _result = FooBarContainer()
+		let _result = FooBarContainer.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -173,6 +203,17 @@ public extension FooBarContainer {
 		return result
 	}
 }
+
+public extension FooBarContainer {
+    public static func fromRawMemory(data : UnsafeMutablePointer<UInt8>, count : Int, config : BinaryReadConfig = BinaryReadConfig()) -> FooBarContainer {
+        let reader = FlatBufferReader.create(data, count: count, config: config)
+        let objectOffset = reader.rootObjectOffset
+        let result = create(reader, objectOffset : objectOffset)!
+        FlatBufferReader.reuse(reader)
+        return result
+    }
+}
+
 public extension FooBarContainer {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
 		let builder = FlatBufferBuilder.create(config)

@@ -41,7 +41,13 @@ public final class FlatBufferReader {
         self.config = config
         length = bytes.count
     }
-    
+
+    public init(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig){
+        self.buffer = bytes
+        self.config = config
+        length = count
+    }
+
     public var rootObjectOffset : Offset {
         let offset : Int32 = fromByteArray(0)
         return offset
@@ -218,6 +224,21 @@ public extension FlatBufferReader {
         return FlatBufferReader(bytes: bytes, config: config)
     }
     
+    public static func create(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig) -> FlatBufferReader {
+        if (instancePool.count > 0)
+        {
+            let reader = instancePool.removeLast()
+            
+            reader.buffer = bytes
+            reader.config = config
+            reader.length = count
+            
+            return reader
+        }
+        
+        return FlatBufferReader(bytes: bytes, count: count, config: config)
+    }
+
     public static func reuse(reader : FlatBufferReader) {
         if (UInt(instancePool.count) < maxInstanceCacheSize)
         {

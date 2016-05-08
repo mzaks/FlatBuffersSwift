@@ -2,6 +2,8 @@
 // generated with FlatBuffersSchemaEditor https://github.com/mzaks/FlatBuffersSchemaEditor
 
 public final class ContactList {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [ContactList] = []
 	public var lastModified : Int64 = 0
 	public var entries : [Contact?] = []
 	public init(){}
@@ -10,6 +12,19 @@ public final class ContactList {
 		self.entries = entries
 	}
 }
+
+extension ContactList : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        while (entries.count > 0)
+        {
+            var x = entries.removeLast()!
+            Contact.reuseInstance(&x)
+        }
+        lastModified = 0
+    }
+}
+
 public extension ContactList {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> ContactList? {
 		guard let objectOffset = objectOffset else {
@@ -20,7 +35,7 @@ public extension ContactList {
 				return o as? ContactList
 			}
 		}
-		let _result = ContactList()
+		let _result = ContactList.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -156,6 +171,8 @@ public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
 }
 public final class Contact {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [Contact] = []
 	public var name : String? = nil
 	public var birthday : Date? = nil
 	public var gender : Gender? = Gender.None
@@ -176,6 +193,29 @@ public final class Contact {
 		self.moods = moods
 	}
 }
+
+extension Contact : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        name = nil
+        if birthday != nil {
+            var x = birthday!
+            birthday = nil
+            Date.reuseInstance(&x)
+        }
+        gender = Gender.None
+        tags = []
+        while (addressEntries.count > 0)
+        {
+            var x = addressEntries.removeLast()!
+            AddressEntry.reuseInstance(&x)
+        }
+        currentLoccation = nil
+        previousLocations = []
+        moods = []
+    }
+}
+
 public extension Contact {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Contact? {
 		guard let objectOffset = objectOffset else {
@@ -186,7 +226,7 @@ public extension Contact {
 				return o as? Contact
 			}
 		}
-		let _result = Contact()
+		let _result = Contact.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -408,6 +448,8 @@ public extension Contact {
 	}
 }
 public final class Date {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [Date] = []
 	public var day : Int8 = 0
 	public var month : Int8 = 0
 	public var year : Int16 = 0
@@ -418,6 +460,15 @@ public final class Date {
 		self.year = year
 	}
 }
+extension Date : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        day = 0
+        month = 0
+        year = 0
+    }
+}
+
 public extension Date {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Date? {
 		guard let objectOffset = objectOffset else {
@@ -428,7 +479,7 @@ public extension Date {
 				return o as? Date
 			}
 		}
-		let _result = Date()
+		let _result = Date.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -509,6 +560,8 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [AddressEntry] = []
 	public var order : Int32 = 0
 	public var address : Address? = nil
 	public init(){}
@@ -517,6 +570,14 @@ public final class AddressEntry {
 		self.address = address
 	}
 }
+extension AddressEntry : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        order = 0
+        address = nil
+    }
+}
+
 public extension AddressEntry {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> AddressEntry? {
 		guard let objectOffset = objectOffset else {
@@ -527,7 +588,7 @@ public extension AddressEntry {
 				return o as? AddressEntry
 			}
 		}
-		let _result = AddressEntry()
+		let _result = AddressEntry.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -588,6 +649,8 @@ public extension AddressEntry {
 	}
 }
 public final class PostalAddress {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [PostalAddress] = []
 	public var country : String? = nil
 	public var city : String? = nil
 	public var postalCode : Int32 = 0
@@ -600,6 +663,16 @@ public final class PostalAddress {
 		self.streetAndNumber = streetAndNumber
 	}
 }
+extension PostalAddress : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        country = nil
+        city = nil
+        postalCode = 0
+        streetAndNumber = nil
+    }
+}
+
 public extension PostalAddress {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> PostalAddress? {
 		guard let objectOffset = objectOffset else {
@@ -610,7 +683,7 @@ public extension PostalAddress {
 				return o as? PostalAddress
 			}
 		}
-		let _result = PostalAddress()
+		let _result = PostalAddress.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -676,12 +749,21 @@ public extension PostalAddress {
 	}
 }
 public final class EmailAddress {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [EmailAddress] = []
 	public var mailto : String? = nil
 	public init(){}
 	public init(mailto: String?){
 		self.mailto = mailto
 	}
 }
+extension EmailAddress : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        mailto = nil
+    }
+}
+
 public extension EmailAddress {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> EmailAddress? {
 		guard let objectOffset = objectOffset else {
@@ -692,7 +774,7 @@ public extension EmailAddress {
 				return o as? EmailAddress
 			}
 		}
-		let _result = EmailAddress()
+		let _result = EmailAddress.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -744,12 +826,21 @@ public extension EmailAddress {
 	}
 }
 public final class WebAddress {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [WebAddress] = []
 	public var url : String? = nil
 	public init(){}
 	public init(url: String?){
 		self.url = url
 	}
 }
+extension WebAddress : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        url = nil
+    }
+}
+
 public extension WebAddress {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> WebAddress? {
 		guard let objectOffset = objectOffset else {
@@ -760,7 +851,7 @@ public extension WebAddress {
 				return o as? WebAddress
 			}
 		}
-		let _result = WebAddress()
+		let _result = WebAddress.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -812,12 +903,21 @@ public extension WebAddress {
 	}
 }
 public final class TelephoneNumber {
+    public static var maxInstanceCacheSize : Int = 0
+    public static var instancePool : [TelephoneNumber] = []
 	public var number : String? = nil
 	public init(){}
 	public init(number: String?){
 		self.number = number
 	}
 }
+extension TelephoneNumber : PoolableInstances
+{
+    public func reset() { // should reset any references here, try to reuse instances when they are objects
+        number = nil
+    }
+}
+
 public extension TelephoneNumber {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> TelephoneNumber? {
 		guard let objectOffset = objectOffset else {
@@ -828,7 +928,7 @@ public extension TelephoneNumber {
 				return o as? TelephoneNumber
 			}
 		}
-		let _result = TelephoneNumber()
+		let _result = TelephoneNumber.createInstance()
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
@@ -990,6 +1090,43 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
+public protocol PoolableInstances : AnyObject {
+    static var maxInstanceCacheSize : Int { get set }
+    static var instancePool : [Self] { get set }
+    init()
+    func reset()
+}
+
+public extension PoolableInstances {
+
+    public static func fillInstancePool(initialPoolSize : Int) -> Void {
+        while ((instancePool.count < initialPoolSize) && (instancePool.count < maxInstanceCacheSize))
+        {
+            instancePool.append(Self())
+        }
+    }
+
+    public static func createInstance() -> Self {
+        if (instancePool.count > 0)
+        {
+            let instance = instancePool.removeLast()
+            return instance
+        }
+        return Self()
+    }
+    
+    // reuseInstance can be called when we believe we are about to zero out
+    // the final strong reference we hold ourselves to put the instance in for reuse
+    public static func reuseInstance(inout instance : Self) {
+        
+        if (isUniquelyReferencedNonObjC(&instance) && (instancePool.count < maxInstanceCacheSize))
+        {
+            instance.reset()
+            instancePool.append(instance)
+        }
+    }
+}
+
 public final class LazyVector<T> : SequenceType {
     
     private let _generator : (Int)->T?
@@ -1099,6 +1236,12 @@ public final class FlatBufferReader {
         length = bytes.count
     }
     
+    public init(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig){
+        self.buffer = bytes
+        self.config = config
+        length = count
+    }
+
     public var rootObjectOffset : Offset {
         let offset : Int32 = fromByteArray(0)
         return offset
@@ -1274,7 +1417,22 @@ public extension FlatBufferReader {
         
         return FlatBufferReader(bytes: bytes, config: config)
     }
-    
+
+    public static func create(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig) -> FlatBufferReader {
+        if (instancePool.count > 0)
+        {
+            let reader = instancePool.removeLast()
+            
+            reader.buffer = bytes
+            reader.config = config
+            reader.length = count
+            
+            return reader
+        }
+        
+        return FlatBufferReader(bytes: bytes, count: count, config: config)
+    }
+
     public static func reuse(reader : FlatBufferReader) {
         if (UInt(instancePool.count) < maxInstanceCacheSize)
         {
