@@ -7,22 +7,21 @@
 //
 
 import Foundation
-import Quartz
 
 func testRandomContactListToByteArrayAndBackAgain(){
     let contactList = generateRandomContactList()
-    let time1 = CACurrentMediaTime()
+    let time1 = CFAbsoluteTimeGetCurrent()
     let data = contactList.toByteArray(BinaryBuildConfig(initialCapacity: 1024*1024*3, uniqueStrings: false, uniqueTables: false, uniqueVTables: true))
-    let after1 = CACurrentMediaTime()
+    let after1 = CFAbsoluteTimeGetCurrent()
     print("\((after1 - time1) * 1000.0) ms encoding to byte array of size \(data.count)")
-    let time2 = CACurrentMediaTime()
+    let time2 = CFAbsoluteTimeGetCurrent()
     _ = ContactList.fromByteArray(UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count), config: BinaryReadConfig(uniqueStrings: false, uniqueTables: false))
-    let after2 = CACurrentMediaTime()
+    let after2 = CFAbsoluteTimeGetCurrent()
     print("\((after2 - time2) * 1000.0) ms decoding")
 
-    let time3 = CACurrentMediaTime()
+    let time3 = CFAbsoluteTimeGetCurrent()
     _ = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
-    let after3 = CACurrentMediaTime()
+    let after3 = CFAbsoluteTimeGetCurrent()
     print("\((after3 - time3) * 1000.0) ms lazy accessor")
     
 //    NSData(bytes: UnsafePointer<UInt8>(data), length: data.count).writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList.bin", atomically: true)
@@ -30,14 +29,14 @@ func testRandomContactListToByteArrayAndBackAgain(){
 
 func testReadingJSON(){
     let jsonData = NSData(contentsOfFile: "/Users/mzaks/dev/FlatBuffersSwift/Example/contactList_.json")!
-    let time1 = CACurrentMediaTime()
+    let time1 = CFAbsoluteTimeGetCurrent()
     let o = try! NSJSONSerialization.JSONObjectWithData(jsonData, options: NSJSONReadingOptions.MutableContainers)
-    let after1 = CACurrentMediaTime()
+    let after1 = CFAbsoluteTimeGetCurrent()
     print("\((after1 - time1) * 1000.0) ms for parsing JSON")
 
-    let time2 = CACurrentMediaTime()
+    let time2 = CFAbsoluteTimeGetCurrent()
     let newData2 : NSData = try!NSJSONSerialization.dataWithJSONObject(o, options: NSJSONWritingOptions(rawValue: 0))
-    let after2 = CACurrentMediaTime()
+    let after2 = CFAbsoluteTimeGetCurrent()
     print("\((after2 - time2) * 1000.0) ms for creating JSON, size \(newData2.length)")
     newData2.writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList_.json", atomically: true)
     

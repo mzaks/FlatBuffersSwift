@@ -9,7 +9,6 @@
 //  based on the implementation from https://github.com/google/flatbuffers/tree/benchmarks/benchmarks/cpp
 
 import Foundation
-import Quartz
 
 let iterations = 1000
 let inner_loop_iterations = 1000
@@ -56,13 +55,13 @@ func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAcc
 func flatuse(foobarcontainer : FooBarContainer) -> Int
 {
     var sum:Int = 1
-    sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
+    sum = sum + Int(foobarcontainer.locationBuffer!.count)
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
     sum = sum + (foobarcontainer.initialized ? 1 : 0)
     
     for i in 0..<foobarcontainer.list.count {
         let foobar = foobarcontainer.list[i]!
-        sum = sum + Int(foobar.name!.utf8.count) // characters.count is quite expensive and misleading here
+        sum = sum + Int(foobar.nameBuffer!.count)
         sum = sum + Int(foobar.postfix)
         sum = sum + Int(foobar.rating)
         
@@ -147,17 +146,17 @@ func runbench(lazyrun: BooleanType)
 
     for _ in 0..<inner_loop_iterations {
         
-        let time1 = CACurrentMediaTime()
+        let time1 = CFAbsoluteTimeGetCurrent()
         for _ in 0..<iterations {
             flatencode(builder, outputData: outputData, &outputDataCount)
             builder.reset()
         }
-        let time2 = CACurrentMediaTime()
+        let time2 = CFAbsoluteTimeGetCurrent()
         buf = Array(UnsafeBufferPointer(start: outputData, count: outputDataCount))
         
         encodedsize = outputDataCount
         
-        let time3 = CACurrentMediaTime()
+        let time3 = CFAbsoluteTimeGetCurrent()
         for _ in 0..<iterations {
             if lazyrun {
                 lazyresults.append(flatdecodelazy(&buf, bufsize))
@@ -167,9 +166,9 @@ func runbench(lazyrun: BooleanType)
                 results.append(flatdecode(outputData, outputDataCount))
             }
         }
-        let time4 = CACurrentMediaTime()
+        let time4 = CFAbsoluteTimeGetCurrent()
         
-        let time5 = CACurrentMediaTime()
+        let time5 = CFAbsoluteTimeGetCurrent()
         for index in 0..<iterations {
             var result = 0
             if lazyrun {
@@ -182,9 +181,9 @@ func runbench(lazyrun: BooleanType)
             assert(result == 8644311667)
             total = total + UInt64(result)
         }
-        let time6 = CACurrentMediaTime()
+        let time6 = CFAbsoluteTimeGetCurrent()
         
-        let time7 = CACurrentMediaTime()
+        let time7 = CFAbsoluteTimeGetCurrent()
         // Try to return objects to instance pool
         while (results.count > 0)
         {
@@ -192,7 +191,7 @@ func runbench(lazyrun: BooleanType)
             FooBarContainer.reuseInstance(&x)
         }
         lazyresults.removeAll(keepCapacity:true)
-        let time8 = CACurrentMediaTime()
+        let time8 = CFAbsoluteTimeGetCurrent()
         
         encode = encode + (time2 - time1)
         decode = decode + (time4 - time3)

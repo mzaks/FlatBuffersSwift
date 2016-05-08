@@ -1,9 +1,11 @@
 
 // generated with FlatBuffersSchemaEditor https://github.com/mzaks/FlatBuffersSchemaEditor
 
+import Foundation
+
 public final class ContactList {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [ContactList] = []
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [ContactList] = []
 	public var lastModified : Int64 = 0
 	public var entries : [Contact?] = []
 	public init(){}
@@ -13,18 +15,15 @@ public final class ContactList {
 	}
 }
 
-extension ContactList : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        while (entries.count > 0)
-        {
-            var x = entries.removeLast()!
-            Contact.reuseInstance(&x)
-        }
-        lastModified = 0
-    }
+extension ContactList : PoolableInstances {
+	public func reset() { 
+		lastModified = 0
+		while (entries.count > 0) {
+			var x = entries.removeLast()!
+			Contact.reuseInstance(&x)
+		}
+	}
 }
-
 public extension ContactList {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> ContactList? {
 		guard let objectOffset = objectOffset else {
@@ -56,6 +55,13 @@ public extension ContactList {
 public extension ContactList {
 	public static func fromByteArray(data : UnsafeBufferPointer<UInt8>, config : BinaryReadConfig = BinaryReadConfig()) -> ContactList {
 		let reader = FlatBufferReader.create(data, config: config)
+		let objectOffset = reader.rootObjectOffset
+		let result = create(reader, objectOffset : objectOffset)!
+		FlatBufferReader.reuse(reader)
+		return result
+	}
+	public static func fromRawMemory(data : UnsafeMutablePointer<UInt8>, count : Int, config : BinaryReadConfig = BinaryReadConfig()) -> ContactList {
+		let reader = FlatBufferReader.create(data, count: count, config: config)
 		let objectOffset = reader.rootObjectOffset
 		let result = create(reader, objectOffset : objectOffset)!
 		FlatBufferReader.reuse(reader)
@@ -171,9 +177,37 @@ public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
 }
 public final class Contact {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [Contact] = []
-	public var name : String? = nil
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [Contact] = []
+	public var name : String? {
+		get {
+			if let s = name_s {
+				return s
+			}
+			if let s = name_ss {
+				name_s = s.stringValue
+			}
+			if let s = name_b {
+				name_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return name_s
+		}
+		set {
+			name_s = newValue
+			name_ss = nil
+			name_b = nil
+		}
+	}
+	public func nameStaticString(newValue : StaticString) {
+		name_ss = newValue
+		name_s = nil
+		name_b = nil
+	}
+	private var name_b : UnsafeBufferPointer<UInt8>? = nil
+	public var nameBuffer : UnsafeBufferPointer<UInt8>? {return name_b}
+	private var name_s : String? = nil
+	private var name_ss : StaticString? = nil
+	
 	public var birthday : Date? = nil
 	public var gender : Gender? = Gender.None
 	public var tags : [String?] = []
@@ -183,7 +217,17 @@ public final class Contact {
 	public var moods : [Mood?] = []
 	public init(){}
 	public init(name: String?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
-		self.name = name
+		self.name_s = name
+		self.birthday = birthday
+		self.gender = gender
+		self.tags = tags
+		self.addressEntries = addressEntries
+		self.currentLoccation = currentLoccation
+		self.previousLocations = previousLocations
+		self.moods = moods
+	}
+	public init(name: StaticString?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
+		self.name_ss = name
 		self.birthday = birthday
 		self.gender = gender
 		self.tags = tags
@@ -194,28 +238,25 @@ public final class Contact {
 	}
 }
 
-extension Contact : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        name = nil
-        if birthday != nil {
-            var x = birthday!
-            birthday = nil
-            Date.reuseInstance(&x)
-        }
-        gender = Gender.None
-        tags = []
-        while (addressEntries.count > 0)
-        {
-            var x = addressEntries.removeLast()!
-            AddressEntry.reuseInstance(&x)
-        }
-        currentLoccation = nil
-        previousLocations = []
-        moods = []
-    }
+extension Contact : PoolableInstances {
+	public func reset() { 
+		name = nil
+		if birthday != nil {
+			var x = birthday!
+			birthday = nil
+			Date.reuseInstance(&x)
+		}
+		gender = Gender.None
+		tags = []
+		while (addressEntries.count > 0) {
+			var x = addressEntries.removeLast()!
+			AddressEntry.reuseInstance(&x)
+		}
+		currentLoccation = nil
+		previousLocations = []
+		moods = []
+	}
 }
-
 public extension Contact {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Contact? {
 		guard let objectOffset = objectOffset else {
@@ -230,7 +271,7 @@ public extension Contact {
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
-		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
+		_result.name_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 0))
 		_result.birthday = Date.create(reader, objectOffset: reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.gender = Gender(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Gender.None.rawValue))
 		let offset_tags : Offset? = reader.getOffset(objectOffset, propertyIndex: 3)
@@ -417,7 +458,15 @@ public extension Contact {
 			offset3 = builder.endVector()
 		}
 		let offset1 = birthday?.addToByteArray(builder) ?? 0
-		let offset0 = try! builder.createString(name)
+		// let offset0 = try! builder.createString(name)
+		var offset0 : Offset
+		if let s = name_b {
+			offset0 = try! builder.createString(s)
+		} else if let s = name_ss {
+			offset0 = try! builder.createStaticString(s)
+		} else {
+			offset0 = try! builder.createString(name)
+		}
 		try! builder.openObject(8)
 		if moods.count > 0 {
 			try! builder.addPropertyOffsetToOpenObject(7, offset: offset7)
@@ -448,8 +497,8 @@ public extension Contact {
 	}
 }
 public final class Date {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [Date] = []
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [Date] = []
 	public var day : Int8 = 0
 	public var month : Int8 = 0
 	public var year : Int16 = 0
@@ -460,15 +509,14 @@ public final class Date {
 		self.year = year
 	}
 }
-extension Date : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        day = 0
-        month = 0
-        year = 0
-    }
-}
 
+extension Date : PoolableInstances {
+	public func reset() { 
+		day = 0
+		month = 0
+		year = 0
+	}
+}
 public extension Date {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> Date? {
 		guard let objectOffset = objectOffset else {
@@ -560,8 +608,8 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [AddressEntry] = []
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [AddressEntry] = []
 	public var order : Int32 = 0
 	public var address : Address? = nil
 	public init(){}
@@ -570,14 +618,13 @@ public final class AddressEntry {
 		self.address = address
 	}
 }
-extension AddressEntry : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        order = 0
-        address = nil
-    }
-}
 
+extension AddressEntry : PoolableInstances {
+	public func reset() { 
+		order = 0
+		address = nil
+	}
+}
 public extension AddressEntry {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> AddressEntry? {
 		guard let objectOffset = objectOffset else {
@@ -649,30 +696,119 @@ public extension AddressEntry {
 	}
 }
 public final class PostalAddress {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [PostalAddress] = []
-	public var country : String? = nil
-	public var city : String? = nil
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [PostalAddress] = []
+	public var country : String? {
+		get {
+			if let s = country_s {
+				return s
+			}
+			if let s = country_ss {
+				country_s = s.stringValue
+			}
+			if let s = country_b {
+				country_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return country_s
+		}
+		set {
+			country_s = newValue
+			country_ss = nil
+			country_b = nil
+		}
+	}
+	public func countryStaticString(newValue : StaticString) {
+		country_ss = newValue
+		country_s = nil
+		country_b = nil
+	}
+	private var country_b : UnsafeBufferPointer<UInt8>? = nil
+	public var countryBuffer : UnsafeBufferPointer<UInt8>? {return country_b}
+	private var country_s : String? = nil
+	private var country_ss : StaticString? = nil
+	
+	public var city : String? {
+		get {
+			if let s = city_s {
+				return s
+			}
+			if let s = city_ss {
+				city_s = s.stringValue
+			}
+			if let s = city_b {
+				city_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return city_s
+		}
+		set {
+			city_s = newValue
+			city_ss = nil
+			city_b = nil
+		}
+	}
+	public func cityStaticString(newValue : StaticString) {
+		city_ss = newValue
+		city_s = nil
+		city_b = nil
+	}
+	private var city_b : UnsafeBufferPointer<UInt8>? = nil
+	public var cityBuffer : UnsafeBufferPointer<UInt8>? {return city_b}
+	private var city_s : String? = nil
+	private var city_ss : StaticString? = nil
+	
 	public var postalCode : Int32 = 0
-	public var streetAndNumber : String? = nil
+	public var streetAndNumber : String? {
+		get {
+			if let s = streetAndNumber_s {
+				return s
+			}
+			if let s = streetAndNumber_ss {
+				streetAndNumber_s = s.stringValue
+			}
+			if let s = streetAndNumber_b {
+				streetAndNumber_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return streetAndNumber_s
+		}
+		set {
+			streetAndNumber_s = newValue
+			streetAndNumber_ss = nil
+			streetAndNumber_b = nil
+		}
+	}
+	public func streetAndNumberStaticString(newValue : StaticString) {
+		streetAndNumber_ss = newValue
+		streetAndNumber_s = nil
+		streetAndNumber_b = nil
+	}
+	private var streetAndNumber_b : UnsafeBufferPointer<UInt8>? = nil
+	public var streetAndNumberBuffer : UnsafeBufferPointer<UInt8>? {return streetAndNumber_b}
+	private var streetAndNumber_s : String? = nil
+	private var streetAndNumber_ss : StaticString? = nil
+	
 	public init(){}
 	public init(country: String?, city: String?, postalCode: Int32, streetAndNumber: String?){
-		self.country = country
-		self.city = city
+		self.country_s = country
+		self.city_s = city
 		self.postalCode = postalCode
-		self.streetAndNumber = streetAndNumber
+		self.streetAndNumber_s = streetAndNumber
+	}
+	public init(country: StaticString?, city: StaticString?, postalCode: Int32, streetAndNumber: StaticString?){
+		self.country_ss = country
+		self.city_ss = city
+		self.postalCode = postalCode
+		self.streetAndNumber_ss = streetAndNumber
 	}
 }
-extension PostalAddress : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        country = nil
-        city = nil
-        postalCode = 0
-        streetAndNumber = nil
-    }
-}
 
+extension PostalAddress : PoolableInstances {
+	public func reset() { 
+		country = nil
+		city = nil
+		postalCode = 0
+		streetAndNumber = nil
+	}
+}
 public extension PostalAddress {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> PostalAddress? {
 		guard let objectOffset = objectOffset else {
@@ -687,10 +823,10 @@ public extension PostalAddress {
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
-		_result.country = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
-		_result.city = reader.getString(reader.getOffset(objectOffset, propertyIndex: 1))
+		_result.country_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 0))
+		_result.city_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.postalCode = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
-		_result.streetAndNumber = reader.getString(reader.getOffset(objectOffset, propertyIndex: 3))
+		_result.streetAndNumber_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 3))
 		return _result
 	}
 }
@@ -733,9 +869,33 @@ public extension PostalAddress {
 				return myOffset
 			}
 		}
-		let offset3 = try! builder.createString(streetAndNumber)
-		let offset1 = try! builder.createString(city)
-		let offset0 = try! builder.createString(country)
+		// let offset3 = try! builder.createString(streetAndNumber)
+		var offset3 : Offset
+		if let s = streetAndNumber_b {
+			offset3 = try! builder.createString(s)
+		} else if let s = streetAndNumber_ss {
+			offset3 = try! builder.createStaticString(s)
+		} else {
+			offset3 = try! builder.createString(streetAndNumber)
+		}
+		// let offset1 = try! builder.createString(city)
+		var offset1 : Offset
+		if let s = city_b {
+			offset1 = try! builder.createString(s)
+		} else if let s = city_ss {
+			offset1 = try! builder.createStaticString(s)
+		} else {
+			offset1 = try! builder.createString(city)
+		}
+		// let offset0 = try! builder.createString(country)
+		var offset0 : Offset
+		if let s = country_b {
+			offset0 = try! builder.createString(s)
+		} else if let s = country_ss {
+			offset0 = try! builder.createStaticString(s)
+		} else {
+			offset0 = try! builder.createString(country)
+		}
 		try! builder.openObject(4)
 		try! builder.addPropertyOffsetToOpenObject(3, offset: offset3)
 		try! builder.addPropertyToOpenObject(2, value : postalCode, defaultValue : 0)
@@ -749,21 +909,51 @@ public extension PostalAddress {
 	}
 }
 public final class EmailAddress {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [EmailAddress] = []
-	public var mailto : String? = nil
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [EmailAddress] = []
+	public var mailto : String? {
+		get {
+			if let s = mailto_s {
+				return s
+			}
+			if let s = mailto_ss {
+				mailto_s = s.stringValue
+			}
+			if let s = mailto_b {
+				mailto_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return mailto_s
+		}
+		set {
+			mailto_s = newValue
+			mailto_ss = nil
+			mailto_b = nil
+		}
+	}
+	public func mailtoStaticString(newValue : StaticString) {
+		mailto_ss = newValue
+		mailto_s = nil
+		mailto_b = nil
+	}
+	private var mailto_b : UnsafeBufferPointer<UInt8>? = nil
+	public var mailtoBuffer : UnsafeBufferPointer<UInt8>? {return mailto_b}
+	private var mailto_s : String? = nil
+	private var mailto_ss : StaticString? = nil
+	
 	public init(){}
 	public init(mailto: String?){
-		self.mailto = mailto
+		self.mailto_s = mailto
+	}
+	public init(mailto: StaticString?){
+		self.mailto_ss = mailto
 	}
 }
-extension EmailAddress : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        mailto = nil
-    }
-}
 
+extension EmailAddress : PoolableInstances {
+	public func reset() { 
+		mailto = nil
+	}
+}
 public extension EmailAddress {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> EmailAddress? {
 		guard let objectOffset = objectOffset else {
@@ -778,7 +968,7 @@ public extension EmailAddress {
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
-		_result.mailto = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
+		_result.mailto_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
 }
@@ -815,7 +1005,15 @@ public extension EmailAddress {
 				return myOffset
 			}
 		}
-		let offset0 = try! builder.createString(mailto)
+		// let offset0 = try! builder.createString(mailto)
+		var offset0 : Offset
+		if let s = mailto_b {
+			offset0 = try! builder.createString(s)
+		} else if let s = mailto_ss {
+			offset0 = try! builder.createStaticString(s)
+		} else {
+			offset0 = try! builder.createString(mailto)
+		}
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
@@ -826,21 +1024,51 @@ public extension EmailAddress {
 	}
 }
 public final class WebAddress {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [WebAddress] = []
-	public var url : String? = nil
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [WebAddress] = []
+	public var url : String? {
+		get {
+			if let s = url_s {
+				return s
+			}
+			if let s = url_ss {
+				url_s = s.stringValue
+			}
+			if let s = url_b {
+				url_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return url_s
+		}
+		set {
+			url_s = newValue
+			url_ss = nil
+			url_b = nil
+		}
+	}
+	public func urlStaticString(newValue : StaticString) {
+		url_ss = newValue
+		url_s = nil
+		url_b = nil
+	}
+	private var url_b : UnsafeBufferPointer<UInt8>? = nil
+	public var urlBuffer : UnsafeBufferPointer<UInt8>? {return url_b}
+	private var url_s : String? = nil
+	private var url_ss : StaticString? = nil
+	
 	public init(){}
 	public init(url: String?){
-		self.url = url
+		self.url_s = url
+	}
+	public init(url: StaticString?){
+		self.url_ss = url
 	}
 }
-extension WebAddress : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        url = nil
-    }
-}
 
+extension WebAddress : PoolableInstances {
+	public func reset() { 
+		url = nil
+	}
+}
 public extension WebAddress {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> WebAddress? {
 		guard let objectOffset = objectOffset else {
@@ -855,7 +1083,7 @@ public extension WebAddress {
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
-		_result.url = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
+		_result.url_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
 }
@@ -892,7 +1120,15 @@ public extension WebAddress {
 				return myOffset
 			}
 		}
-		let offset0 = try! builder.createString(url)
+		// let offset0 = try! builder.createString(url)
+		var offset0 : Offset
+		if let s = url_b {
+			offset0 = try! builder.createString(s)
+		} else if let s = url_ss {
+			offset0 = try! builder.createStaticString(s)
+		} else {
+			offset0 = try! builder.createString(url)
+		}
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
@@ -903,21 +1139,51 @@ public extension WebAddress {
 	}
 }
 public final class TelephoneNumber {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [TelephoneNumber] = []
-	public var number : String? = nil
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [TelephoneNumber] = []
+	public var number : String? {
+		get {
+			if let s = number_s {
+				return s
+			}
+			if let s = number_ss {
+				number_s = s.stringValue
+			}
+			if let s = number_b {
+				number_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return number_s
+		}
+		set {
+			number_s = newValue
+			number_ss = nil
+			number_b = nil
+		}
+	}
+	public func numberStaticString(newValue : StaticString) {
+		number_ss = newValue
+		number_s = nil
+		number_b = nil
+	}
+	private var number_b : UnsafeBufferPointer<UInt8>? = nil
+	public var numberBuffer : UnsafeBufferPointer<UInt8>? {return number_b}
+	private var number_s : String? = nil
+	private var number_ss : StaticString? = nil
+	
 	public init(){}
 	public init(number: String?){
-		self.number = number
+		self.number_s = number
+	}
+	public init(number: StaticString?){
+		self.number_ss = number
 	}
 }
-extension TelephoneNumber : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        number = nil
-    }
-}
 
+extension TelephoneNumber : PoolableInstances {
+	public func reset() { 
+		number = nil
+	}
+}
 public extension TelephoneNumber {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> TelephoneNumber? {
 		guard let objectOffset = objectOffset else {
@@ -932,7 +1198,7 @@ public extension TelephoneNumber {
 		if reader.config.uniqueTables {
 			reader.objectPool[objectOffset] = _result
 		}
-		_result.number = reader.getString(reader.getOffset(objectOffset, propertyIndex: 0))
+		_result.number_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 0))
 		return _result
 	}
 }
@@ -969,7 +1235,15 @@ public extension TelephoneNumber {
 				return myOffset
 			}
 		}
-		let offset0 = try! builder.createString(number)
+		// let offset0 = try! builder.createString(number)
+		var offset0 : Offset
+		if let s = number_b {
+			offset0 = try! builder.createString(s)
+		} else if let s = number_ss {
+			offset0 = try! builder.createStaticString(s)
+		} else {
+			offset0 = try! builder.createString(number)
+		}
 		try! builder.openObject(1)
 		try! builder.addPropertyOffsetToOpenObject(0, offset: offset0)
 		let myOffset =  try! builder.closeObject()
@@ -1055,7 +1329,6 @@ private func performLateBindings(builder : FlatBufferBuilder) {
 	}
 }
 // MARK: Generic Type Definitions
-import Foundation
 public typealias Offset = Int32
 
 public protocol Scalar : Equatable {}
@@ -1098,14 +1371,15 @@ public protocol PoolableInstances : AnyObject {
 }
 
 public extension PoolableInstances {
-
+    
+    // Optional preheat of instance pool
     public static func fillInstancePool(initialPoolSize : Int) -> Void {
         while ((instancePool.count < initialPoolSize) && (instancePool.count < maxInstanceCacheSize))
         {
             instancePool.append(Self())
         }
     }
-
+    
     public static func createInstance() -> Self {
         if (instancePool.count > 0)
         {
@@ -1235,7 +1509,7 @@ public final class FlatBufferReader {
         self.config = config
         length = bytes.count
     }
-    
+
     public init(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig){
         self.buffer = bytes
         self.config = config
@@ -1417,7 +1691,7 @@ public extension FlatBufferReader {
         
         return FlatBufferReader(bytes: bytes, config: config)
     }
-
+    
     public static func create(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig) -> FlatBufferReader {
         if (instancePool.count > 0)
         {
