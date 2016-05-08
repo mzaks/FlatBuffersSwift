@@ -61,13 +61,13 @@ public extension ContactList {
 }
 
 public extension ContactList {
-    public func toFlatBufferBuilder (builder : FlatBufferBuilder) -> Void {
-        let offset = addToByteArray(builder)
-        performLateBindings(builder)
-        try! builder.finish(offset, fileIdentifier: nil)
-        return
-    }
+	public func toFlatBufferBuilder (builder : FlatBufferBuilder) -> Void {
+		let offset = addToByteArray(builder)
+		performLateBindings(builder)
+		try! builder.finish(offset, fileIdentifier: nil)
+	}
 }
+
 public extension ContactList {
 	public final class LazyAccess : Hashable {
 		private let _reader : FlatBufferReader!
