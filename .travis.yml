@@ -1,9 +1,9 @@
 language: objective-c
 osx_image: xcode7.3
 script:
-#  - echo -en "travis_fold:start:generate\r"
-#  - sh generate.sh
-#  - echo -en "travis_fold:end:generate\r"
+  - echo -en "travis_fold:start:generate\r"
+  - sh generate.sh
+  - echo -en "travis_fold:end:generate\r"
   - echo -en "travis_fold:start:unit_test\r"
   - xcodebuild test -project FlatBuffersSwift.xcodeproj -scheme FlatBuffersSwift ONLY_ACTIVE_ARCH=NO
   - echo -en "travis_fold:end:unit_test\r"
