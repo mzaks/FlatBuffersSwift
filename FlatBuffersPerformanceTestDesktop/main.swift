@@ -43,12 +43,35 @@ func testReadingJSON(){
     
 }
 
+// optional eager preload of instance cache, otherwise lazy
+func precache()
+{
+    ContactList.maxInstanceCacheSize = 1
+    Contact.maxInstanceCacheSize = 10000
+    Date.maxInstanceCacheSize = 30000
+    AddressEntry.maxInstanceCacheSize = 20000
+    PostalAddress.maxInstanceCacheSize = 20000
+    EmailAddress.maxInstanceCacheSize = 20000
+    WebAddress.maxInstanceCacheSize = 20000
+    TelephoneNumber.maxInstanceCacheSize = 20000
+
+    ContactList.fillInstancePool(ContactList.maxInstanceCacheSize)
+    Contact.fillInstancePool(Contact.maxInstanceCacheSize)
+    Date.fillInstancePool(Date.maxInstanceCacheSize)
+    AddressEntry.fillInstancePool(AddressEntry.maxInstanceCacheSize)
+    PostalAddress.fillInstancePool(PostalAddress.maxInstanceCacheSize)
+    EmailAddress.fillInstancePool(EmailAddress.maxInstanceCacheSize)
+    WebAddress.fillInstancePool(WebAddress.maxInstanceCacheSize)
+    TelephoneNumber.fillInstancePool(TelephoneNumber.maxInstanceCacheSize)
+}
+
 print("-----------------Starting Performance Tests-------------")
 
 flatbench()
 
 print("------------")
 
+// precache()
 testRandomContactListToByteArrayAndBackAgain()
 
 print("------------")
