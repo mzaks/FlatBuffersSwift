@@ -27,12 +27,12 @@ func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<U
         let ident : UInt64 = 0xABADCAFE + UInt64(i)
         let foo = Foo(i_d: ident, count: 10000 + i, prefix: 64 + i, length: UInt32(1000000 + i))
         let bar = Bar(parent: foo, time: 123456 + i, ratio: 3.14159 + Float(i), size: UInt16(10000 + i))
-        let name = "Hello, World!"
+        let name : StaticString = "Hello, World!"
         let foobar = FooBar(sibling: bar, name: name, rating: 3.1415432432445543543+Double(i), postfix: UInt8(33 + i))
         foobars[i] = foobar
     }
     
-    let location = "http://google.com/flatbuffers/"
+    let location : StaticString = "http://google.com/flatbuffers/"
     let foobarcontainer = FooBarContainer(list: foobars, initialized: true, fruit: Enum.Bananas, location: location)
     
     assert(builder._dataCount <= bufsize)
@@ -60,7 +60,7 @@ func flatuse(foobarcontainer : FooBarContainer) -> Int
     var sum:Int = 1
     sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
-    sum = sum + Int(foobarcontainer.initialized)
+    sum = sum + (foobarcontainer.initialized ? 1 : 0)
     
     for i in 0..<foobarcontainer.list.count {
         let foobar = foobarcontainer.list[i]!
@@ -89,7 +89,7 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
     var sum:Int = 1
     sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
-    sum = sum + Int(foobarcontainer.initialized)
+    sum = sum + (foobarcontainer.initialized ? 1 : 0)
     
     for i in 0..<foobarcontainer.list.count {
         let foobar = foobarcontainer.list[i]!
