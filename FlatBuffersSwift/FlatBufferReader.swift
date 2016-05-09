@@ -13,7 +13,7 @@ public enum FlatBufferReaderError : ErrorType {
 
 public final class FlatBufferReader {
 
-    public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
+    public static var maxInstanceCacheSize : UInt = 0 // max number of cached instances
     static var instancePool : [FlatBufferReader] = []
     
     public var config : BinaryReadConfig
@@ -185,7 +185,6 @@ public final class FlatBufferReader {
 }
 
 public extension FlatBufferReader {
-    
     public func reset ()
     {
         buffer = nil
@@ -195,6 +194,9 @@ public extension FlatBufferReader {
     }
     
     public static func create(buffer : [UInt8], config: BinaryReadConfig) -> FlatBufferReader {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
@@ -210,6 +212,9 @@ public extension FlatBufferReader {
     }
     
     public static func create(bytes : UnsafeBufferPointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
@@ -225,6 +230,9 @@ public extension FlatBufferReader {
     }
     
     public static func create(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig) -> FlatBufferReader {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
@@ -240,6 +248,9 @@ public extension FlatBufferReader {
     }
 
     public static func reuse(reader : FlatBufferReader) {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (UInt(instancePool.count) < maxInstanceCacheSize)
         {
             reader.reset()
