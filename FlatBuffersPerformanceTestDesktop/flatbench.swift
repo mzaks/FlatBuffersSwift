@@ -10,8 +10,8 @@
 
 import Foundation
 
-let iterations = 1000
-let inner_loop_iterations = 1000
+let iterations : UInt = 1000
+let inner_loop_iterations : UInt = 1000
 let bufsize = 4096
 var encodedsize = 0
 let readConfiguration = BinaryReadConfig(uniqueStrings: false, uniqueTables: false)
@@ -40,9 +40,9 @@ func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<U
     outputDataCount = builder._dataCount
 }
 
-func flatdecode(data : UnsafeMutablePointer<UInt8>, _ dataCount:Int) -> FooBarContainer
+func flatdecode(reader : FlatBufferReader) -> FooBarContainer
 {
-    return FooBarContainer.fromRawMemory(data, count: dataCount, config: readConfiguration)
+    return FooBarContainer.fromFlatBufferReader(reader)
 }
 
 func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
@@ -130,16 +130,20 @@ func runbench(lazyrun: BooleanType)
     var results : [FooBarContainer] = []
     var lazyresults : [FooBarContainer.LazyAccess] = []
     let builder = FlatBufferBuilder.create(buildConfiguration)
+    var reader : FlatBufferReader
     var outputData : UnsafeMutablePointer<UInt8> = nil
     var outputDataCount = 0
     var buf = [UInt8](count: bufsize, repeatedValue: 0)
     
-    results.reserveCapacity(iterations)
-    lazyresults.reserveCapacity(iterations)
+    results.reserveCapacity(Int(iterations))
+    lazyresults.reserveCapacity(Int(iterations))
     outputData = UnsafeMutablePointer.alloc(bufsize)
-    // doing optional preload of instance cache
-    FooBarContainer.maxInstanceCacheSize = 1000
-    FooBar.maxInstanceCacheSize = 10000
+    
+    // doing optional preload of instance caches
+    FlatBufferBuilder.maxInstanceCacheSize = 10
+    FlatBufferReader.maxInstanceCacheSize = iterations
+    FooBarContainer.maxInstanceCacheSize = iterations
+    FooBar.maxInstanceCacheSize = iterations * 3
     
     FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize)
     FooBar.fillInstancePool(FooBar.maxInstanceCacheSize)
@@ -152,24 +156,25 @@ func runbench(lazyrun: BooleanType)
             builder.reset()
         }
         let time2 = CFAbsoluteTimeGetCurrent()
-        buf = Array(UnsafeBufferPointer(start: outputData, count: outputDataCount))
-        
-        encodedsize = outputDataCount
         
         let time3 = CFAbsoluteTimeGetCurrent()
+        buf = Array(UnsafeBufferPointer(start: outputData, count: outputDataCount))
+        reader = FlatBufferReader.create(outputData, count: outputDataCount, config: readConfiguration)
+        encodedsize = outputDataCount
+
         for _ in 0..<iterations {
             if lazyrun {
                 lazyresults.append(flatdecodelazy(&buf, bufsize))
             }
             else
             {
-                results.append(flatdecode(outputData, outputDataCount))
+                results.append(flatdecode(reader))
             }
         }
         let time4 = CFAbsoluteTimeGetCurrent()
         
         let time5 = CFAbsoluteTimeGetCurrent()
-        for index in 0..<iterations {
+        for index in 0 ..< Int(iterations) {
             var result = 0
             if lazyrun {
                 result = flatuselazy(lazyresults[index])
@@ -191,6 +196,8 @@ func runbench(lazyrun: BooleanType)
             FooBarContainer.reuseInstance(&x)
         }
         lazyresults.removeAll(keepCapacity:true)
+        FlatBufferReader.reuse(reader)
+        
         let time8 = CFAbsoluteTimeGetCurrent()
         
         encode = encode + (time2 - time1)

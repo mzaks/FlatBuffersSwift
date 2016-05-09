@@ -4,7 +4,7 @@
 import Foundation
 
 public final class ContactList {
-	public static var maxInstanceCacheSize : Int = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [ContactList] = []
 	public var lastModified : Int64 = 0
 	public var entries : [Contact?] = []
@@ -177,7 +177,7 @@ public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
 }
 public final class Contact {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [Contact] = []
 	public var name : String? {
 		get {
@@ -497,7 +497,7 @@ public extension Contact {
 	}
 }
 public final class Date {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [Date] = []
 	public var day : Int8 = 0
 	public var month : Int8 = 0
@@ -608,7 +608,7 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [AddressEntry] = []
 	public var order : Int32 = 0
 	public var address : Address? = nil
@@ -696,7 +696,7 @@ public extension AddressEntry {
 	}
 }
 public final class PostalAddress {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [PostalAddress] = []
 	public var country : String? {
 		get {
@@ -909,7 +909,7 @@ public extension PostalAddress {
 	}
 }
 public final class EmailAddress {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [EmailAddress] = []
 	public var mailto : String? {
 		get {
@@ -1024,7 +1024,7 @@ public extension EmailAddress {
 	}
 }
 public final class WebAddress {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [WebAddress] = []
 	public var url : String? {
 		get {
@@ -1139,7 +1139,7 @@ public extension WebAddress {
 	}
 }
 public final class TelephoneNumber {
-	public static var maxInstanceCacheSize : Int = 0
+    public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [TelephoneNumber] = []
 	public var number : String? {
 		get {
@@ -1364,7 +1364,7 @@ extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
 public protocol PoolableInstances : AnyObject {
-    static var maxInstanceCacheSize : Int { get set }
+    static var maxInstanceCacheSize : UInt { get set }
     static var instancePool : [Self] { get set }
     init()
     func reset()
@@ -1373,8 +1373,8 @@ public protocol PoolableInstances : AnyObject {
 public extension PoolableInstances {
     
     // Optional preheat of instance pool
-    public static func fillInstancePool(initialPoolSize : Int) -> Void {
-        while ((instancePool.count < initialPoolSize) && (instancePool.count < maxInstanceCacheSize))
+    public static func fillInstancePool(initialPoolSize : UInt) -> Void {
+        while ((UInt(instancePool.count) < initialPoolSize) && (UInt(instancePool.count) < maxInstanceCacheSize))
         {
             instancePool.append(Self())
         }
@@ -1393,7 +1393,7 @@ public extension PoolableInstances {
     // the final strong reference we hold ourselves to put the instance in for reuse
     public static func reuseInstance(inout instance : Self) {
         
-        if (isUniquelyReferencedNonObjC(&instance) && (instancePool.count < maxInstanceCacheSize))
+        if (isUniquelyReferencedNonObjC(&instance) && (UInt(instancePool.count) < maxInstanceCacheSize))
         {
             instance.reset()
             instancePool.append(instance)
@@ -1663,6 +1663,9 @@ public extension FlatBufferReader {
     }
     
     public static func create(buffer : [UInt8], config: BinaryReadConfig) -> FlatBufferReader {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
@@ -1678,6 +1681,9 @@ public extension FlatBufferReader {
     }
     
     public static func create(bytes : UnsafeBufferPointer<UInt8>, config: BinaryReadConfig) -> FlatBufferReader {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
@@ -1693,6 +1699,9 @@ public extension FlatBufferReader {
     }
     
     public static func create(bytes : UnsafeMutablePointer<UInt8>, count : Int, config: BinaryReadConfig) -> FlatBufferReader {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (instancePool.count > 0)
         {
             let reader = instancePool.removeLast()
@@ -1708,6 +1717,9 @@ public extension FlatBufferReader {
     }
 
     public static func reuse(reader : FlatBufferReader) {
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
         if (UInt(instancePool.count) < maxInstanceCacheSize)
         {
             reader.reset()
@@ -1729,7 +1741,7 @@ public enum FlatBufferBuilderError : ErrorType {
 public final class FlatBufferBuilder {
     
     public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
-    static var builderPool : [FlatBufferBuilder] = []
+    static var instancePool : [FlatBufferBuilder] = []
     
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
@@ -2092,9 +2104,12 @@ public extension FlatBufferBuilder {
     }
     
     public static func create(config: BinaryBuildConfig) -> FlatBufferBuilder {
-        if (builderPool.count > 0)
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
+        if (instancePool.count > 0)
         {
-            let builder = builderPool.removeLast()
+            let builder = instancePool.removeLast()
             builder.config = config
             if (config.initialCapacity > builder.capacity) {
                 builder._data.dealloc(builder.capacity)
@@ -2108,10 +2123,13 @@ public extension FlatBufferBuilder {
     }
     
     public static func reuse(builder : FlatBufferBuilder) {
-        if (UInt(builderPool.count) < maxInstanceCacheSize) 
+        objc_sync_enter(instancePool)
+        defer { objc_sync_exit(instancePool) }
+
+        if (UInt(instancePool.count) < maxInstanceCacheSize)
         {
             builder.reset()
-            builderPool.append(builder)
+            instancePool.append(builder)
         }
     }
     

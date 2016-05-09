@@ -43,7 +43,7 @@ extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
 public protocol PoolableInstances : AnyObject {
-    static var maxInstanceCacheSize : Int { get set }
+    static var maxInstanceCacheSize : UInt { get set }
     static var instancePool : [Self] { get set }
     init()
     func reset()
@@ -52,8 +52,8 @@ public protocol PoolableInstances : AnyObject {
 public extension PoolableInstances {
     
     // Optional preheat of instance pool
-    public static func fillInstancePool(initialPoolSize : Int) -> Void {
-        while ((instancePool.count < initialPoolSize) && (instancePool.count < maxInstanceCacheSize))
+    public static func fillInstancePool(initialPoolSize : UInt) -> Void {
+        while ((UInt(instancePool.count) < initialPoolSize) && (UInt(instancePool.count) < maxInstanceCacheSize))
         {
             instancePool.append(Self())
         }
@@ -72,7 +72,7 @@ public extension PoolableInstances {
     // the final strong reference we hold ourselves to put the instance in for reuse
     public static func reuseInstance(inout instance : Self) {
         
-        if (isUniquelyReferencedNonObjC(&instance) && (instancePool.count < maxInstanceCacheSize))
+        if (isUniquelyReferencedNonObjC(&instance) && (UInt(instancePool.count) < maxInstanceCacheSize))
         {
             instance.reset()
             instancePool.append(instance)

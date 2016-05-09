@@ -25,7 +25,7 @@ public func ==(v1:Bar, v2:Bar) -> Bool {
 	return  v1.parent==v2.parent &&  v1.time==v2.time &&  v1.ratio==v2.ratio &&  v1.size==v2.size
 }
 public final class FooBar {
-	public static var maxInstanceCacheSize : Int = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [FooBar] = []
 	public var sibling : Bar? = nil
 	public var name : String? {
@@ -177,7 +177,7 @@ public extension FooBar {
 	}
 }
 public final class FooBarContainer {
-	public static var maxInstanceCacheSize : Int = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [FooBarContainer] = []
 	public var list : [FooBar?] = []
 	public var initialized : Bool = false
@@ -282,6 +282,9 @@ public extension FooBarContainer {
 		FlatBufferReader.reuse(reader)
 		return result
 	}
+    public static func fromFlatBufferReader(flatBufferReader : FlatBufferReader) -> FooBarContainer {
+        return create(flatBufferReader, objectOffset : flatBufferReader.rootObjectOffset)!
+    }
 }
 public extension FooBarContainer {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
