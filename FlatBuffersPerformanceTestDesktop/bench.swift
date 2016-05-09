@@ -1,6 +1,8 @@
 
 // generated with FlatBuffersSchemaEditor https://github.com/mzaks/FlatBuffersSchemaEditor
 
+import Foundation
+
 public enum Enum : Int16 {
 	case Apples, Pears, Bananas
 }
@@ -23,31 +25,63 @@ public func ==(v1:Bar, v2:Bar) -> Bool {
 	return  v1.parent==v2.parent &&  v1.time==v2.time &&  v1.ratio==v2.ratio &&  v1.size==v2.size
 }
 public final class FooBar {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [FooBar] = []
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [FooBar] = []
 	public var sibling : Bar? = nil
-	public var name : String? = nil
+	public var name : String? {
+		get {
+			if let s = name_s {
+				return s
+			}
+			if let s = name_ss {
+				name_s = s.stringValue
+			}
+			if let s = name_b {
+				name_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return name_s
+		}
+		set {
+			name_s = newValue
+			name_ss = nil
+			name_b = nil
+		}
+	}
+	public func nameStaticString(newValue : StaticString) {
+		name_ss = newValue
+		name_s = nil
+		name_b = nil
+	}
+	private var name_b : UnsafeBufferPointer<UInt8>? = nil
+	public var nameBuffer : UnsafeBufferPointer<UInt8>? {return name_b}
+	private var name_s : String? = nil
+	private var name_ss : StaticString? = nil
+	
 	public var rating : Float64 = 0
 	public var postfix : UInt8 = 0
 	public init(){}
 	public init(sibling: Bar?, name: String?, rating: Float64, postfix: UInt8){
 		self.sibling = sibling
-		self.name = name
+		self.name_s = name
+		self.rating = rating
+		self.postfix = postfix
+	}
+	public init(sibling: Bar?, name: StaticString?, rating: Float64, postfix: UInt8){
+		self.sibling = sibling
+		self.name_ss = name
 		self.rating = rating
 		self.postfix = postfix
 	}
 }
 
-extension FooBar : PoolableInstances
-{
-    public func reset() { // should reset any references here
-        self.name = nil
-        self.sibling = nil
-        self.rating = 0
-        self.postfix = 0
-    }
+extension FooBar : PoolableInstances {
+	public func reset() { 
+		sibling = nil
+		name = nil
+		rating = 0
+		postfix = 0
+	}
 }
-
 public extension FooBar {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> FooBar? {
 		guard let objectOffset = objectOffset else {
@@ -63,7 +97,7 @@ public extension FooBar {
 			reader.objectPool[objectOffset] = _result
 		}
 		_result.sibling = reader.get(objectOffset, propertyIndex: 0)
-		_result.name = reader.getString(reader.getOffset(objectOffset, propertyIndex: 1))
+		_result.name_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 1))
 		_result.rating = reader.get(objectOffset, propertyIndex: 2, defaultValue: 0)
 		_result.postfix = reader.get(objectOffset, propertyIndex: 3, defaultValue: 0)
 		return _result
@@ -118,7 +152,15 @@ public extension FooBar {
 				return myOffset
 			}
 		}
-		let offset1 = try! builder.createString(name)
+		// let offset1 = try! builder.createString(name)
+		var offset1 : Offset
+		if let s = name_b {
+			offset1 = try! builder.createString(s)
+		} else if let s = name_ss {
+			offset1 = try! builder.createStaticString(s)
+		} else {
+			offset1 = try! builder.createString(name)
+		}
 		try! builder.openObject(4)
 		try! builder.addPropertyToOpenObject(3, value : postfix, defaultValue : 0)
 		try! builder.addPropertyToOpenObject(2, value : rating, defaultValue : 0)
@@ -135,35 +177,66 @@ public extension FooBar {
 	}
 }
 public final class FooBarContainer {
-    public static var maxInstanceCacheSize : Int = 0
-    public static var instancePool : [FooBarContainer] = []
+	public static var maxInstanceCacheSize : Int = 0
+	public static var instancePool : [FooBarContainer] = []
 	public var list : [FooBar?] = []
 	public var initialized : Bool = false
 	public var fruit : Enum? = Enum.Apples
-	public var location : String? = nil
+	public var location : String? {
+		get {
+			if let s = location_s {
+				return s
+			}
+			if let s = location_ss {
+				location_s = s.stringValue
+			}
+			if let s = location_b {
+				location_s = String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(s.baseAddress), length: s.count, encoding: NSUTF8StringEncoding, freeWhenDone: false)
+			}
+			return location_s
+		}
+		set {
+			location_s = newValue
+			location_ss = nil
+			location_b = nil
+		}
+	}
+	public func locationStaticString(newValue : StaticString) {
+		location_ss = newValue
+		location_s = nil
+		location_b = nil
+	}
+	private var location_b : UnsafeBufferPointer<UInt8>? = nil
+	public var locationBuffer : UnsafeBufferPointer<UInt8>? {return location_b}
+	private var location_s : String? = nil
+	private var location_ss : StaticString? = nil
+	
 	public init(){}
 	public init(list: [FooBar?], initialized: Bool, fruit: Enum?, location: String?){
 		self.list = list
 		self.initialized = initialized
 		self.fruit = fruit
-		self.location = location
+		self.location_s = location
+	}
+	public init(list: [FooBar?], initialized: Bool, fruit: Enum?, location: StaticString?){
+		self.list = list
+		self.initialized = initialized
+		self.fruit = fruit
+		self.location_ss = location
 	}
 }
 
-extension FooBarContainer : PoolableInstances
-{
-    public func reset() { // should reset any references here, try to reuse instances when they are objects
-        while (list.count > 0)
-        {
-            var x = list.removeLast()!
-            FooBar.reuseInstance(&x)
-        }
-        initialized = false
-        fruit = Enum.Apples
-        location = nil
-    }
+extension FooBarContainer : PoolableInstances {
+	public func reset() { 
+		while (list.count > 0) {
+			var x = list.removeLast()!
+			FooBar.reuseInstance(&x)
+		}
+		initialized = false
+		fruit = Enum.Apples
+		location = nil
+	}
 }
-
 public extension FooBarContainer {
 	private static func create(reader : FlatBufferReader, objectOffset : Offset?) -> FooBarContainer? {
 		guard let objectOffset = objectOffset else {
@@ -190,7 +263,7 @@ public extension FooBarContainer {
 		}
 		_result.initialized = reader.get(objectOffset, propertyIndex: 1, defaultValue: false)
 		_result.fruit = Enum(rawValue: reader.get(objectOffset, propertyIndex: 2, defaultValue: Enum.Apples.rawValue))
-		_result.location = reader.getString(reader.getOffset(objectOffset, propertyIndex: 3))
+		_result.location_b = reader.getStringBuffer(reader.getOffset(objectOffset, propertyIndex: 3))
 		return _result
 	}
 }
@@ -202,18 +275,14 @@ public extension FooBarContainer {
 		FlatBufferReader.reuse(reader)
 		return result
 	}
+	public static func fromRawMemory(data : UnsafeMutablePointer<UInt8>, count : Int, config : BinaryReadConfig = BinaryReadConfig()) -> FooBarContainer {
+		let reader = FlatBufferReader.create(data, count: count, config: config)
+		let objectOffset = reader.rootObjectOffset
+		let result = create(reader, objectOffset : objectOffset)!
+		FlatBufferReader.reuse(reader)
+		return result
+	}
 }
-
-public extension FooBarContainer {
-    public static func fromRawMemory(data : UnsafeMutablePointer<UInt8>, count : Int, config : BinaryReadConfig = BinaryReadConfig()) -> FooBarContainer {
-        let reader = FlatBufferReader.create(data, count: count, config: config)
-        let objectOffset = reader.rootObjectOffset
-        let result = create(reader, objectOffset : objectOffset)!
-        FlatBufferReader.reuse(reader)
-        return result
-    }
-}
-
 public extension FooBarContainer {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
 		let builder = FlatBufferBuilder.create(config)
@@ -297,7 +366,15 @@ public extension FooBarContainer {
 				return myOffset
 			}
 		}
-		let offset3 = try! builder.createString(location)
+		// let offset3 = try! builder.createString(location)
+		var offset3 : Offset
+		if let s = location_b {
+			offset3 = try! builder.createString(s)
+		} else if let s = location_ss {
+			offset3 = try! builder.createStaticString(s)
+		} else {
+			offset3 = try! builder.createString(location)
+		}
 		var offset0 = Offset(0)
 		if list.count > 0{
 			var offsets = [Offset?](count: list.count, repeatedValue: nil)
