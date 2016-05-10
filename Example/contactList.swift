@@ -67,6 +67,9 @@ public extension ContactList {
 		FlatBufferReader.reuse(reader)
 		return result
 	}
+	public static func fromFlatBufferReader(flatBufferReader : FlatBufferReader) -> ContactList {
+		return create(flatBufferReader, objectOffset : flatBufferReader.rootObjectOffset)!
+	}
 }
 public extension ContactList {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {
@@ -177,7 +180,7 @@ public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
 }
 public final class Contact {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [Contact] = []
 	public var name : String? {
 		get {
@@ -497,7 +500,7 @@ public extension Contact {
 	}
 }
 public final class Date {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [Date] = []
 	public var day : Int8 = 0
 	public var month : Int8 = 0
@@ -608,7 +611,7 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [AddressEntry] = []
 	public var order : Int32 = 0
 	public var address : Address? = nil
@@ -696,7 +699,7 @@ public extension AddressEntry {
 	}
 }
 public final class PostalAddress {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [PostalAddress] = []
 	public var country : String? {
 		get {
@@ -909,7 +912,7 @@ public extension PostalAddress {
 	}
 }
 public final class EmailAddress {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [EmailAddress] = []
 	public var mailto : String? {
 		get {
@@ -1024,7 +1027,7 @@ public extension EmailAddress {
 	}
 }
 public final class WebAddress {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [WebAddress] = []
 	public var url : String? {
 		get {
@@ -1139,7 +1142,7 @@ public extension WebAddress {
 	}
 }
 public final class TelephoneNumber {
-    public static var maxInstanceCacheSize : UInt = 0
+	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : [TelephoneNumber] = []
 	public var number : String? {
 		get {
@@ -1401,6 +1404,7 @@ public extension PoolableInstances {
     }
 }
 
+
 public final class LazyVector<T> : SequenceType {
     
     private let _generator : (Int)->T?
@@ -1481,7 +1485,7 @@ public enum FlatBufferReaderError : ErrorType {
 
 public final class FlatBufferReader {
 
-    public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
+    public static var maxInstanceCacheSize : UInt = 0 // max number of cached instances
     static var instancePool : [FlatBufferReader] = []
     
     public var config : BinaryReadConfig
@@ -1653,7 +1657,6 @@ public final class FlatBufferReader {
 }
 
 public extension FlatBufferReader {
-    
     public func reset ()
     {
         buffer = nil
@@ -1740,7 +1743,7 @@ public enum FlatBufferBuilderError : ErrorType {
 
 public final class FlatBufferBuilder {
     
-    public static var maxInstanceCacheSize : UInt = 1000 // max number of cached instances
+    public static var maxInstanceCacheSize : UInt = 0 // max number of cached instances
     static var instancePool : [FlatBufferBuilder] = []
     
     public var cache : [ObjectIdentifier : Offset] = [:]
@@ -2134,4 +2137,3 @@ public extension FlatBufferBuilder {
     }
     
 }
-

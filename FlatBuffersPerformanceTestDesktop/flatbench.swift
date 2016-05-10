@@ -109,6 +109,38 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
     return sum
 }
 
+func flatDecodeDirect(buffer : UnsafePointer<UInt8>) -> Int{
+    
+    let fooBarContainerOffset = getFooBarContainerRootOffset(buffer)
+    
+    var sum:Int = 1
+    
+    sum = sum + Int(getLocationFrom(buffer, fooBarContainerOffset: fooBarContainerOffset).count)
+    sum = sum + Int(getFrootFrom(buffer, fooBarContainerOffset: fooBarContainerOffset).rawValue)
+    sum = sum + (getInitializedFrom(buffer, fooBarContainerOffset: fooBarContainerOffset) ? 1 : 0)
+    
+    for i in 0..<getListCountFrom(buffer, fooBarContainerOffset: fooBarContainerOffset) {
+        let foobarOffset = getFooBarOffsetFrom(buffer, fooBarContainerOffset: fooBarContainerOffset, listIndex: i)
+        sum = sum + Int(getNameFrom(buffer, fooBarOffset: foobarOffset).count)
+        sum = sum + Int(getPostfixFrom(buffer, fooBarOffset: foobarOffset))
+        sum = sum + Int(getRatingFrom(buffer, fooBarOffset: foobarOffset))
+        
+        let bar = getSiblingFrom(buffer, fooBarOffset: foobarOffset)
+        
+        sum = sum + Int(bar.ratio)
+        sum = sum + Int(bar.size)
+        sum = sum + Int(bar.time)
+        
+        let foo = bar.parent
+        sum = sum + Int(foo.count)
+        sum = sum + Int(foo.i_d)
+        sum = sum + Int(foo.length)
+        sum = sum + Int(foo.prefix)
+    }
+    
+    return sum
+}
+
 // convenience formatter
 extension Double {
     func string(fractionDigits:Int) -> String {
@@ -124,6 +156,7 @@ func runbench(lazyrun: BooleanType)
 {
     var encode = 0.0
     var decode = 0.0
+    var direct = 0.0
     var use = 0.0
     var dealloc = 0.0
     var total:UInt64 = 0
@@ -200,10 +233,19 @@ func runbench(lazyrun: BooleanType)
         
         let time8 = CFAbsoluteTimeGetCurrent()
         
+        let time9 = CFAbsoluteTimeGetCurrent()
+        for _ in 0..<iterations {
+            let result = flatDecodeDirect(outputData)
+            assert(result == 8644311667)
+            total = total + UInt64(result)
+        }
+        let time10 = CFAbsoluteTimeGetCurrent()
+        
         encode = encode + (time2 - time1)
         decode = decode + (time4 - time3)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
+        direct = direct + (time10 - time9)
     }
     
     outputData.dealloc(bufsize)
@@ -214,6 +256,7 @@ func runbench(lazyrun: BooleanType)
     print("\(((use) * 1000).string(0)) ms use")
     print("\(((dealloc) * 1000).string(0)) ms dealloc")
     print("\(((decode+use+dealloc) * 1000).string(0)) ms decode+use+dealloc")
+    print("\(((direct) * 1000)) ms direct")
     print("=================================")
     print("Total counter is \(total)") // just to make sure we dont get optimized out
     print("Encoded size is \(encodedsize) bytes, should be 344 if not using unique strings") // 344 is with proper padding https://google.github.io/flatbuffers/flatbuffers_benchmarks.html

@@ -282,9 +282,9 @@ public extension FooBarContainer {
 		FlatBufferReader.reuse(reader)
 		return result
 	}
-    public static func fromFlatBufferReader(flatBufferReader : FlatBufferReader) -> FooBarContainer {
-        return create(flatBufferReader, objectOffset : flatBufferReader.rootObjectOffset)!
-    }
+	public static func fromFlatBufferReader(flatBufferReader : FlatBufferReader) -> FooBarContainer {
+		return create(flatBufferReader, objectOffset : flatBufferReader.rootObjectOffset)!
+	}
 }
 public extension FooBarContainer {
 	public func toByteArray (config : BinaryBuildConfig = BinaryBuildConfig()) -> [UInt8] {

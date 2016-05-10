@@ -13,6 +13,7 @@
 		0B62C2081C49391F002500FE /* contactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C2031C493912002500FE /* contactList.swift */; };
 		0B62C20B1C4958D9002500FE /* contactListGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C2091C4958B1002500FE /* contactListGenerator.swift */; };
 		0B62C20C1C4958DA002500FE /* contactListGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C2091C4958B1002500FE /* contactListGenerator.swift */; };
+		0B7541041CE123C000F59B24 /* bench_direct_access.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B7541031CE123C000F59B24 /* bench_direct_access.swift */; };
 		0BA0E8491C32B62200B896B7 /* FlatBuffersSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0BA0E8681C32B6A300B896B7 /* FlatBuffersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E8671C32B6A300B896B7 /* FlatBuffersTests.swift */; };
 		0BA0E86E1C32B6AD00B896B7 /* FlatBufferReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */; };
@@ -62,6 +63,7 @@
 		0B62C2031C493912002500FE /* contactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = contactList.swift; sourceTree = "<group>"; };
 		0B62C2041C493912002500FE /* contacts.fbs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = contacts.fbs; sourceTree = "<group>"; };
 		0B62C2091C4958B1002500FE /* contactListGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = contactListGenerator.swift; sourceTree = "<group>"; };
+		0B7541031CE123C000F59B24 /* bench_direct_access.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = bench_direct_access.swift; sourceTree = "<group>"; };
 		0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FlatBuffersSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlatBuffersSwift.h; sourceTree = "<group>"; };
 		0BA0E84A1C32B62200B896B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				0BA0E87B1C3AC27800B896B7 /* main.swift */,
 				85518ADA1CD21D4300EEBCAC /* flatbench.swift */,
 				85518AD81CD21D3700EEBCAC /* bench.swift */,
+				0B7541031CE123C000F59B24 /* bench_direct_access.swift */,
 			);
 			path = FlatBuffersPerformanceTestDesktop;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 				0BA0E87C1C3AC27800B896B7 /* main.swift in Sources */,
 				85518AD91CD21D3700EEBCAC /* bench.swift in Sources */,
 				0B62C20C1C4958DA002500FE /* contactListGenerator.swift in Sources */,
+				0B7541041CE123C000F59B24 /* bench_direct_access.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
