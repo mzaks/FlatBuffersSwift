@@ -141,6 +141,41 @@ func flatDecodeDirect(buffer : UnsafePointer<UInt8>) -> Int{
     return sum
 }
 
+func flatuseStruct(buffer : UnsafePointer<UInt8>) -> Int
+{
+    var sum:Int = 1
+    
+    // this struct or copies of it are only valid as long as pointer
+    // to the underlying data is valid
+    // should use createInstance() for a long-term usable mutable object instance
+    // if needed, but the struct interface is good for lazy stream processing
+    let foobarcontainer = FooBarContainerStruct(buffer)
+    
+    sum = sum + Int(foobarcontainer.location.count)
+    sum = sum + Int(foobarcontainer.fruit.rawValue)
+    sum = sum + (foobarcontainer.initialized ? 1 : 0)
+    
+    for i in 0..<foobarcontainer.list.count {
+    let foobar = foobarcontainer.list[i]
+        sum = sum + Int(foobar.name.count)
+        sum = sum + Int(foobar.postfix)
+        sum = sum + Int(foobar.rating)
+
+        let bar = foobar.sibling
+        
+        sum = sum + Int(bar.ratio)
+        sum = sum + Int(bar.size)
+        sum = sum + Int(bar.time)
+        
+        let foo = bar.parent
+        sum = sum + Int(foo.count)
+        sum = sum + Int(foo.i_d)
+        sum = sum + Int(foo.length)
+        sum = sum + Int(foo.prefix)
+    }
+    return sum
+}
+
 // convenience formatter
 extension Double {
     func string(fractionDigits:Int) -> String {
@@ -159,6 +194,7 @@ func runbench(lazyrun: BooleanType)
     var direct = 0.0
     var use = 0.0
     var dealloc = 0.0
+    var withStruct = 0.0
     var total:UInt64 = 0
     var results : [FooBarContainer] = []
     var lazyresults : [FooBarContainer.LazyAccess] = []
@@ -220,7 +256,7 @@ func runbench(lazyrun: BooleanType)
             total = total + UInt64(result)
         }
         let time6 = CFAbsoluteTimeGetCurrent()
-        
+
         let time7 = CFAbsoluteTimeGetCurrent()
         // Try to return objects to instance pool
         while (results.count > 0)
@@ -240,12 +276,21 @@ func runbench(lazyrun: BooleanType)
             total = total + UInt64(result)
         }
         let time10 = CFAbsoluteTimeGetCurrent()
+
+        let time11 = CFAbsoluteTimeGetCurrent()
+        for _ in 0..<iterations {
+            let result = flatuseStruct(outputData)
+            assert(result == 8644311667)
+            total = total + UInt64(result)
+        }
+        let time12 = CFAbsoluteTimeGetCurrent()
         
         encode = encode + (time2 - time1)
         decode = decode + (time4 - time3)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
         direct = direct + (time10 - time9)
+        withStruct = withStruct + (time12 - time11)
     }
     
     outputData.dealloc(bufsize)
@@ -256,7 +301,8 @@ func runbench(lazyrun: BooleanType)
     print("\(((use) * 1000).string(0)) ms use")
     print("\(((dealloc) * 1000).string(0)) ms dealloc")
     print("\(((decode+use+dealloc) * 1000).string(0)) ms decode+use+dealloc")
-    print("\(((direct) * 1000)) ms direct")
+    print("\(((direct) * 1000).string(2)) ms direct")
+    print("\(((withStruct) * 1000).string(2)) ms using struct")
     print("=================================")
     print("Total counter is \(total)") // just to make sure we dont get optimized out
     print("Encoded size is \(encodedsize) bytes, should be 344 if not using unique strings") // 344 is with proper padding https://google.github.io/flatbuffers/flatbuffers_benchmarks.html
