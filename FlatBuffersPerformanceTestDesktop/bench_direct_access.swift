@@ -178,10 +178,5 @@ struct FooBarContainerStruct {
             return FooBarStruct(buffer: buffer, myOffset: ofs)
         }
     }
-    
-    // Convenience to get a shared object for long-term usage
-    func createInstance (reader : FlatBufferReader) -> FooBarContainer {
-        return FooBarContainer.fromFlatBufferReader(reader)
-    }
 }
 
