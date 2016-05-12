@@ -10,7 +10,7 @@
 
 import FlatBuffersSwift
 
-let builder = FlatBufferBuilder.create(BinaryBuildConfig(initialCapacity: 1000))
+let builder = FlatBufferBuilder(config: BinaryBuildConfig(initialCapacity: 1000))
 
 // Create some weapons for the Monster: A 'sword' and an 'axe'.
 let sword = Weapon(name: "Sword", damage: 3)
@@ -36,7 +36,7 @@ let orc_serialized = orc.toByteArray()
 
 // Instead, we're going to access it right away (as if we just received it).
 
-let reader = FlatBufferReader.create(orc_serialized, config: BinaryReadConfig())
+let reader = FlatBufferReader(buffer: orc_serialized, config: BinaryReadConfig())
 
 // Get access to the root:
 
