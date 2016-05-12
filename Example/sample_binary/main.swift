@@ -64,27 +64,18 @@ for i in 0 ..< weps.count
 
 // Get and test the `Equipment` union (`equipped` field).
 
-/* C++ code
- assert(monster.equipped)
- assert(monster->equipped_type() == Equipment_Weapon);
- auto equipped = static_cast<const Weapon*>(monster->equipped());
- assert(equipped->name()->str() == "Axe");
- assert(equipped->damage() == 5);
- (void)equipped;
- */
-
-/*  We cant check type type of object that was in the union
- 
- if let equipped = monster.equipped {
-    let equipped = Weapon(
-    assert(equipped.name == "Axe")
-    assert(equipped.name == "Axe")
+if let equipped = monster.equipped {
+    switch equipped {
+        case let equipped as Weapon:
+            assert(equipped.name == "Axe")
+            assert(equipped.damage == 5)
+        default:
+            print("implement what to do for forward compatibility")
+    }
 }
 else
 {
-    print("No weapon equipped!")
+    print("Nothing equipped!")
 }
-*/
-
 
 print("The FlatBuffer was successfully created and verified!")
