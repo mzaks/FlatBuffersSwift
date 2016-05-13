@@ -2,7 +2,7 @@
 //  main.swift
 //  sample_binary
 //
-//  Implementation of the Flatbuffers tutorial
+//  Implementation of the Flatbuffers tutorial on how to use FlatBuffers to create and read binary buffers
 //
 //  Created by Joakim Hassila on 2016-05-12.
 //  Copyright © 2016 Joakim Hassila. All rights reserved.
@@ -10,20 +10,25 @@
 
 import FlatBuffersSwift
 
-let builder = FlatBufferBuilder.create(BinaryBuildConfig(initialCapacity: 1000))
+let builder = FlatBufferBuilder(config: BinaryBuildConfig(initialCapacity: 1000))
 
-// First, lets add some weapons for the Monster: A 'sword' and an 'axe'.
+// Create some weapons for the Monster: A 'sword' and an 'axe'.
 let sword = Weapon(name: "Sword", damage: 3)
 let axe = Weapon(name: "Axe", damage: 5)
 let weapons : [Weapon?] = [sword, axe]
 
-// Second, serialize the rest of the objects needed by the Monster.
-let position = Vec3(x: 1.0, y: 2.0, z: 3.0)
-let inventory : [UInt8] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+// Set up the Monster
+let orc = Monster()
+orc.pos = Vec3(x: 1.0, y: 2.0, z: 3.0)
+orc.name = "MyMonster"
+orc.color = Color.Red
+orc.hp = 80
+orc.inventory = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+orc.weapons = weapons
+orc.equipped = weapons[1]
 
-let orc = Monster(pos: position, mana: 150, hp: 80, name: "MyMonster", inventory: inventory, color: Color.Red, weapons: weapons, equipped: axe)
-
-let orc_serialized = orc.toByteArray() // Serialize the object graph
+// Finally, serialize the Monster to FlatBuffers format
+let orc_serialized = orc.toByteArray()
 
 // We now have a FlatBuffer we can store on disk or send over a network.
     
@@ -31,35 +36,41 @@ let orc_serialized = orc.toByteArray() // Serialize the object graph
 
 // Instead, we're going to access it right away (as if we just received it).
 
-let reader = FlatBufferReader.create(orc_serialized, config: BinaryReadConfig())
+let reader = FlatBufferReader(buffer: orc_serialized, config: BinaryReadConfig())
+
+// Get access to the root:
 
 let monster = Monster.fromFlatBufferReader(reader)
 
 // Get and test some scalar types from the FlatBuffer.
 assert(monster.hp == 80)
-assert(monster.mana == 150)  // default
+assert(monster.mana == 150)  // default value, was not set
 assert(monster.name == "MyMonster")
     
-// Get and test a field of the FlatBuffer's `struct`.
+// Get and test the FlatBuffer's `struct`.
 if let pos = monster.pos {
+    assert(pos.x == 1.0)
+    assert(pos.y == 2.0)
     assert(pos.z == 3.0)
 }
 else
 {
-    print("No pos!")
+    print("No monster.pos!")
 }
 
-let inv = monster.inventory
-assert(inv[9] == 9)
+// Get and test the inventory vector
+for i in 0 ..< monster.inventory.count
+{
+    assert(monster.inventory[i] == UInt8(i))
+}
 
 let expected_weapon_names = ["Sword", "Axe"]
 let expected_weapon_damages : [Int16] = [3,5]
-let weps = monster.weapons
 
-for i in 0 ..< weps.count
+for i in 0 ..< monster.weapons.count
 {
-    assert(weps[i]!.name == expected_weapon_names[i])
-    assert(weps[i]!.damage == expected_weapon_damages[i])
+    assert(monster.weapons[i]!.name == expected_weapon_names[i])
+    assert(monster.weapons[i]!.damage == expected_weapon_damages[i])
 }
 
 // Get and test the `Equipment` union (`equipped` field).

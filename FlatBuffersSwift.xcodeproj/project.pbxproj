@@ -28,6 +28,7 @@
 		85EE88711CE486610030231F /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
 		85EE887A1CE487890030231F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EE88771CE487890030231F /* main.swift */; };
 		85EE887B1CE487890030231F /* monster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EE88791CE487890030231F /* monster.swift */; };
+		85EE887D1CE5128E0030231F /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 85EE887C1CE5128E0030231F /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,6 +99,8 @@
 		85EE88771CE487890030231F /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		85EE88781CE487890030231F /* monster.fbs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monster.fbs; sourceTree = "<group>"; };
 		85EE88791CE487890030231F /* monster.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = monster.swift; sourceTree = "<group>"; };
+		85EE887C1CE5128E0030231F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		85EE887E1CE512980030231F /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +212,8 @@
 		85EE885C1CDE830A0030231F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				85EE887E1CE512980030231F /* LICENSE */,
+				85EE887C1CE5128E0030231F /* README.md */,
 				85EE88611CDE83E00030231F /* generate.sh */,
 				85EE88621CDE84640030231F /* .travis.yml */,
 			);
@@ -414,6 +419,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85EE887D1CE5128E0030231F /* README.md in Sources */,
 				85EE887B1CE487890030231F /* monster.swift in Sources */,
 				85EE887A1CE487890030231F /* main.swift in Sources */,
 			);
