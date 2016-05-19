@@ -232,6 +232,10 @@ func runbench(lazyrun: BooleanType)
         reader = FlatBufferReader.create(builder._dataStart, count: builder._dataCount, config: readConfiguration)
         encodedsize = builder._dataCount
 
+        // that we actually store object instances costs signficantly
+        // compared to original benchmark that just stores the raw buffers
+        // should probabably have separate measurements for stream processing
+        // of .Fast (similar to original benchmark) and creation of actual object graphs 
         for _ in 0..<iterations {
             if lazyrun {
                 lazyresults.append(flatdecodelazy(&buf, bufsize))
