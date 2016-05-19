@@ -630,6 +630,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
@@ -679,6 +680,7 @@
 				85EE886E1CE484900030231F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
