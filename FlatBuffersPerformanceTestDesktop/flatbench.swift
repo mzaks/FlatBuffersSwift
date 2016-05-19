@@ -24,7 +24,7 @@ func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<U
 
     for i in 0..<veclen { // 0xABADCAFEABADCAFE will overflow in usage
         let ident : UInt64 = 0xABADCAFE + UInt64(i)
-        let foo = Foo(i_d: ident, count: 10000 + i, prefix: 64 + i, length: UInt32(1000000 + i))
+        let foo = Foo(id: ident, count: 10000 + i, prefix: 64 + i, length: UInt32(1000000 + i))
         let bar = Bar(parent: foo, time: 123456 + i, ratio: 3.14159 + Float(i), size: UInt16(10000 + i))
         let name : StaticString = "Hello, World!"
         let foobar = FooBar(sibling: bar, name: name, rating: 3.1415432432445543543+Double(i), postfix: UInt8(33 + i))
@@ -73,7 +73,7 @@ func flatuse(foobarcontainer : FooBarContainer) -> Int
         
         let foo = bar.parent
         sum = sum + Int(foo.count)
-        sum = sum + Int(foo.i_d)
+        sum = sum + Int(foo.id)
         sum = sum + Int(foo.length)
         sum = sum + Int(foo.prefix)
     }
@@ -102,26 +102,30 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
         
         let foo = bar.parent
         sum = sum + Int(foo.count)
-        sum = sum + Int(foo.i_d)
+        sum = sum + Int(foo.id)
         sum = sum + Int(foo.length)
         sum = sum + Int(foo.prefix)
     }
     return sum
 }
 
-func flatDecodeDirect(buffer : UnsafePointer<UInt8>) -> Int{
+func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : UInt) -> Int{
     
     let fooBarContainerOffset = getFooBarContainerRootOffset(buffer)
     
-    var sum:Int = 1
+    var sum:Int = Int(start)
     
     sum = sum + Int(getLocationFrom(buffer, fooBarContainerOffset: fooBarContainerOffset).count)
+//    sum = sum + Int(getLocationFromS(buffer, fooBarContainerOffset: fooBarContainerOffset).utf8.count)
+
     sum = sum + Int(getFrootFrom(buffer, fooBarContainerOffset: fooBarContainerOffset).rawValue)
     sum = sum + (getInitializedFrom(buffer, fooBarContainerOffset: fooBarContainerOffset) ? 1 : 0)
+//    sum = sum + Int(getInitializedFrom(buffer, fooBarContainerOffset: fooBarContainerOffset))
     
     for i in 0..<getListCountFrom(buffer, fooBarContainerOffset: fooBarContainerOffset) {
         let foobarOffset = getFooBarOffsetFrom(buffer, fooBarContainerOffset: fooBarContainerOffset, listIndex: i)
         sum = sum + Int(getNameFrom(buffer, fooBarOffset: foobarOffset).count)
+//        sum = sum + Int(getNameFromS(buffer, fooBarOffset: foobarOffset).utf8.count)
         sum = sum + Int(getPostfixFrom(buffer, fooBarOffset: foobarOffset))
         sum = sum + Int(getRatingFrom(buffer, fooBarOffset: foobarOffset))
         
@@ -133,7 +137,7 @@ func flatDecodeDirect(buffer : UnsafePointer<UInt8>) -> Int{
         
         let foo = bar.parent
         sum = sum + Int(foo.count)
-        sum = sum + Int(foo.i_d)
+        sum = sum + Int(foo.id)
         sum = sum + Int(foo.length)
         sum = sum + Int(foo.prefix)
     }
@@ -141,27 +145,27 @@ func flatDecodeDirect(buffer : UnsafePointer<UInt8>) -> Int{
     return sum
 }
 
-func flatuseStruct(buffer : UnsafePointer<UInt8>) -> Int
+func flatuseStruct(buffer : UnsafePointer<UInt8>, start : UInt) -> Int
 {
-    var sum:Int = 1
+    var sum:Int = Int(start)
     
     // this struct or copies of it are only valid as long as pointer
     // to the underlying data is valid
     // should use createInstance() for a long-term usable mutable object instance
     // if needed, but the struct interface is good for lazy stream processing
-    let foobarcontainer = FooBarContainerStruct(buffer)
+    var foobarcontainer = FooBarContainer.Fast(buffer)
     
-    sum = sum + Int(foobarcontainer.location.count)
-    sum = sum + Int(foobarcontainer.fruit.rawValue)
+    sum = sum + Int(foobarcontainer.location!.count)
+    sum = sum + Int(foobarcontainer.fruit!.rawValue)
     sum = sum + (foobarcontainer.initialized ? 1 : 0)
-    
-    for i in 0..<foobarcontainer.list.count {
-    let foobar = foobarcontainer.list[i]
-        sum = sum + Int(foobar.name.count)
+    let list = foobarcontainer.list
+    for i in 0..<list.count {
+        let foobar = list[i]!
+        sum = sum + Int(foobar.name!.count)
         sum = sum + Int(foobar.postfix)
         sum = sum + Int(foobar.rating)
 
-        let bar = foobar.sibling
+        let bar = foobar.sibling!
         
         sum = sum + Int(bar.ratio)
         sum = sum + Int(bar.size)
@@ -169,7 +173,7 @@ func flatuseStruct(buffer : UnsafePointer<UInt8>) -> Int
         
         let foo = bar.parent
         sum = sum + Int(foo.count)
-        sum = sum + Int(foo.i_d)
+        sum = sum + Int(foo.id)
         sum = sum + Int(foo.length)
         sum = sum + Int(foo.prefix)
     }
@@ -196,6 +200,8 @@ func runbench(lazyrun: BooleanType)
     var dealloc = 0.0
     var withStruct = 0.0
     var total:UInt64 = 0
+    var total1:UInt64 = 0
+    var total2:UInt64 = 0
     var results : [FooBarContainer] = []
     var lazyresults : [FooBarContainer.LazyAccess] = []
     let builder = FlatBufferBuilder.create(buildConfiguration)
@@ -218,7 +224,6 @@ func runbench(lazyrun: BooleanType)
     FooBar.fillInstancePool(FooBar.maxInstanceCacheSize)
 
     for _ in 0..<inner_loop_iterations {
-        
         let time1 = CFAbsoluteTimeGetCurrent()
         for _ in 0..<iterations {
             flatencode(builder, outputData: outputData, &outputDataCount)
@@ -270,18 +275,18 @@ func runbench(lazyrun: BooleanType)
         let time8 = CFAbsoluteTimeGetCurrent()
         
         let time9 = CFAbsoluteTimeGetCurrent()
-        for _ in 0..<iterations {
-            let result = flatDecodeDirect(outputData)
-            assert(result == 8644311667)
-            total = total + UInt64(result)
+        for i in 0..<iterations {
+            let result = flatDecodeDirect(outputData, start:i)
+            assert(result == 8644311666 + Int(i))
+            total1 = total1 + UInt64(result)
         }
         let time10 = CFAbsoluteTimeGetCurrent()
 
         let time11 = CFAbsoluteTimeGetCurrent()
-        for _ in 0..<iterations {
-            let result = flatuseStruct(outputData)
-            assert(result == 8644311667)
-            total = total + UInt64(result)
+        for i in 0..<iterations {
+            let result = flatuseStruct(outputData, start:i)
+            assert(result == 8644311666 + Int(i))
+            total2 = total2 + UInt64(result)
         }
         let time12 = CFAbsoluteTimeGetCurrent()
         
@@ -304,7 +309,9 @@ func runbench(lazyrun: BooleanType)
     print("\(((direct) * 1000).string(2)) ms direct")
     print("\(((withStruct) * 1000).string(2)) ms using struct")
     print("=================================")
-    print("Total counter is \(total)") // just to make sure we dont get optimized out
+    print("Total counter1 is \(total)") // just to make sure we dont get optimized out
+    print("Total counter2 is \(total1)") // just to make sure we dont get optimized out
+    print("Total counter3 is \(total2)") // just to make sure we dont get optimized out
     print("Encoded size is \(encodedsize) bytes, should be 344 if not using unique strings") // 344 is with proper padding https://google.github.io/flatbuffers/flatbuffers_benchmarks.html
     print("=================================")
     print("")

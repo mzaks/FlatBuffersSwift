@@ -259,6 +259,101 @@ public func ==(t1 : Monster.LazyAccess, t2 : Monster.LazyAccess) -> Bool {
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension Monster {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public init(_ data : UnsafePointer<UInt8>) {
+		self.buffer = data
+		self.myOffset = UnsafePointer<Offset>(buffer.advancedBy(0)).memory
+	}
+	public func getData() -> UnsafePointer<UInt8> {
+		return buffer
+	}
+	public var pos : Vec3? { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 0)}
+		set { 
+			if let newValue = newValue {
+				try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 0, value: newValue)
+			}
+		}
+	}
+	public var mana : Int16 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 1, defaultValue: 150) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 1, value: newValue) }
+	}
+	public var hp : Int16 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 2, defaultValue: 100) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 2, value: newValue) }
+	}
+	public var name : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:3)) } }
+	public var __friendly : Bool { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 4, defaultValue: false) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 4, value: newValue) }
+	}
+	public struct InventoryVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 5)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> UInt8 {
+			get {
+				return FlatBufferReaderFast.getVectorScalarElement(buffer, offsetList!, index: index)
+			}
+			set {
+				if let newValue = newValue {
+					FlatBufferReaderFast.setVectorScalarElement(UnsafeMutablePointer<UInt8>(buffer), offsetList!, index: index, value: newValue)
+				}
+			}
+		}
+	}
+	public lazy var inventory : InventoryVector = InventoryVector(buffer: self.buffer, myOffset: self.myOffset)
+	public var color : Color? { 
+		get { return Color(rawValue: FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 6, defaultValue: Color.Blue.rawValue)) }
+		set {
+			if let newValue = newValue {
+				try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 6, value: newValue.rawValue)
+			}
+		}
+	}
+	public struct WeaponsVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 7)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> Weapon.Fast? {
+			get {
+				if let ofs = FlatBufferReaderFast.getVectorOffsetElement(buffer, offsetList!, index: index) {
+					return Weapon.Fast(buffer: buffer, myOffset: ofs)
+				}
+				return nil
+			}
+		}
+	}
+	public lazy var weapons : WeaponsVector = WeaponsVector(buffer: self.buffer, myOffset: self.myOffset)
+	public var equipped : Equipment_Fast? { get { 
+		return create_Equipment_Fast(buffer, propertyIndex: 8, objectOffset: self.myOffset)
+	} }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : Monster.Fast, t2 : Monster.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension Monster {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -433,6 +528,25 @@ public func ==(t1 : Weapon.LazyAccess, t2 : Weapon.LazyAccess) -> Bool {
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension Weapon {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var name : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:0)) } }
+	public var damage : Int16 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 1, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 1, value: newValue) }
+	}
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : Weapon.Fast, t2 : Weapon.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension Weapon {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -461,8 +575,10 @@ public extension Weapon {
 }
 public protocol Equipment{}
 public protocol Equipment_LazyAccess{}
+public protocol Equipment_Fast{}
 extension Weapon : Equipment {}
 extension Weapon.LazyAccess : Equipment_LazyAccess {}
+extension Weapon.Fast : Equipment_Fast {}
 private func create_Equipment(reader : FlatBufferReader, propertyIndex : Int, objectOffset : Offset?) -> Equipment? {
 	guard let objectOffset = objectOffset else {
 		return nil
@@ -486,6 +602,19 @@ private func create_Equipment_LazyAccess(reader : FlatBufferReader, propertyInde
 	}
 	switch unionCase {
 	case 1 : return Weapon.LazyAccess(reader: reader, objectOffset: caseObjectOffset)
+	default : return nil
+	}
+}
+private func create_Equipment_Fast(buffer : UnsafePointer<UInt8>, propertyIndex : Int, objectOffset : Offset?) -> Equipment_Fast? {
+	guard let objectOffset = objectOffset else {
+		return nil
+	}
+	let unionCase : Int8 = FlatBufferReaderFast.get(buffer, objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
+	guard let caseObjectOffset : Offset = FlatBufferReaderFast.getOffset(buffer, objectOffset, propertyIndex:propertyIndex + 1) else {
+		return nil
+	}
+	switch unionCase {
+	case 1 : return Weapon.Fast(buffer: buffer, myOffset: caseObjectOffset)
 	default : return nil
 	}
 }

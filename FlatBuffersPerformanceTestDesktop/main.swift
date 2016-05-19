@@ -20,9 +20,16 @@ func testRandomContactListToByteArrayAndBackAgain(){
     print("\((after2 - time2) * 1000.0) ms decoding")
 
     let time3 = CFAbsoluteTimeGetCurrent()
-    _ = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: UnsafePointer(data), count: data.count))
+    var list = ContactList.Fast(UnsafePointer(data))
+    let entriesCount = list.entries.count
     let after3 = CFAbsoluteTimeGetCurrent()
-    print("\((after3 - time3) * 1000.0) ms lazy accessor")
+    print("\((after3 - time3) * 1000.0) ms fast accessor for \(entriesCount) entries")
+    
+    let time4 = CFAbsoluteTimeGetCurrent()
+    let list2 = ContactList.LazyAccess(data: UnsafeBufferPointer<UInt8>(start: data, count: data.count))
+    let entriesCount2 = list2.entries.count
+    let after4 = CFAbsoluteTimeGetCurrent()
+    print("\((after4 - time4) * 1000.0) ms lazy accessor for \(entriesCount2) entries")
     
 //    NSData(bytes: UnsafePointer<UInt8>(data), length: data.count).writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList.bin", atomically: true)
 }

@@ -7,13 +7,13 @@ public enum Enum : Int16 {
 	case Apples, Pears, Bananas
 }
 public struct Foo : Scalar {
-	public let i_d : UInt64
+	public let id : UInt64
 	public let count : Int16
 	public let prefix : Int8
 	public let length : UInt32
 }
 public func ==(v1:Foo, v2:Foo) -> Bool {
-	return  v1.i_d==v2.i_d &&  v1.count==v2.count &&  v1.prefix==v2.prefix &&  v1.length==v2.length
+	return  v1.id==v2.id &&  v1.count==v2.count &&  v1.prefix==v2.prefix &&  v1.length==v2.length
 }
 public struct Bar : Scalar {
 	public let parent : Foo
@@ -145,6 +145,37 @@ public func ==(t1 : FooBar.LazyAccess, t2 : FooBar.LazyAccess) -> Bool {
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension FooBar {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var sibling : Bar? { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 0)}
+		set { 
+			if let newValue = newValue {
+				try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 0, value: newValue)
+			}
+		}
+	}
+	public var name : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:1)) } }
+	public var rating : Float64 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 2, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 2, value: newValue) }
+	}
+	public var postfix : UInt8 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 3, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 3, value: newValue) }
+	}
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : FooBar.Fast, t2 : FooBar.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension FooBar {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -362,6 +393,60 @@ public func ==(t1 : FooBarContainer.LazyAccess, t2 : FooBarContainer.LazyAccess)
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension FooBarContainer {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public init(_ data : UnsafePointer<UInt8>) {
+		self.buffer = data
+		self.myOffset = UnsafePointer<Offset>(buffer.advancedBy(0)).memory
+	}
+	public func getData() -> UnsafePointer<UInt8> {
+		return buffer
+	}
+	public struct ListVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 0)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> FooBar.Fast? {
+			get {
+				if let ofs = FlatBufferReaderFast.getVectorOffsetElement(buffer, offsetList!, index: index) {
+					return FooBar.Fast(buffer: buffer, myOffset: ofs)
+				}
+				return nil
+			}
+		}
+	}
+	public lazy var list : ListVector = ListVector(buffer: self.buffer, myOffset: self.myOffset)
+	public var initialized : Bool { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 1, defaultValue: false) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 1, value: newValue) }
+	}
+	public var fruit : Enum? { 
+		get { return Enum(rawValue: FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 2, defaultValue: Enum.Apples.rawValue)) }
+		set {
+			if let newValue = newValue {
+				try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 2, value: newValue.rawValue)
+			}
+		}
+	}
+	public var location : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:3)) } }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : FooBarContainer.Fast, t2 : FooBarContainer.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension FooBarContainer {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {

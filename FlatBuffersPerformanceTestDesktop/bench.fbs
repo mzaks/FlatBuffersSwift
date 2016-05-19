@@ -21,15 +21,13 @@ namespace benchfb;
 
 enum Enum : short { Apples, Pears, Bananas }
 
-// should be struct but not currently supported
 struct Foo {
-  i_d:ulong;
+  id:ulong;
   count:short;
   prefix:byte;
   length:uint;
 }
 
-// should be struct but not currently supported
 struct Bar {
   parent:Foo;
   time:int;
