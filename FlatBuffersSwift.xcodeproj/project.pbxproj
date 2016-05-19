@@ -630,6 +630,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
