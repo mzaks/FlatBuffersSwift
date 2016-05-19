@@ -139,6 +139,51 @@ public func ==(t1 : ContactList.LazyAccess, t2 : ContactList.LazyAccess) -> Bool
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension ContactList {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public init(_ data : UnsafePointer<UInt8>) {
+		self.buffer = data
+		self.myOffset = UnsafePointer<Offset>(buffer.advancedBy(0)).memory
+	}
+	public func getData() -> UnsafePointer<UInt8> {
+		return buffer
+	}
+	public var lastModified : Int64 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 0, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 0, value: newValue) }
+	}
+	public struct EntriesVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 1)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> Contact.Fast? {
+			get {
+				if let ofs = FlatBufferReaderFast.getVectorOffsetElement(buffer, offsetList!, index: index) {
+					return Contact.Fast(buffer: buffer, myOffset: ofs)
+				}
+				return nil
+			}
+		}
+	}
+	public lazy var entries : EntriesVector = EntriesVector(buffer: self.buffer, myOffset: self.myOffset)
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : ContactList.Fast, t2 : ContactList.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension ContactList {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -402,6 +447,127 @@ public func ==(t1 : Contact.LazyAccess, t2 : Contact.LazyAccess) -> Bool {
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension Contact {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var name : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:0)) } }
+	public var birthday : Date.Fast? { get { 
+		if let offset = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 1) {
+			return Date.Fast(buffer: buffer, myOffset: offset)
+		}
+		return nil
+	} }
+	public var gender : Gender? { 
+		get { return Gender(rawValue: FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 2, defaultValue: Gender.None.rawValue)) }
+		set {
+			if let newValue = newValue {
+				try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 2, value: newValue.rawValue)
+			}
+		}
+	}
+	public struct TagsVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 3)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> UnsafeBufferPointer<UInt8>? {
+			get {
+				if let ofs = FlatBufferReaderFast.getVectorOffsetElement(buffer, offsetList!, index: index) {
+					return FlatBufferReaderFast.getStringBuffer(buffer, ofs)
+				}
+				return nil
+			}
+		}
+	}
+	public lazy var tags : TagsVector = TagsVector(buffer: self.buffer, myOffset: self.myOffset)
+	public struct AddressEntriesVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 4)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> AddressEntry.Fast? {
+			get {
+				if let ofs = FlatBufferReaderFast.getVectorOffsetElement(buffer, offsetList!, index: index) {
+					return AddressEntry.Fast(buffer: buffer, myOffset: ofs)
+				}
+				return nil
+			}
+		}
+	}
+	public lazy var addressEntries : AddressEntriesVector = AddressEntriesVector(buffer: self.buffer, myOffset: self.myOffset)
+	public var currentLoccation : GeoLocation? { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 5)}
+		set { 
+			if let newValue = newValue {
+				try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 5, value: newValue)
+			}
+		}
+	}
+	public struct PreviousLocationsVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 6)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> GeoLocation? {
+			get {
+				return FlatBufferReaderFast.getVectorScalarElement(buffer, offsetList!, index: index) as GeoLocation
+			}
+			set {
+				if let newValue = newValue {
+					FlatBufferReaderFast.setVectorScalarElement(UnsafeMutablePointer<UInt8>(buffer), offsetList!, index: index, value: newValue)
+				}
+			}
+		}
+	}
+	public lazy var previousLocations : PreviousLocationsVector = PreviousLocationsVector(buffer: self.buffer, myOffset: self.myOffset)
+	public struct MoodsVector {
+		private var buffer : UnsafePointer<UInt8> = nil
+		private var myOffset : Offset = 0
+		private let offsetList : Offset?
+		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
+			buffer = b
+			myOffset = o
+			offsetList = FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex: 7)
+		}
+		public var count : Int { get { return FlatBufferReaderFast.getVectorLength(buffer, offsetList) } }
+		public subscript (index : Int) -> Mood? {
+			get {
+				return Mood(rawValue: FlatBufferReaderFast.getVectorScalarElement(buffer, offsetList!, index: index))
+			}
+			set {
+				if let newValue = newValue {
+					FlatBufferReaderFast.setVectorScalarElement(UnsafeMutablePointer<UInt8>(buffer), offsetList!, index: index, value: newValue.rawValue)
+				}
+			}
+		}
+	}
+	public lazy var moods : MoodsVector = MoodsVector(buffer: self.buffer, myOffset: self.myOffset)
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : Contact.Fast, t2 : Contact.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension Contact {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -578,6 +744,32 @@ public func ==(t1 : Date.LazyAccess, t2 : Date.LazyAccess) -> Bool {
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension Date {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var day : Int8 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 0, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 0, value: newValue) }
+	}
+	public var month : Int8 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 1, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 1, value: newValue) }
+	}
+	public var year : Int16 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 2, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 2, value: newValue) }
+	}
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : Date.Fast, t2 : Date.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension Date {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -678,6 +870,27 @@ public func ==(t1 : AddressEntry.LazyAccess, t2 : AddressEntry.LazyAccess) -> Bo
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension AddressEntry {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var order : Int32 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 0, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 0, value: newValue) }
+	}
+	public var address : Address_Fast? { get { 
+		return create_Address_Fast(buffer, propertyIndex: 1, objectOffset: self.myOffset)
+	} }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : AddressEntry.Fast, t2 : AddressEntry.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension AddressEntry {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -866,6 +1079,27 @@ public func ==(t1 : PostalAddress.LazyAccess, t2 : PostalAddress.LazyAccess) -> 
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension PostalAddress {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var country : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:0)) } }
+	public var city : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:1)) } }
+	public var postalCode : Int32 { 
+		get { return FlatBufferReaderFast.get(buffer, myOffset, propertyIndex: 2, defaultValue: 0) }
+		set { try!FlatBufferReaderFast.set(UnsafeMutablePointer<UInt8>(buffer), myOffset, propertyIndex: 2, value: newValue) }
+	}
+	public var streetAndNumber : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:3)) } }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : PostalAddress.Fast, t2 : PostalAddress.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension PostalAddress {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -1002,6 +1236,21 @@ public func ==(t1 : EmailAddress.LazyAccess, t2 : EmailAddress.LazyAccess) -> Bo
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension EmailAddress {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var mailto : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:0)) } }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : EmailAddress.Fast, t2 : EmailAddress.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension EmailAddress {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -1117,6 +1366,21 @@ public func ==(t1 : WebAddress.LazyAccess, t2 : WebAddress.LazyAccess) -> Bool {
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension WebAddress {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var url : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:0)) } }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : WebAddress.Fast, t2 : WebAddress.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension WebAddress {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -1232,6 +1496,21 @@ public func ==(t1 : TelephoneNumber.LazyAccess, t2 : TelephoneNumber.LazyAccess)
 	return t1._objectOffset == t2._objectOffset && t1._reader === t2._reader
 }
 
+extension TelephoneNumber {
+public struct Fast : Hashable {
+	private var buffer : UnsafePointer<UInt8> = nil
+	private var myOffset : Offset = 0
+	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
+		self.buffer = buffer
+		self.myOffset = myOffset
+	}
+	public var number : UnsafeBufferPointer<UInt8>? { get { return FlatBufferReaderFast.getStringBuffer(buffer, FlatBufferReaderFast.getOffset(buffer, myOffset, propertyIndex:0)) } }
+	public var hashValue: Int { return Int(myOffset) }
+}
+}
+public func ==(t1 : TelephoneNumber.Fast, t2 : TelephoneNumber.Fast) -> Bool {
+	return t1.buffer == t2.buffer && t1.myOffset == t2.myOffset
+}
 public extension TelephoneNumber {
 	private func addToByteArray(builder : FlatBufferBuilder) -> Offset {
 		if builder.config.uniqueTables {
@@ -1259,14 +1538,19 @@ public extension TelephoneNumber {
 }
 public protocol Address{}
 public protocol Address_LazyAccess{}
+public protocol Address_Fast{}
 extension PostalAddress : Address {}
 extension PostalAddress.LazyAccess : Address_LazyAccess {}
+extension PostalAddress.Fast : Address_Fast {}
 extension EmailAddress : Address {}
 extension EmailAddress.LazyAccess : Address_LazyAccess {}
+extension EmailAddress.Fast : Address_Fast {}
 extension WebAddress : Address {}
 extension WebAddress.LazyAccess : Address_LazyAccess {}
+extension WebAddress.Fast : Address_Fast {}
 extension TelephoneNumber : Address {}
 extension TelephoneNumber.LazyAccess : Address_LazyAccess {}
+extension TelephoneNumber.Fast : Address_Fast {}
 private func create_Address(reader : FlatBufferReader, propertyIndex : Int, objectOffset : Offset?) -> Address? {
 	guard let objectOffset = objectOffset else {
 		return nil
@@ -1296,6 +1580,22 @@ private func create_Address_LazyAccess(reader : FlatBufferReader, propertyIndex 
 	case 2 : return EmailAddress.LazyAccess(reader: reader, objectOffset: caseObjectOffset)
 	case 3 : return WebAddress.LazyAccess(reader: reader, objectOffset: caseObjectOffset)
 	case 4 : return TelephoneNumber.LazyAccess(reader: reader, objectOffset: caseObjectOffset)
+	default : return nil
+	}
+}
+private func create_Address_Fast(buffer : UnsafePointer<UInt8>, propertyIndex : Int, objectOffset : Offset?) -> Address_Fast? {
+	guard let objectOffset = objectOffset else {
+		return nil
+	}
+	let unionCase : Int8 = FlatBufferReaderFast.get(buffer, objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
+	guard let caseObjectOffset : Offset = FlatBufferReaderFast.getOffset(buffer, objectOffset, propertyIndex:propertyIndex + 1) else {
+		return nil
+	}
+	switch unionCase {
+	case 1 : return PostalAddress.Fast(buffer: buffer, myOffset: caseObjectOffset)
+	case 2 : return EmailAddress.Fast(buffer: buffer, myOffset: caseObjectOffset)
+	case 3 : return WebAddress.Fast(buffer: buffer, myOffset: caseObjectOffset)
+	case 4 : return TelephoneNumber.Fast(buffer: buffer, myOffset: caseObjectOffset)
 	default : return nil
 	}
 }
