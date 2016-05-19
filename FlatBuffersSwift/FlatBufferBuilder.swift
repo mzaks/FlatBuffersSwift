@@ -24,7 +24,7 @@ public final class FlatBufferBuilder {
     
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
-    public var deferedBindings : [(object:Any, cursor:Int)] = []
+    public var deferedBindings : ContiguousArray<(object:Any, cursor:Int)> = []
     
     public var config : BinaryBuildConfig
     
@@ -40,10 +40,10 @@ public final class FlatBufferBuilder {
         return capacity - cursor
     }
     
-    var currentVTable : [Int32] = []
+    var currentVTable : ContiguousArray<Int32> = []
     var objectStart : Int32 = -1
     var vectorNumElems : Int32 = -1;
-    var vTableOffsets : [Int32] = []
+    var vTableOffsets : ContiguousArray<Int32> = []
     
     public init(config : BinaryBuildConfig){
         self.config = config

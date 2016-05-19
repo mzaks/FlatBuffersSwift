@@ -17,10 +17,10 @@ var encodedsize = 0
 let readConfiguration = BinaryReadConfig(uniqueStrings: false, uniqueTables: false)
 let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrings: false, uniqueTables: false, uniqueVTables: false)
 
-func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<UInt8>, inout _ outputDataCount:Int)
+func flatencode(builder : FlatBufferBuilder)
 {
     let veclen = 3
-    var foobars : [FooBar?] = Array(count: veclen, repeatedValue:nil)
+    var foobars = ContiguousArray<FooBar?>.init(count: veclen, repeatedValue:nil)
 
     for i in 0..<veclen { // 0xABADCAFEABADCAFE will overflow in usage
         let ident : UInt64 = 0xABADCAFE + UInt64(i)
@@ -36,8 +36,6 @@ func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<U
     
     assert(builder._dataCount <= bufsize)
     foobarcontainer.toFlatBufferBuilder(builder)
-    outputData.initializeFrom(builder._dataStart, count: builder._dataCount)
-    outputDataCount = builder._dataCount
 }
 
 func flatdecode(reader : FlatBufferReader) -> FooBarContainer
@@ -202,17 +200,14 @@ func runbench(lazyrun: BooleanType)
     var total:UInt64 = 0
     var total1:UInt64 = 0
     var total2:UInt64 = 0
-    var results : [FooBarContainer] = []
-    var lazyresults : [FooBarContainer.LazyAccess] = []
+    var results : ContiguousArray<FooBarContainer> = []
+    var lazyresults : ContiguousArray<FooBarContainer.LazyAccess> = []
     let builder = FlatBufferBuilder.create(buildConfiguration)
     var reader : FlatBufferReader
-    var outputData : UnsafeMutablePointer<UInt8> = nil
-    var outputDataCount = 0
     var buf = [UInt8](count: bufsize, repeatedValue: 0)
     
     results.reserveCapacity(Int(iterations))
     lazyresults.reserveCapacity(Int(iterations))
-    outputData = UnsafeMutablePointer.alloc(bufsize)
     
     // doing optional preload of instance caches
     FlatBufferBuilder.maxInstanceCacheSize = 10
@@ -225,17 +220,22 @@ func runbench(lazyrun: BooleanType)
 
     for _ in 0..<inner_loop_iterations {
         let time1 = CFAbsoluteTimeGetCurrent()
-        for _ in 0..<iterations {
-            flatencode(builder, outputData: outputData, &outputDataCount)
-            builder.reset()
+        for _ in 0..<iterations-1 {
+            builder.reset() // we keep the last encoding to decode directly from the builder to mimic original test - no unnecessary memcpy
+            flatencode(builder)
         }
         let time2 = CFAbsoluteTimeGetCurrent()
         
         let time3 = CFAbsoluteTimeGetCurrent()
-        buf = Array(UnsafeBufferPointer(start: outputData, count: outputDataCount))
-        reader = FlatBufferReader.create(outputData, count: outputDataCount, config: readConfiguration)
-        encodedsize = outputDataCount
 
+        buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount))
+        reader = FlatBufferReader.create(builder._dataStart, count: builder._dataCount, config: readConfiguration)
+        encodedsize = builder._dataCount
+
+        // that we actually store object instances costs signficantly
+        // compared to original benchmark that just stores the raw buffers
+        // should probabably have separate measurements for stream processing
+        // of .Fast (similar to original benchmark) and creation of actual object graphs 
         for _ in 0..<iterations {
             if lazyrun {
                 lazyresults.append(flatdecodelazy(&buf, bufsize))
@@ -276,7 +276,7 @@ func runbench(lazyrun: BooleanType)
         
         let time9 = CFAbsoluteTimeGetCurrent()
         for i in 0..<iterations {
-            let result = flatDecodeDirect(outputData, start:i)
+            let result = flatDecodeDirect(builder._dataStart, start:i)
             assert(result == 8644311666 + Int(i))
             total1 = total1 + UInt64(result)
         }
@@ -284,7 +284,7 @@ func runbench(lazyrun: BooleanType)
 
         let time11 = CFAbsoluteTimeGetCurrent()
         for i in 0..<iterations {
-            let result = flatuseStruct(outputData, start:i)
+            let result = flatuseStruct(builder._dataStart, start:i)
             assert(result == 8644311666 + Int(i))
             total2 = total2 + UInt64(result)
         }
@@ -297,8 +297,6 @@ func runbench(lazyrun: BooleanType)
         direct = direct + (time10 - time9)
         withStruct = withStruct + (time12 - time11)
     }
-    
-    outputData.dealloc(bufsize)
     
     print("=================================")
     print("\(((encode) * 1000).string(0)) ms encode")
