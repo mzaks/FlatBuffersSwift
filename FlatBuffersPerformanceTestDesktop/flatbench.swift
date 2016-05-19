@@ -50,9 +50,9 @@ func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAcc
     }
 }
 
-func flatuse(foobarcontainer : FooBarContainer) -> Int
+func flatuse(foobarcontainer : FooBarContainer, start : Int) -> Int
 {
-    var sum:Int = 1
+    var sum:Int = Int(start)
     sum = sum + Int(foobarcontainer.locationBuffer!.count)
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
     sum = sum + (foobarcontainer.initialized ? 1 : 0)
@@ -79,9 +79,9 @@ func flatuse(foobarcontainer : FooBarContainer) -> Int
 }
 
 // Just a copy-paste as we are lacking a protocol so we could write a generic implementation
-func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
+func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess, start : Int) -> Int
 {
-    var sum:Int = 1
+    var sum:Int = start
     sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
     sum = sum + Int(foobarcontainer.fruit!.rawValue)
     sum = sum + (foobarcontainer.initialized ? 1 : 0)
@@ -107,11 +107,11 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess) -> Int
     return sum
 }
 
-func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : UInt) -> Int{
+func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : Int) -> Int{
     
     let fooBarContainerOffset = getFooBarContainerRootOffset(buffer)
     
-    var sum:Int = Int(start)
+    var sum:Int = start
     
     sum = sum + Int(getLocationFrom(buffer, fooBarContainerOffset: fooBarContainerOffset).count)
 //    sum = sum + Int(getLocationFromS(buffer, fooBarContainerOffset: fooBarContainerOffset).utf8.count)
@@ -143,13 +143,13 @@ func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : UInt) -> Int{
     return sum
 }
 
-func flatuseStruct(buffer : UnsafePointer<UInt8>, start : UInt) -> Int
+func flatuseStruct(buffer : UnsafePointer<UInt8>, start : Int) -> Int
 {
-    var sum:Int = Int(start)
+    var sum:Int = start
     
     // this struct or copies of it are only valid as long as pointer
     // to the underlying data is valid
-    // should use createInstance() for a long-term usable mutable object instance
+    // should use an "eager" instance for a long-term usable mutable object instance
     // if needed, but the struct interface is good for lazy stream processing
     var foobarcontainer = FooBarContainer.Fast(buffer)
     
@@ -189,25 +189,30 @@ extension Double {
     }
 }
 
-func runbench(lazyrun: BooleanType)
+enum BenchmarkRunType {
+    case lazyDecode     /// lazy object graph creation
+    case eagerDecode    /// up-front object graph creation
+    case directDecode     /// stream processing
+    case structDecode     /// stream processing
+}
+
+func runbench(runType: BenchmarkRunType) -> (Int, Int)
 {
     var encode = 0.0
     var decode = 0.0
-    var direct = 0.0
     var use = 0.0
     var dealloc = 0.0
-    var withStruct = 0.0
     var total:UInt64 = 0
-    var total1:UInt64 = 0
-    var total2:UInt64 = 0
     var results : ContiguousArray<FooBarContainer> = []
-    var lazyresults : ContiguousArray<FooBarContainer.LazyAccess> = []
+    var lazyResults : ContiguousArray<FooBarContainer.LazyAccess> = []
+    var rawResults : ContiguousArray<UnsafePointer<UInt8>> = []
     let builder = FlatBufferBuilder.create(buildConfiguration)
     var reader : FlatBufferReader
     var buf = [UInt8](count: bufsize, repeatedValue: 0)
     
     results.reserveCapacity(Int(iterations))
-    lazyresults.reserveCapacity(Int(iterations))
+    lazyResults.reserveCapacity(Int(iterations))
+    rawResults.reserveCapacity(Int(iterations))
     
     // doing optional preload of instance caches
     FlatBufferBuilder.maxInstanceCacheSize = 10
@@ -218,84 +223,106 @@ func runbench(lazyrun: BooleanType)
     FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize)
     FooBar.fillInstancePool(FooBar.maxInstanceCacheSize)
 
+    print("\(runType)")
     for _ in 0..<inner_loop_iterations {
+
+        // Build buffers
         let time1 = CFAbsoluteTimeGetCurrent()
         for _ in 0..<iterations-1 {
             builder.reset() // we keep the last encoding to decode directly from the builder to mimic original test - no unnecessary memcpy
             flatencode(builder)
         }
+        buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount)) // only needed for lazy
         let time2 = CFAbsoluteTimeGetCurrent()
-        
+
+        // Decode
         let time3 = CFAbsoluteTimeGetCurrent()
 
-        buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount))
         reader = FlatBufferReader.create(builder._dataStart, count: builder._dataCount, config: readConfiguration)
         encodedsize = builder._dataCount
-
-        // that we actually store object instances costs signficantly
-        // compared to original benchmark that just stores the raw buffers
-        // should probabably have separate measurements for stream processing
-        // of .Fast (similar to original benchmark) and creation of actual object graphs 
-        for _ in 0..<iterations {
-            if lazyrun {
-                lazyresults.append(flatdecodelazy(&buf, bufsize))
-            }
-            else
-            {
+        
+        switch runType {
+        case .eagerDecode:
+            for _ in 0..<iterations {
                 results.append(flatdecode(reader))
             }
+        case .lazyDecode:
+            for _ in 0..<iterations {
+                lazyResults.append(flatdecodelazy(&buf, bufsize))
+            }
+        case .directDecode:
+            for _ in 0..<iterations {
+                rawResults.append(builder._dataStart)
+            }
+        case .structDecode:
+            for _ in 0..<iterations {
+                rawResults.append(builder._dataStart)
+            }
         }
-        let time4 = CFAbsoluteTimeGetCurrent()
         
+        let time4 = CFAbsoluteTimeGetCurrent()
+
+        // Use results
         let time5 = CFAbsoluteTimeGetCurrent()
-        for index in 0 ..< Int(iterations) {
-            var result = 0
-            if lazyrun {
-                result = flatuselazy(lazyresults[index])
+        
+        switch runType {
+        case .eagerDecode:
+            for i in 0..<Int(iterations) {
+                var result = 0
+                result = flatuse(results[i], start:i)
+                assert(result == 8644311666 + Int(i))
+                total = total + UInt64(result)
             }
-            else
-            {
-                result = flatuse(results[index])
+        case .lazyDecode:
+            for i in 0..<Int(iterations) {
+                var result = 0
+                result = flatuselazy(lazyResults[i], start:i)
+                assert(result == 8644311666 + Int(i))
+                total = total + UInt64(result)
             }
-            assert(result == 8644311667)
-            total = total + UInt64(result)
+        case .directDecode:
+            for i in 0..<Int(iterations) {
+                let result = flatDecodeDirect(rawResults[i], start:i)
+                assert(result == 8644311666 + Int(i))
+                total = total + UInt64(result)
+            }
+        case .structDecode:
+            for i in 0..<Int(iterations) {
+                assert(rawResults[i] == UnsafePointer(builder._dataStart))
+                let result = flatuseStruct(rawResults[i], start:i)
+                assert(result == 8644311666 + Int(i))
+                total = total + UInt64(result)
+            }
         }
+
         let time6 = CFAbsoluteTimeGetCurrent()
 
         let time7 = CFAbsoluteTimeGetCurrent()
-        // Try to return objects to instance pool
-        while (results.count > 0)
-        {
-            var x = results.removeLast()
-            FooBarContainer.reuseInstance(&x)
+        
+        switch runType {
+        case .eagerDecode:
+            // Try to return objects to instance pool
+            while (results.count > 0)
+            {
+                var x = results.removeLast()
+                FooBarContainer.reuseInstance(&x)
+            }
+        case .lazyDecode:
+            lazyResults.removeAll(keepCapacity:true)
+        case .directDecode:
+            rawResults.removeAll(keepCapacity:true)
+        case .structDecode:
+            rawResults.removeAll(keepCapacity:true)
         }
-        lazyresults.removeAll(keepCapacity:true)
+
         FlatBufferReader.reuse(reader)
         
         let time8 = CFAbsoluteTimeGetCurrent()
-        
-        let time9 = CFAbsoluteTimeGetCurrent()
-        for i in 0..<iterations {
-            let result = flatDecodeDirect(builder._dataStart, start:i)
-            assert(result == 8644311666 + Int(i))
-            total1 = total1 + UInt64(result)
-        }
-        let time10 = CFAbsoluteTimeGetCurrent()
-
-        let time11 = CFAbsoluteTimeGetCurrent()
-        for i in 0..<iterations {
-            let result = flatuseStruct(builder._dataStart, start:i)
-            assert(result == 8644311666 + Int(i))
-            total2 = total2 + UInt64(result)
-        }
-        let time12 = CFAbsoluteTimeGetCurrent()
         
         encode = encode + (time2 - time1)
         decode = decode + (time4 - time3)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
-        direct = direct + (time10 - time9)
-        withStruct = withStruct + (time12 - time11)
     }
     
     print("=================================")
@@ -304,25 +331,32 @@ func runbench(lazyrun: BooleanType)
     print("\(((use) * 1000).string(0)) ms use")
     print("\(((dealloc) * 1000).string(0)) ms dealloc")
     print("\(((decode+use+dealloc) * 1000).string(0)) ms decode+use+dealloc")
-    print("\(((direct) * 1000).string(2)) ms direct")
-    print("\(((withStruct) * 1000).string(2)) ms using struct")
-    print("=================================")
-    print("Total counter1 is \(total)") // just to make sure we dont get optimized out
-    print("Total counter2 is \(total1)") // just to make sure we dont get optimized out
-    print("Total counter3 is \(total2)") // just to make sure we dont get optimized out
-    print("Encoded size is \(encodedsize) bytes, should be 344 if not using unique strings") // 344 is with proper padding https://google.github.io/flatbuffers/flatbuffers_benchmarks.html
     print("=================================")
     print("")
+    return (Int(total), encodedsize)
 }
 
 func flatbench() {
+    
+    let benchMarks : [BenchmarkRunType] = [.lazyDecode, .eagerDecode, .directDecode, .structDecode]
+
+    var total = 0
+    var subtotal = 0
+    var messageSize = 0
     print("Running a total of \(inner_loop_iterations*iterations) iterations")
     print("")
     
-    print("Lazy run")
-    runbench(true)
+    for benchmark in benchMarks
+    {
+        (subtotal, messageSize) = runbench(benchmark)
+        total = total + subtotal
+    }
     
-    print("Eager run")
-    runbench(false)
+    print("")
+    print("=================================")
+    print("Subtotal: \(subtotal) Total: \(total)")
+    print("Encoded size is \(messageSize) bytes, should be 344 if not using unique strings")
+    // 344 is with proper padding https://google.github.io/flatbuffers/flatbuffers_benchmarks.html
+    print("=================================")
     print("")
 }
