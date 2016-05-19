@@ -297,6 +297,7 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
 
         let time6 = CFAbsoluteTimeGetCurrent()
 
+        // Clean up
         let time7 = CFAbsoluteTimeGetCurrent()
         
         switch runType {
@@ -337,12 +338,11 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
 }
 
 func flatbench() {
-    
     let benchMarks : [BenchmarkRunType] = [.lazyDecode, .eagerDecode, .directDecode, .structDecode]
-
     var total = 0
     var subtotal = 0
     var messageSize = 0
+    
     print("Running a total of \(inner_loop_iterations*iterations) iterations")
     print("")
     
