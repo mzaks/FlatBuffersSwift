@@ -15,7 +15,7 @@ let builder = FlatBufferBuilder(config: BinaryBuildConfig(initialCapacity: 1000)
 // Create some weapons for the Monster: A 'sword' and an 'axe'.
 let sword = Weapon(name: "Sword", damage: 3)
 let axe = Weapon(name: "Axe", damage: 5)
-let weapons : [Weapon?] = [sword, axe]
+let weapons : ContiguousArray<Weapon?> = [sword, axe]
 
 // Set up the Monster
 let orc = Monster()

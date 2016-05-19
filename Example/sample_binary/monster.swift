@@ -17,7 +17,7 @@ public func ==(v1:Vec3, v2:Vec3) -> Bool {
 }
 public final class Monster {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [Monster] = []
+	public static var instancePool : ContiguousArray<Monster> = []
 	public var pos : Vec3? = nil
 	public var mana : Int16 = 150
 	public var hp : Int16 = 100
@@ -51,12 +51,12 @@ public final class Monster {
 	private var name_ss : StaticString? = nil
 	
 	public var __friendly : Bool = false
-	public var inventory : [UInt8] = []
+	public var inventory : ContiguousArray<UInt8> = []
 	public var color : Color? = Color.Blue
-	public var weapons : [Weapon?] = []
+	public var weapons : ContiguousArray<Weapon?> = []
 	public var equipped : Equipment? = nil
 	public init(){}
-	public init(pos: Vec3?, mana: Int16, hp: Int16, name: String?, inventory: [UInt8], color: Color?, weapons: [Weapon?], equipped: Equipment?){
+	public init(pos: Vec3?, mana: Int16, hp: Int16, name: String?, inventory: ContiguousArray<UInt8>, color: Color?, weapons: ContiguousArray<Weapon?>, equipped: Equipment?){
 		self.pos = pos
 		self.mana = mana
 		self.hp = hp
@@ -66,7 +66,7 @@ public final class Monster {
 		self.weapons = weapons
 		self.equipped = equipped
 	}
-	public init(pos: Vec3?, mana: Int16, hp: Int16, name: StaticString?, inventory: [UInt8], color: Color?, weapons: [Weapon?], equipped: Equipment?){
+	public init(pos: Vec3?, mana: Int16, hp: Int16, name: StaticString?, inventory: ContiguousArray<UInt8>, color: Color?, weapons: ContiguousArray<Weapon?>, equipped: Equipment?){
 		self.pos = pos
 		self.mana = mana
 		self.hp = hp
@@ -310,9 +310,7 @@ public struct Fast : Hashable {
 				return FlatBufferReaderFast.getVectorScalarElement(buffer, offsetList!, index: index)
 			}
 			set {
-				if let newValue = newValue {
 					FlatBufferReaderFast.setVectorScalarElement(UnsafeMutablePointer<UInt8>(buffer), offsetList!, index: index, value: newValue)
-				}
 			}
 		}
 	}
@@ -431,7 +429,7 @@ public extension Monster {
 }
 public final class Weapon {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [Weapon] = []
+	public static var instancePool : ContiguousArray<Weapon> = []
 	public var name : String? {
 		get {
 			if let s = name_s {
