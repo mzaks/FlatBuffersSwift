@@ -26,7 +26,7 @@ public func ==(v1:Bar, v2:Bar) -> Bool {
 }
 public final class FooBar {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [FooBar] = []
+	public static var instancePool : ContiguousArray<FooBar> = []
 	public var sibling : Bar? = nil
 	public var name : String? {
 		get {
@@ -209,8 +209,8 @@ public extension FooBar {
 }
 public final class FooBarContainer {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [FooBarContainer] = []
-	public var list : [FooBar?] = []
+	public static var instancePool : ContiguousArray<FooBarContainer> = []
+	public var list : ContiguousArray<FooBar?> = []
 	public var initialized : Bool = false
 	public var fruit : Enum? = Enum.Apples
 	public var location : String? {
@@ -243,13 +243,13 @@ public final class FooBarContainer {
 	private var location_ss : StaticString? = nil
 	
 	public init(){}
-	public init(list: [FooBar?], initialized: Bool, fruit: Enum?, location: String?){
+	public init(list: ContiguousArray<FooBar?>, initialized: Bool, fruit: Enum?, location: String?){
 		self.list = list
 		self.initialized = initialized
 		self.fruit = fruit
 		self.location_s = location
 	}
-	public init(list: [FooBar?], initialized: Bool, fruit: Enum?, location: StaticString?){
+	public init(list: ContiguousArray<FooBar?>, initialized: Bool, fruit: Enum?, location: StaticString?){
 		self.list = list
 		self.initialized = initialized
 		self.fruit = fruit

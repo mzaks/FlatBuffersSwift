@@ -44,7 +44,7 @@ extension Float64 : Scalar {}
 
 public protocol PoolableInstances : AnyObject {
     static var maxInstanceCacheSize : UInt { get set }
-    static var instancePool : [Self] { get set }
+    static var instancePool : ContiguousArray<Self> { get set }
     init()
     func reset()
 }

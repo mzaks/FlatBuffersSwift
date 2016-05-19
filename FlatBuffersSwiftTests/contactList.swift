@@ -6,11 +6,11 @@ import Foundation
 import FlatBuffersSwift
 public final class ContactList {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [ContactList] = []
+	public static var instancePool : ContiguousArray<ContactList> = []
 	public var lastModified : Int64 = 0
-	public var entries : [Contact?] = []
+	public var entries : ContiguousArray<Contact?> = []
 	public init(){}
-	public init(lastModified: Int64, entries: [Contact?]){
+	public init(lastModified: Int64, entries: ContiguousArray<Contact?>){
 		self.lastModified = lastModified
 		self.entries = entries
 	}
@@ -227,7 +227,7 @@ public enum Mood : Int8 {
 }
 public final class Contact {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [Contact] = []
+	public static var instancePool : ContiguousArray<Contact> = []
 	public var name : String? {
 		get {
 			if let s = name_s {
@@ -668,7 +668,7 @@ public extension Contact {
 }
 public final class Date {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [Date] = []
+	public static var instancePool : ContiguousArray<Date> = []
 	public var day : Int8 = 0
 	public var month : Int8 = 0
 	public var year : Int16 = 0
@@ -805,7 +805,7 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 }
 public final class AddressEntry {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [AddressEntry] = []
+	public static var instancePool : ContiguousArray<AddressEntry> = []
 	public var order : Int32 = 0
 	public var address : Address? = nil
 	public init(){}
@@ -914,7 +914,7 @@ public extension AddressEntry {
 }
 public final class PostalAddress {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [PostalAddress] = []
+	public static var instancePool : ContiguousArray<PostalAddress> = []
 	public var country : String? {
 		get {
 			if let s = country_s {
@@ -1148,7 +1148,7 @@ public extension PostalAddress {
 }
 public final class EmailAddress {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [EmailAddress] = []
+	public static var instancePool : ContiguousArray<EmailAddress> = []
 	public var mailto : String? {
 		get {
 			if let s = mailto_s {
@@ -1278,7 +1278,7 @@ public extension EmailAddress {
 }
 public final class WebAddress {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [WebAddress] = []
+	public static var instancePool : ContiguousArray<WebAddress> = []
 	public var url : String? {
 		get {
 			if let s = url_s {
@@ -1408,7 +1408,7 @@ public extension WebAddress {
 }
 public final class TelephoneNumber {
 	public static var maxInstanceCacheSize : UInt = 0
-	public static var instancePool : [TelephoneNumber] = []
+	public static var instancePool : ContiguousArray<TelephoneNumber> = []
 	public var number : String? {
 		get {
 			if let s = number_s {

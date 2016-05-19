@@ -20,7 +20,7 @@ let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrin
 func flatencode(builder : FlatBufferBuilder, outputData : UnsafeMutablePointer<UInt8>, inout _ outputDataCount:Int)
 {
     let veclen = 3
-    var foobars : [FooBar?] = Array(count: veclen, repeatedValue:nil)
+    var foobars = ContiguousArray<FooBar?>.init(count: veclen, repeatedValue:nil)
 
     for i in 0..<veclen { // 0xABADCAFEABADCAFE will overflow in usage
         let ident : UInt64 = 0xABADCAFE + UInt64(i)
@@ -202,8 +202,8 @@ func runbench(lazyrun: BooleanType)
     var total:UInt64 = 0
     var total1:UInt64 = 0
     var total2:UInt64 = 0
-    var results : [FooBarContainer] = []
-    var lazyresults : [FooBarContainer.LazyAccess] = []
+    var results : ContiguousArray<FooBarContainer> = []
+    var lazyresults : ContiguousArray<FooBarContainer.LazyAccess> = []
     let builder = FlatBufferBuilder.create(buildConfiguration)
     var reader : FlatBufferReader
     var outputData : UnsafeMutablePointer<UInt8> = nil

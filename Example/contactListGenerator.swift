@@ -11,7 +11,7 @@ import Foundation
 public func generateRandomContactList(count : Int = 10_000) -> ContactList {
     let contactList = ContactList()
     contactList.lastModified = Int64(rnd())
-    var contacts = [Contact?]()
+    var contacts = ContiguousArray<Contact?>()
     for _ in 0 ..< count {
         contacts.append(generateContact())
     }
