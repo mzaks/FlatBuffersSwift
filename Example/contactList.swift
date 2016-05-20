@@ -4,6 +4,7 @@
 import Foundation
 
 public final class ContactList {
+    public static var instancePoolMutex : pthread_mutex_t = ContactList.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<ContactList> = []
 	public var lastModified : Int64 = 0
@@ -225,6 +226,7 @@ public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
 }
 public final class Contact {
+    public static var instancePoolMutex : pthread_mutex_t = Contact.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<Contact> = []
 	public var name : String? {
@@ -666,6 +668,7 @@ public extension Contact {
 	}
 }
 public final class Date {
+    public static var instancePoolMutex : pthread_mutex_t = Date.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<Date> = []
 	public var day : Int8 = 0
@@ -803,6 +806,7 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
+    public static var instancePoolMutex : pthread_mutex_t = AddressEntry.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<AddressEntry> = []
 	public var order : Int32 = 0
@@ -912,6 +916,7 @@ public extension AddressEntry {
 	}
 }
 public final class PostalAddress {
+    public static var instancePoolMutex : pthread_mutex_t = PostalAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<PostalAddress> = []
 	public var country : String? {
@@ -1146,6 +1151,7 @@ public extension PostalAddress {
 	}
 }
 public final class EmailAddress {
+    public static var instancePoolMutex : pthread_mutex_t = EmailAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<EmailAddress> = []
 	public var mailto : String? {
@@ -1276,6 +1282,7 @@ public extension EmailAddress {
 	}
 }
 public final class WebAddress {
+    public static var instancePoolMutex : pthread_mutex_t = WebAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<WebAddress> = []
 	public var url : String? {
@@ -1406,6 +1413,7 @@ public extension WebAddress {
 	}
 }
 public final class TelephoneNumber {
+    public static var instancePoolMutex : pthread_mutex_t = TelephoneNumber.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<TelephoneNumber> = []
 	public var number : String? {
@@ -1669,14 +1677,26 @@ extension Float64 : Scalar {}
 public protocol PoolableInstances : AnyObject {
     static var maxInstanceCacheSize : UInt { get set }
     static var instancePool : ContiguousArray<Self> { get set }
+    static var instancePoolMutex : pthread_mutex_t { get set }
     init()
     func reset()
 }
 
 public extension PoolableInstances {
     
+    // Must be called to initialize mutex
+    public static func setupInstancePoolMutex() -> pthread_mutex_t
+    {
+        var mtx = pthread_mutex_t()
+        pthread_mutex_init(&mtx, nil)
+        return mtx
+    }
+    
     // Optional preheat of instance pool
     public static func fillInstancePool(initialPoolSize : UInt) -> Void {
+        pthread_mutex_lock(&instancePoolMutex)
+        defer { pthread_mutex_unlock(&instancePoolMutex) }
+        
         while ((UInt(instancePool.count) < initialPoolSize) && (UInt(instancePool.count) < maxInstanceCacheSize))
         {
             instancePool.append(Self())
@@ -1684,6 +1704,14 @@ public extension PoolableInstances {
     }
     
     public static func createInstance() -> Self {
+        guard maxInstanceCacheSize > 0 else // avoid taking the mutex if not using pool
+        {
+            return Self()
+        }
+        
+        pthread_mutex_lock(&instancePoolMutex)
+        defer { pthread_mutex_unlock(&instancePoolMutex) }
+        
         if (instancePool.count > 0)
         {
             let instance = instancePool.removeLast()
@@ -1695,6 +1723,13 @@ public extension PoolableInstances {
     // reuseInstance can be called when we believe we are about to zero out
     // the final strong reference we hold ourselves to put the instance in for reuse
     public static func reuseInstance(inout instance : Self) {
+        guard maxInstanceCacheSize > 0 else // avoid taking the mutex if not using pool
+        {
+            return // don't pool
+        }
+        
+        pthread_mutex_lock(&instancePoolMutex)
+        defer { pthread_mutex_unlock(&instancePoolMutex) }
         
         if (isUniquelyReferencedNonObjC(&instance) && (UInt(instancePool.count) < maxInstanceCacheSize))
         {
@@ -1703,7 +1738,6 @@ public extension PoolableInstances {
         }
     }
 }
-
 
 public final class LazyVector<T> : SequenceType {
     

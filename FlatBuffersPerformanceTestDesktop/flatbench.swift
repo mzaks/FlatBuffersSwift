@@ -217,11 +217,11 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
     // doing optional preload of instance caches
     FlatBufferBuilder.maxInstanceCacheSize = 10
     FlatBufferReader.maxInstanceCacheSize = iterations
-    FooBarContainer.maxInstanceCacheSize = iterations
-    FooBar.maxInstanceCacheSize = iterations * 3
+    FooBarContainer.maxInstanceCacheSize = iterations * 2
+    FooBar.maxInstanceCacheSize = iterations * 3 * 2
     
-    FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize)
-    FooBar.fillInstancePool(FooBar.maxInstanceCacheSize)
+    FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize / 2)
+    FooBar.fillInstancePool(FooBar.maxInstanceCacheSize / 2)
 
     print("\(runType)")
     for _ in 0..<inner_loop_iterations {
