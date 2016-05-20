@@ -206,14 +206,13 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
     var total:UInt64 = 0
     var results : ContiguousArray<FooBarContainer> = []
     var lazyResults : ContiguousArray<FooBarContainer.LazyAccess> = []
-    var rawResults : ContiguousArray<UnsafePointer<UInt8>> = []
+    var rawResults = ContiguousArray<UnsafePointer<UInt8>>.init(count: Int(iterations), repeatedValue: nil)
     let builder = FlatBufferBuilder.create(buildConfiguration)
     var reader : FlatBufferReader? = nil
     var buf = [UInt8](count: bufsize, repeatedValue: 0)
     
     results.reserveCapacity(Int(iterations))
     lazyResults.reserveCapacity(Int(iterations))
-    rawResults.reserveCapacity(Int(iterations))
     
     // doing optional preload of instance caches
     FlatBufferBuilder.maxInstanceCacheSize = 10
@@ -250,13 +249,10 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
             for _ in 0..<iterations {
                 lazyResults.append(flatdecodelazy(&buf, bufsize))
             }
-        case .directDecode:
-            for _ in 0..<iterations {
-                rawResults.append(builder._dataStart)
-            }
-        case .structDecode:
-            for _ in 0..<iterations {
-                rawResults.append(builder._dataStart)
+        case .directDecode,
+             .structDecode:
+            for i : Int in 0..<Int(iterations) {
+                rawResults[i] = UnsafePointer(builder._dataStart)
             }
         }
         
@@ -313,10 +309,10 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
             }
         case .lazyDecode:
             lazyResults.removeAll(keepCapacity:true)
-        case .directDecode:
-            rawResults.removeAll(keepCapacity:true)
-        case .structDecode:
-            rawResults.removeAll(keepCapacity:true)
+        case .directDecode,
+             .structDecode:
+            break
+            // rawResults.removeAll(keepCapacity:true) we are just using the vector in-place
         }
 
         let time8 = CFAbsoluteTimeGetCurrent()
