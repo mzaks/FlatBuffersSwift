@@ -232,7 +232,6 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
             builder.reset() // we keep the last encoding to decode directly from the builder to mimic original test - no unnecessary memcpy
             flatencode(builder)
         }
-        buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount)) // only needed for lazy
         encodedsize = builder._dataCount
         let time2 = CFAbsoluteTimeGetCurrent()
 
@@ -246,6 +245,7 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
                 results.append(flatdecode(reader!))
             }
         case .lazyDecode:
+            buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount)) // only needed for lazy
             for _ in 0..<iterations {
                 lazyResults.append(flatdecodelazy(&buf, bufsize))
             }
@@ -322,7 +322,7 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
     }
-    
+    rawResults.removeAll()
     print("=================================")
     print("\(((encode) * 1000).string(0)) ms encode")
     print("\(((decode) * 1000).string(0)) ms decode")
@@ -335,8 +335,8 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
 }
 
 func flatbench() {
-    let benchMarks : [BenchmarkRunType] = [.lazyDecode, .eagerDecode, .directDecode, .structDecode]
-    // let benchMarks : [BenchmarkRunType] = [.structDecode, .structDecode, .structDecode, .structDecode, .structDecode, .structDecode]
+    let benchmarks : [BenchmarkRunType] = [.lazyDecode, .eagerDecode, .directDecode, .structDecode]
+    // let benchmarks : [BenchmarkRunType] = [.structDecode, .structDecode, .structDecode, .structDecode, .structDecode, .structDecode]
     var total = 0
     var subtotal = 0
     var messageSize = 0
@@ -344,7 +344,7 @@ func flatbench() {
     print("Running a total of \(inner_loop_iterations*iterations) iterations")
     print("")
     
-    for benchmark in benchMarks
+    for benchmark in benchmarks
     {
         (subtotal, messageSize) = runbench(benchmark)
         total = total + subtotal
