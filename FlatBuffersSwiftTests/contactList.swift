@@ -259,13 +259,13 @@ public final class Contact {
 	
 	public var birthday : Date? = nil
 	public var gender : Gender? = Gender.None
-	public var tags : [String?] = []
-	public var addressEntries : [AddressEntry?] = []
+	public var tags : ContiguousArray<String?> = []
+	public var addressEntries : ContiguousArray<AddressEntry?> = []
 	public var currentLoccation : GeoLocation? = nil
-	public var previousLocations : [GeoLocation?] = []
-	public var moods : [Mood?] = []
+	public var previousLocations : ContiguousArray<GeoLocation?> = []
+	public var moods : ContiguousArray<Mood?> = []
 	public init(){}
-	public init(name: String?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
+	public init(name: String?, birthday: Date?, gender: Gender?, tags: ContiguousArray<String?>, addressEntries: ContiguousArray<AddressEntry?>, currentLoccation: GeoLocation?, previousLocations: ContiguousArray<GeoLocation?>, moods: ContiguousArray<Mood?>){
 		self.name_s = name
 		self.birthday = birthday
 		self.gender = gender
@@ -275,7 +275,7 @@ public final class Contact {
 		self.previousLocations = previousLocations
 		self.moods = moods
 	}
-	public init(name: StaticString?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
+	public init(name: StaticString?, birthday: Date?, gender: Gender?, tags: ContiguousArray<String?>, addressEntries: ContiguousArray<AddressEntry?>, currentLoccation: GeoLocation?, previousLocations: ContiguousArray<GeoLocation?>, moods: ContiguousArray<Mood?>){
 		self.name_ss = name
 		self.birthday = birthday
 		self.gender = gender

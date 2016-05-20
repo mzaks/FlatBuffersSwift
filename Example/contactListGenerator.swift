@@ -40,8 +40,8 @@ private func generateDate() -> Date {
     return date
 }
 
-private func generateAddress() -> [AddressEntry?] {
-    var address : [AddressEntry?] = []
+private func generateAddress() -> ContiguousArray<AddressEntry?> {
+    var address : ContiguousArray<AddressEntry?> = []
     for i in 1...2{
         let entry = AddressEntry()
         entry.order = Int32(i)
@@ -93,9 +93,9 @@ private func generateLocation() -> GeoLocation {
     return GeoLocation(latitude: 2.5, longitude: 3.5, elevation: 7.5, s: S1(i:12))
 }
 
-private func generateLocations() -> [GeoLocation?] {
+private func generateLocations() -> ContiguousArray<GeoLocation?> {
     let length = Int(rnd(5))
-    var locations : [GeoLocation?] = []
+    var locations : ContiguousArray<GeoLocation?> = []
     for _ in 0..<length {
         locations.append(generateLocation())
     }
@@ -103,18 +103,18 @@ private func generateLocations() -> [GeoLocation?] {
 }
 
 
-private func generateMoods() -> [Mood?] {
+private func generateMoods() -> ContiguousArray<Mood?> {
     let length = Int(rnd(5))
-    var moods : [Mood?] = []
+    var moods : ContiguousArray<Mood?> = []
     for _ in 0..<length {
         moods.append(Mood(rawValue: Int8(rnd(4))))
     }
     return moods
 }
 
-private func randomNumberStrings() -> [String?] {
+private func randomNumberStrings() -> ContiguousArray<String?> {
     let length = Int(rnd(5))
-    var result : [String?] = []
+    var result : ContiguousArray<String?> = []
     for _ in 0..<length {
         result.append(randomNumberString())
     }

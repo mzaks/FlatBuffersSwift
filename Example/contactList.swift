@@ -5,7 +5,7 @@ import Foundation
 
 public final class ContactList {
 	public static var maxInstanceCacheSize : UInt = 0
-    public static var instancePool : ContiguousArray<ContactList> = []
+	public static var instancePool : ContiguousArray<ContactList> = []
 	public var lastModified : Int64 = 0
 	public var entries : ContiguousArray<Contact?> = []
 	public init(){}
@@ -226,7 +226,7 @@ public enum Mood : Int8 {
 }
 public final class Contact {
 	public static var maxInstanceCacheSize : UInt = 0
-    public static var instancePool : ContiguousArray<Contact> = []
+	public static var instancePool : ContiguousArray<Contact> = []
 	public var name : String? {
 		get {
 			if let s = name_s {
@@ -258,13 +258,13 @@ public final class Contact {
 	
 	public var birthday : Date? = nil
 	public var gender : Gender? = Gender.None
-	public var tags : [String?] = []
-	public var addressEntries : [AddressEntry?] = []
+	public var tags : ContiguousArray<String?> = []
+	public var addressEntries : ContiguousArray<AddressEntry?> = []
 	public var currentLoccation : GeoLocation? = nil
-	public var previousLocations : [GeoLocation?] = []
-	public var moods : [Mood?] = []
+	public var previousLocations : ContiguousArray<GeoLocation?> = []
+	public var moods : ContiguousArray<Mood?> = []
 	public init(){}
-	public init(name: String?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
+	public init(name: String?, birthday: Date?, gender: Gender?, tags: ContiguousArray<String?>, addressEntries: ContiguousArray<AddressEntry?>, currentLoccation: GeoLocation?, previousLocations: ContiguousArray<GeoLocation?>, moods: ContiguousArray<Mood?>){
 		self.name_s = name
 		self.birthday = birthday
 		self.gender = gender
@@ -274,7 +274,7 @@ public final class Contact {
 		self.previousLocations = previousLocations
 		self.moods = moods
 	}
-	public init(name: StaticString?, birthday: Date?, gender: Gender?, tags: [String?], addressEntries: [AddressEntry?], currentLoccation: GeoLocation?, previousLocations: [GeoLocation?], moods: [Mood?]){
+	public init(name: StaticString?, birthday: Date?, gender: Gender?, tags: ContiguousArray<String?>, addressEntries: ContiguousArray<AddressEntry?>, currentLoccation: GeoLocation?, previousLocations: ContiguousArray<GeoLocation?>, moods: ContiguousArray<Mood?>){
 		self.name_ss = name
 		self.birthday = birthday
 		self.gender = gender
@@ -667,7 +667,7 @@ public extension Contact {
 }
 public final class Date {
 	public static var maxInstanceCacheSize : UInt = 0
-    public static var instancePool : ContiguousArray<Date> = []
+	public static var instancePool : ContiguousArray<Date> = []
 	public var day : Int8 = 0
 	public var month : Int8 = 0
 	public var year : Int16 = 0
@@ -2032,13 +2032,14 @@ public extension FlatBufferReader {
 }
 
 
+// MARK: Fast Reader
 
-public final class FlatBufferReaderFast{
-    
+public final class FlatBufferReaderFast {
+
     public static func fromByteArray<T : Scalar>(buffer : UnsafePointer<UInt8>, _ position : Int) -> T{
         return UnsafePointer<T>(buffer.advancedBy(position)).memory
     }
-    
+
     public static func getPropertyOffset(buffer : UnsafePointer<UInt8>, _ objectOffset : Offset, propertyIndex : Int)->Int {
         let offset = Int(objectOffset)
         let localOffset : Int32 = fromByteArray(buffer, offset)
@@ -2048,11 +2049,11 @@ public final class FlatBufferReaderFast{
             return 0
         }
         let propertyStart = vTableOffset + 4 + (2 * propertyIndex)
-        
+
         let propertyOffset : Int16 = fromByteArray(buffer, propertyStart)
         return Int(propertyOffset)
     }
-    
+
     public static func getOffset(buffer : UnsafePointer<UInt8>, _ objectOffset : Offset, propertyIndex : Int) -> Offset?{
         let propertyOffset = getPropertyOffset(buffer, objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -2061,13 +2062,13 @@ public final class FlatBufferReaderFast{
         let position = objectOffset + propertyOffset
         let localObjectOffset : Int32 = fromByteArray(buffer, Int(position))
         let offset = position + localObjectOffset
-        
+
         if localObjectOffset == 0 {
             return nil
         }
         return offset
     }
-    
+
     public static func getVectorLength(buffer : UnsafePointer<UInt8>, _ vectorOffset : Offset?) -> Int {
         guard let vectorOffset = vectorOffset else {
             return 0
@@ -2076,7 +2077,7 @@ public final class FlatBufferReaderFast{
         let length2 : Int32 = fromByteArray(buffer, vectorPosition)
         return Int(length2)
     }
-    
+
     public static func getVectorOffsetElement(buffer : UnsafePointer<UInt8>, _ vectorOffset : Offset, index : Int) -> Offset? {
         let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(Int32)))
         let localOffset : Int32 = fromByteArray(buffer, valueStartPosition)
@@ -2085,12 +2086,12 @@ public final class FlatBufferReaderFast{
         }
         return localOffset + valueStartPosition
     }
-    
+
     public static func getVectorScalarElement<T : Scalar>(buffer : UnsafePointer<UInt8>, _ vectorOffset : Offset, index : Int) -> T {
         let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(T)))
         return UnsafePointer<T>(UnsafePointer<UInt8>(buffer).advancedBy(valueStartPosition)).memory
     }
-    
+
     public static func get<T : Scalar>(buffer : UnsafePointer<UInt8>, _ objectOffset : Offset, propertyIndex : Int, defaultValue : T) -> T{
         let propertyOffset = getPropertyOffset(buffer, objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -2099,7 +2100,7 @@ public final class FlatBufferReaderFast{
         let position = Int(objectOffset + propertyOffset)
         return fromByteArray(buffer, position)
     }
-    
+
     public static func get<T : Scalar>(buffer : UnsafePointer<UInt8>, _ objectOffset : Offset, propertyIndex : Int) -> T?{
         let propertyOffset = getPropertyOffset(buffer, objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -2108,7 +2109,7 @@ public final class FlatBufferReaderFast{
         let position = Int(objectOffset + propertyOffset)
         return fromByteArray(buffer, position) as T
     }
-    
+
     public static func getStringBuffer(buffer : UnsafePointer<UInt8>, _ stringOffset : Offset?) -> UnsafeBufferPointer<UInt8>? {
         guard let stringOffset = stringOffset else {
             return nil
@@ -2118,20 +2119,20 @@ public final class FlatBufferReaderFast{
         let pointer = UnsafePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
         return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(stringLength))
     }
-    
+
     public static func getString(buffer : UnsafePointer<UInt8>, _ stringOffset : Offset?) -> String? {
         guard let stringOffset = stringOffset else {
             return nil
         }
         let stringPosition = Int(stringOffset)
         let stringLength : Int32 = fromByteArray(buffer, stringPosition)
-        
+
         let pointer = UnsafeMutablePointer<UInt8>(buffer).advancedBy((stringPosition + strideof(Int32)))
         let result = String.init(bytesNoCopy: pointer, length: Int(stringLength), encoding: NSUTF8StringEncoding, freeWhenDone: false)
-        
+
         return result
     }
-    
+
     public static func set<T : Scalar>(buffer : UnsafeMutablePointer<UInt8>, _ objectOffset : Offset, propertyIndex : Int, value : T) throws {
         let propertyOffset = getPropertyOffset(buffer, objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -2144,7 +2145,7 @@ public final class FlatBufferReaderFast{
             buffer.advancedBy(position).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
     }
-    
+
     public static func setVectorScalarElement<T : Scalar>(buffer : UnsafeMutablePointer<UInt8>, _ vectorOffset : Offset, index : Int, value : T) {
         let valueStartPosition = Int(vectorOffset + strideof(Int32) + (index * strideof(T)))
         var v = value
@@ -2153,7 +2154,7 @@ public final class FlatBufferReaderFast{
             buffer.advancedBy(valueStartPosition).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)
         }
     }
-    
+
 }
 
 
@@ -2176,7 +2177,7 @@ public final class FlatBufferBuilder {
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
     public var deferedBindings : ContiguousArray<(object:Any, cursor:Int)> = []
-
+    
     public var config : BinaryBuildConfig
     
     var capacity : Int

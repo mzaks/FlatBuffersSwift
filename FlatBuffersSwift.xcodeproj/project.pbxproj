@@ -28,7 +28,6 @@
 		85EE88711CE486610030231F /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
 		85EE887A1CE487890030231F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EE88771CE487890030231F /* main.swift */; };
 		85EE887B1CE487890030231F /* monster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EE88791CE487890030231F /* monster.swift */; };
-		85EE887D1CE5128E0030231F /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 85EE887C1CE5128E0030231F /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -419,7 +418,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				85EE887D1CE5128E0030231F /* README.md in Sources */,
 				85EE887B1CE487890030231F /* monster.swift in Sources */,
 				85EE887A1CE487890030231F /* main.swift in Sources */,
 			);
