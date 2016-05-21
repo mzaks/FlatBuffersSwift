@@ -16,6 +16,7 @@ public func ==(v1:Vec3, v2:Vec3) -> Bool {
 	return  v1.x==v2.x &&  v1.y==v2.y &&  v1.z==v2.z
 }
 public final class Monster {
+	public static var instancePoolMutex : pthread_mutex_t = Monster.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<Monster> = []
 	public var pos : Vec3? = nil
@@ -428,6 +429,7 @@ public extension Monster {
 	}
 }
 public final class Weapon {
+	public static var instancePoolMutex : pthread_mutex_t = Weapon.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<Weapon> = []
 	public var name : String? {
