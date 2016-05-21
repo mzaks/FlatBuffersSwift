@@ -5,7 +5,7 @@ import Foundation
 
 import FlatBuffersSwift
 public final class ContactList {
-    public static var instancePoolMutex : pthread_mutex_t = ContactList.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = ContactList.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<ContactList> = []
 	public var lastModified : Int64 = 0
@@ -227,7 +227,7 @@ public enum Mood : Int8 {
 	case Funny, Serious, Angry, Humble
 }
 public final class Contact {
-    public static var instancePoolMutex : pthread_mutex_t = Contact.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = Contact.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<Contact> = []
 	public var name : String? {
@@ -669,7 +669,7 @@ public extension Contact {
 	}
 }
 public final class Date {
-    public static var instancePoolMutex : pthread_mutex_t = Date.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = Date.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<Date> = []
 	public var day : Int8 = 0
@@ -807,7 +807,7 @@ public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
 }
 public final class AddressEntry {
-    public static var instancePoolMutex : pthread_mutex_t = AddressEntry.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = AddressEntry.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<AddressEntry> = []
 	public var order : Int32 = 0
@@ -917,7 +917,7 @@ public extension AddressEntry {
 	}
 }
 public final class PostalAddress {
-    public static var instancePoolMutex : pthread_mutex_t = PostalAddress.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = PostalAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<PostalAddress> = []
 	public var country : String? {
@@ -1152,7 +1152,7 @@ public extension PostalAddress {
 	}
 }
 public final class EmailAddress {
-    public static var instancePoolMutex : pthread_mutex_t = EmailAddress.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = EmailAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<EmailAddress> = []
 	public var mailto : String? {
@@ -1283,7 +1283,7 @@ public extension EmailAddress {
 	}
 }
 public final class WebAddress {
-    public static var instancePoolMutex : pthread_mutex_t = WebAddress.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = WebAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<WebAddress> = []
 	public var url : String? {
@@ -1414,7 +1414,7 @@ public extension WebAddress {
 	}
 }
 public final class TelephoneNumber {
-    public static var instancePoolMutex : pthread_mutex_t = TelephoneNumber.setupInstancePoolMutex()
+	public static var instancePoolMutex : pthread_mutex_t = TelephoneNumber.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
 	public static var instancePool : ContiguousArray<TelephoneNumber> = []
 	public var number : String? {
