@@ -10,14 +10,15 @@
 
 import Foundation
 
-let iterations : UInt = 1000
-let inner_loop_iterations : UInt = 1000
-let bufsize = 4096
-var encodedsize = 0
-let readConfiguration = BinaryReadConfig(uniqueStrings: false, uniqueTables: false)
-let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrings: false, uniqueTables: false, uniqueVTables: false)
+private let iterations : UInt = 1000
+private let inner_loop_iterations : UInt = 1000
+private let bufsize = 4096
+private var encodedsize = 0
+private let readConfiguration = BinaryReadConfig(uniqueStrings: false, uniqueTables: false)
+private let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrings: false, uniqueTables: false, uniqueVTables: false)
 
-func flatencode(builder : FlatBufferBuilder)
+
+private func flatencode(builder : FlatBufferBuilder)
 {
     let veclen = 3
     var foobars = ContiguousArray<FooBar?>.init(count: veclen, repeatedValue:nil)
@@ -38,19 +39,19 @@ func flatencode(builder : FlatBufferBuilder)
     foobarcontainer.toFlatBufferBuilder(builder)
 }
 
-func flatdecode(reader : FlatBufferReader) -> FooBarContainer
+private func flatdecode(reader : FlatBufferReader) -> FooBarContainer
 {
     return FooBarContainer.fromFlatBufferReader(reader)
 }
 
-func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
+private func flatdecodelazy(inout buf:[UInt8], _ bufsize:Int) -> FooBarContainer.LazyAccess
 {
     return buf.withUnsafeBufferPointer {
         FooBarContainer.LazyAccess(data:($0), config: readConfiguration)
     }
 }
 
-func flatuse(foobarcontainer : FooBarContainer, start : Int) -> Int
+private func flatuse(foobarcontainer : FooBarContainer, start : Int) -> Int
 {
     var sum:Int = Int(start)
     sum = sum + Int(foobarcontainer.locationBuffer!.count)
@@ -79,7 +80,7 @@ func flatuse(foobarcontainer : FooBarContainer, start : Int) -> Int
 }
 
 // Just a copy-paste as we are lacking a protocol so we could write a generic implementation
-func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess, start : Int) -> Int
+private func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess, start : Int) -> Int
 {
     var sum:Int = start
     sum = sum + Int(foobarcontainer.location!.utf8.count) // characters.count is quite expensive and misleading here
@@ -107,7 +108,7 @@ func flatuselazy(foobarcontainer : FooBarContainer.LazyAccess, start : Int) -> I
     return sum
 }
 
-func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : Int) -> Int{
+private func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : Int) -> Int{
     
     let fooBarContainerOffset = getFooBarContainerRootOffset(buffer)
     
@@ -143,7 +144,7 @@ func flatDecodeDirect(buffer : UnsafePointer<UInt8>, start : Int) -> Int{
     return sum
 }
 
-func flatuseStruct(buffer : UnsafePointer<UInt8>, start : Int) -> Int
+private func flatuseStruct(buffer : UnsafePointer<UInt8>, start : Int) -> Int
 {
     var sum:Int = start
     
@@ -196,7 +197,7 @@ enum BenchmarkRunType {
     case structDecode     /// stream processing
 }
 
-func runbench(runType: BenchmarkRunType) -> (Int, Int)
+private func runbench(runType: BenchmarkRunType) -> (Int, Int)
 {
     var encode = 0.0
     var decode = 0.0
@@ -205,23 +206,22 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
     var total:UInt64 = 0
     var results : ContiguousArray<FooBarContainer> = []
     var lazyResults : ContiguousArray<FooBarContainer.LazyAccess> = []
-    var rawResults : ContiguousArray<UnsafePointer<UInt8>> = []
+    var rawResults = ContiguousArray<UnsafePointer<UInt8>>.init(count: Int(iterations), repeatedValue: nil)
     let builder = FlatBufferBuilder.create(buildConfiguration)
-    var reader : FlatBufferReader
+    var reader : FlatBufferReader? = nil
     var buf = [UInt8](count: bufsize, repeatedValue: 0)
     
     results.reserveCapacity(Int(iterations))
     lazyResults.reserveCapacity(Int(iterations))
-    rawResults.reserveCapacity(Int(iterations))
     
     // doing optional preload of instance caches
     FlatBufferBuilder.maxInstanceCacheSize = 10
     FlatBufferReader.maxInstanceCacheSize = iterations
-    FooBarContainer.maxInstanceCacheSize = iterations
-    FooBar.maxInstanceCacheSize = iterations * 3
+    FooBarContainer.maxInstanceCacheSize = iterations * 2
+    FooBar.maxInstanceCacheSize = iterations * 3 * 2
     
-    FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize)
-    FooBar.fillInstancePool(FooBar.maxInstanceCacheSize)
+    FooBarContainer.fillInstancePool(FooBarContainer.maxInstanceCacheSize / 2)
+    FooBar.fillInstancePool(FooBar.maxInstanceCacheSize / 2)
 
     print("\(runType)")
     for _ in 0..<inner_loop_iterations {
@@ -232,31 +232,27 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
             builder.reset() // we keep the last encoding to decode directly from the builder to mimic original test - no unnecessary memcpy
             flatencode(builder)
         }
-        buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount)) // only needed for lazy
+        encodedsize = builder._dataCount
         let time2 = CFAbsoluteTimeGetCurrent()
 
         // Decode
         let time3 = CFAbsoluteTimeGetCurrent()
-
-        reader = FlatBufferReader.create(builder._dataStart, count: builder._dataCount, config: readConfiguration)
-        encodedsize = builder._dataCount
         
         switch runType {
         case .eagerDecode:
+            reader = FlatBufferReader.create(builder._dataStart, count: builder._dataCount, config: readConfiguration)
             for _ in 0..<iterations {
-                results.append(flatdecode(reader))
+                results.append(flatdecode(reader!))
             }
         case .lazyDecode:
+            buf = Array(UnsafeBufferPointer(start: builder._dataStart, count: builder._dataCount)) // only needed for lazy
             for _ in 0..<iterations {
                 lazyResults.append(flatdecodelazy(&buf, bufsize))
             }
-        case .directDecode:
-            for _ in 0..<iterations {
-                rawResults.append(builder._dataStart)
-            }
-        case .structDecode:
-            for _ in 0..<iterations {
-                rawResults.append(builder._dataStart)
+        case .directDecode,
+             .structDecode:
+            for i : Int in 0..<Int(iterations) {
+                rawResults[i] = UnsafePointer(builder._dataStart)
             }
         }
         
@@ -308,16 +304,17 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
                 var x = results.removeLast()
                 FooBarContainer.reuseInstance(&x)
             }
+            if reader != nil {
+             FlatBufferReader.reuse(reader!)
+            }
         case .lazyDecode:
             lazyResults.removeAll(keepCapacity:true)
-        case .directDecode:
-            rawResults.removeAll(keepCapacity:true)
-        case .structDecode:
-            rawResults.removeAll(keepCapacity:true)
+        case .directDecode,
+             .structDecode:
+            break
+            // rawResults.removeAll(keepCapacity:true) we are just using the vector in-place
         }
 
-        FlatBufferReader.reuse(reader)
-        
         let time8 = CFAbsoluteTimeGetCurrent()
         
         encode = encode + (time2 - time1)
@@ -325,7 +322,7 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
     }
-    
+    rawResults.removeAll()
     print("=================================")
     print("\(((encode) * 1000).string(0)) ms encode")
     print("\(((decode) * 1000).string(0)) ms decode")
@@ -338,7 +335,8 @@ func runbench(runType: BenchmarkRunType) -> (Int, Int)
 }
 
 func flatbench() {
-    let benchMarks : [BenchmarkRunType] = [.lazyDecode, .eagerDecode, .directDecode, .structDecode]
+    let benchmarks : [BenchmarkRunType] = [.lazyDecode, .eagerDecode, .directDecode, .structDecode]
+    // let benchmarks : [BenchmarkRunType] = [.structDecode, .structDecode, .structDecode, .structDecode, .structDecode, .structDecode]
     var total = 0
     var subtotal = 0
     var messageSize = 0
@@ -346,7 +344,7 @@ func flatbench() {
     print("Running a total of \(inner_loop_iterations*iterations) iterations")
     print("")
     
-    for benchmark in benchMarks
+    for benchmark in benchmarks
     {
         (subtotal, messageSize) = runbench(benchmark)
         total = total + subtotal
