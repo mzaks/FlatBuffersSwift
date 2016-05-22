@@ -148,8 +148,8 @@ public func ==(t1 : FooBar.LazyAccess, t2 : FooBar.LazyAccess) -> Bool {
 
 extension FooBar {
 public struct Fast : Hashable {
-	private var buffer : UnsafePointer<UInt8> = nil
-	private var myOffset : Offset = 0
+    private let buffer : UnsafePointer<UInt8>
+    private let myOffset : Offset
 	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
 		self.buffer = buffer
 		self.myOffset = myOffset
@@ -397,8 +397,8 @@ public func ==(t1 : FooBarContainer.LazyAccess, t2 : FooBarContainer.LazyAccess)
 
 extension FooBarContainer {
 public struct Fast : Hashable {
-	private var buffer : UnsafePointer<UInt8> = nil
-	private var myOffset : Offset = 0
+    private let buffer : UnsafePointer<UInt8>
+    private let myOffset : Offset
 	public init(buffer: UnsafePointer<UInt8>, myOffset: Offset){
 		self.buffer = buffer
 		self.myOffset = myOffset
@@ -411,8 +411,8 @@ public struct Fast : Hashable {
 		return buffer
 	}
 	public struct ListVector {
-		private var buffer : UnsafePointer<UInt8> = nil
-		private var myOffset : Offset = 0
+        private let buffer : UnsafePointer<UInt8>
+        private let myOffset : Offset
 		private let offsetList : Offset?
 		private init(buffer b: UnsafePointer<UInt8>, myOffset o: Offset ) {
 			buffer = b
