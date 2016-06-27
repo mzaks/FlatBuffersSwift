@@ -15,7 +15,7 @@ private let inner_loop_iterations : UInt = 1000
 private let bufsize = 4096
 private var encodedsize = 0
 private let readConfiguration = BinaryReadConfig(uniqueStrings: false, uniqueTables: false)
-private let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrings: false, uniqueTables: false, uniqueVTables: false)
+private let buildConfiguration = BinaryBuildConfig(initialCapacity: bufsize, uniqueStrings: false, uniqueTables: false, uniqueVTables: false, forceDefaults: false, fullMemoryAlignment: false)
 
 
 private func flatencode(builder : FlatBufferBuilder)
@@ -322,6 +322,7 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
     }
+    try!NSData(bytes: builder._dataStart, length: builder._dataCount).writeToFile("/Users/mzaks/dev/bin2.bin", options: [])
     rawResults.removeAll()
     print("=================================")
     print("\(((encode) * 1000).string(0)) ms encode")

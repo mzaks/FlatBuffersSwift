@@ -373,7 +373,7 @@ public extension Monster {
 				offsets[index] = weapons[index]?.addToByteArray(builder)
 				index -= 1
 			}
-			try! builder.startVector(weapons.count)
+			try! builder.startVector(weapons.count, elementSize: strideof(Offset))
 			index = weapons.count - 1
 			while(index >= 0){
 				try! builder.putOffset(offsets[index])
@@ -383,7 +383,7 @@ public extension Monster {
 		}
 		var offset5 = Offset(0)
 		if inventory.count > 0{
-			try! builder.startVector(inventory.count)
+			try! builder.startVector(inventory.count, elementSize: strideof(UInt8))
 			var index = inventory.count - 1
 			while(index >= 0){
 				builder.put(inventory[index])

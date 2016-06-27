@@ -473,7 +473,7 @@ public extension FooBarContainer {
 				offsets[index] = list[index]?.addToByteArray(builder)
 				index -= 1
 			}
-			try! builder.startVector(list.count)
+			try! builder.startVector(list.count, elementSize: strideof(Offset))
 			index = list.count - 1
 			while(index >= 0){
 				try! builder.putOffset(offsets[index])

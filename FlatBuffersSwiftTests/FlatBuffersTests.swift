@@ -208,7 +208,7 @@ class FlatBuffersTests: XCTestCase {
     
     func testCreateVectorOffBools() {
         let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
-        try! fbb.startVector(3)
+        try! fbb.startVector(3, elementSize: 1)
         fbb.put(true)
         fbb.put(true)
         fbb.put(false)
@@ -497,7 +497,7 @@ class FlatBuffersTests: XCTestCase {
     
     func testReadIntFromVector() {
         let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
-        try! fbb.startVector(2)
+        try! fbb.startVector(2, elementSize: 8)
         fbb.put(34) // puting stuff in reversed order!!!
         fbb.put(43) // puting stuff in reversed order!!!
         let sOffset = fbb.endVector()
@@ -519,10 +519,34 @@ class FlatBuffersTests: XCTestCase {
         XCTAssertEqual(reader.getVectorScalarElement(objectOffset2, index: 1) as Int, 34)
     }
     
+    func testReadStructFromVector() {
+        let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
+        try! fbb.startVector(2, elementSize: strideof(GeoLocation))
+        fbb.put(GeoLocation(latitude: 1.8, longitude: 3.5, elevation: 4.9, s: S1(i: 13))) // puting stuff in reversed order!!!
+        fbb.put(GeoLocation(latitude: 2.8, longitude: 4.5, elevation: 3.9, s: S1(i: 17))) // puting stuff in reversed order!!!
+        let sOffset = fbb.endVector()
+        
+        try! fbb.openObject(3)
+        try! fbb.addPropertyToOpenObject(0, value: true, defaultValue: false)
+        try! fbb.addPropertyOffsetToOpenObject(1, offset: sOffset)
+        let oOffset1 = try! fbb.closeObject()
+        
+        try! fbb.finish(oOffset1, fileIdentifier: nil)
+        let data = fbb.data
+        
+        let reader = FlatBufferReader(buffer: data, config: BinaryReadConfig())
+        let objectOffset = reader.rootObjectOffset
+        let objectOffset2 : Offset = reader.getOffset(objectOffset, propertyIndex: 1)!
+        let length = reader.getVectorLength(objectOffset2)
+        XCTAssertEqual(length, 2)
+        XCTAssertEqual((reader.getVectorScalarElement(objectOffset2, index: 0) as GeoLocation).s.i, 17)
+        XCTAssertEqual((reader.getVectorScalarElement(objectOffset2, index: 1) as GeoLocation).s.i, 13)
+    }
+    
     func testReadStringFromVector() {
         let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
-        try! fbb.startVector(1)
+        try! fbb.startVector(1, elementSize: 4)
         try! fbb.putOffset(sOffset)
         let vOffset = fbb.endVector()
         
@@ -547,7 +571,7 @@ class FlatBuffersTests: XCTestCase {
         let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         let sOffset = try! fbb.createString("max")
         
-        try! fbb.startVector(1)
+        try! fbb.startVector(1, elementSize: 4)
         let cursor = try! fbb.putOffset(0)
         let vOffset = fbb.endVector()
         
@@ -611,7 +635,7 @@ class FlatBuffersTests: XCTestCase {
     func testReplaceScalarInVectorThrouhgReader() {
         let fbb = FlatBufferBuilder(config:BinaryBuildConfig())
         
-        try! fbb.startVector(3)
+        try! fbb.startVector(3, elementSize: 8)
         fbb.put(1)
         fbb.put(2)
         fbb.put(3)

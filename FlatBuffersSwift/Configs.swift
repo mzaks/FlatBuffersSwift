@@ -14,14 +14,19 @@ public struct BinaryBuildConfig{
     public let uniqueTables : Bool
     public let uniqueVTables : Bool
     public let forceDefaults : Bool
-    public init(initialCapacity : Int = 1, uniqueStrings : Bool = true, uniqueTables : Bool = true, uniqueVTables : Bool = true, forceDefaults : Bool = false) {
+    public let fullMemoryAlignment : Bool
+    public let nullTerminatedUTF8 : Bool
+    public init(initialCapacity : Int = 1, uniqueStrings : Bool = true, uniqueTables : Bool = true, uniqueVTables : Bool = true, forceDefaults : Bool = false, fullMemoryAlignment: Bool = false, nullTerminatedUTF8 : Bool = false) {
         self.initialCapacity = initialCapacity
         self.uniqueStrings = uniqueStrings
         self.uniqueTables = uniqueTables
         self.uniqueVTables = uniqueVTables
         self.forceDefaults = forceDefaults
+        self.fullMemoryAlignment = fullMemoryAlignment
+        self.nullTerminatedUTF8 = nullTerminatedUTF8
     }
 }
+
 
 public struct BinaryReadConfig {
     public let uniqueTables : Bool

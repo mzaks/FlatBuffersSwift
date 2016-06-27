@@ -200,7 +200,7 @@ public extension ContactList {
 				offsets[index] = entries[index]?.addToByteArray(builder)
 				index -= 1
 			}
-			try! builder.startVector(entries.count)
+			try! builder.startVector(entries.count, elementSize: strideof(Offset))
 			index = entries.count - 1
 			while(index >= 0){
 				try! builder.putOffset(offsets[index])
@@ -579,7 +579,7 @@ public extension Contact {
 		}
 		var offset7 = Offset(0)
 		if moods.count > 0{
-			try! builder.startVector(moods.count)
+			try! builder.startVector(moods.count, elementSize: strideof(Mood))
 			var index = moods.count - 1
 			while(index >= 0){
 				builder.put(moods[index]!.rawValue)
@@ -589,7 +589,7 @@ public extension Contact {
 		}
 		var offset6 = Offset(0)
 		if previousLocations.count > 0{
-			try! builder.startVector(previousLocations.count)
+			try! builder.startVector(previousLocations.count, elementSize: strideof(GeoLocation))
 			var index = previousLocations.count - 1
 			while(index >= 0){
 				builder.put(previousLocations[index]!)
@@ -605,7 +605,7 @@ public extension Contact {
 				offsets[index] = addressEntries[index]?.addToByteArray(builder)
 				index -= 1
 			}
-			try! builder.startVector(addressEntries.count)
+			try! builder.startVector(addressEntries.count, elementSize: strideof(Offset))
 			index = addressEntries.count - 1
 			while(index >= 0){
 				try! builder.putOffset(offsets[index])
@@ -621,7 +621,7 @@ public extension Contact {
 				offsets[index] = try!builder.createString(tags[index])
 				index -= 1
 			}
-			try! builder.startVector(tags.count)
+			try! builder.startVector(tags.count, elementSize: strideof(Offset))
 			index = tags.count - 1
 			while(index >= 0){
 				try! builder.putOffset(offsets[index])
