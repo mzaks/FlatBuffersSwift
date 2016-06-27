@@ -322,7 +322,7 @@ private func runbench(runType: BenchmarkRunType) -> (Int, Int)
         use = use + (time6 - time5)
         dealloc = dealloc + (time8 - time7)
     }
-    try!NSData(bytes: builder._dataStart, length: builder._dataCount).writeToFile("/Users/mzaks/dev/bin2.bin", options: [])
+    
     rawResults.removeAll()
     print("=================================")
     print("\(((encode) * 1000).string(0)) ms encode")
