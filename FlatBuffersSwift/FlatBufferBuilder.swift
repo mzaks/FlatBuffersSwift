@@ -87,9 +87,6 @@ public final class FlatBufferBuilder {
     
     public func put<T : Scalar>(value : T){
         var v = value
-        if UInt32(CFByteOrderGetCurrent()) == CFByteOrderBigEndian.rawValue{
-            v = value.littleEndian
-        }
         let c = strideofValue(v)
         if c > 8 {
             align(8, additionalBytes: c)
@@ -157,9 +154,6 @@ public final class FlatBufferBuilder {
     
     private func put<T : Scalar>(value : T, at index : Int){
         var v = value
-        if UInt32(CFByteOrderGetCurrent()) == CFByteOrderBigEndian.rawValue{
-            v = value.littleEndian
-        }
         let c = strideofValue(v)
         withUnsafePointer(&v){
             _data.advancedBy(index + leftCursor).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)

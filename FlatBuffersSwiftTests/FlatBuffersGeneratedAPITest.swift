@@ -216,4 +216,27 @@ class FlatBuffersGeneratedAPITest: XCTestCase {
         XCTAssert(eagerList.entries[0]?.moods[0] == Mood.Serious)
         XCTAssert(eagerList.entries[0]?.moods[1] == Mood.Funny)
     }
+    
+    func testJSONEncodingAndDecoding(){
+        let list = ContactList()
+        let p1 = Contact()
+        p1.name = "Max"
+        p1.gender = .Male
+        p1.moods = [Mood.Angry, Mood.Funny]
+        p1.currentLoccation = GeoLocation(latitude: 3.5, longitude: 3.5, elevation: 3.5, s: S1(i:8))
+        p1.previousLocations = [GeoLocation(latitude: 1.5, longitude: 2.5, elevation: 3.5, s: S1(i:2))]
+        
+        let postalAddres = PostalAddress(country: "DE", city: "BE", postalCode: 12345, streetAndNumber: "foo bar str. 45")
+        p1.addressEntries = [AddressEntry(order: 0, address: postalAddres)]
+        
+        list.entries = [p1]
+        
+        let jsonString = list.toJSON()
+        let json = try!NSJSONSerialization.JSONObjectWithData(jsonString.dataUsingEncoding(NSUTF8StringEncoding)!, options: []) as! NSDictionary
+        
+        let newList  = ContactList.fromJSON(json)
+        let newJsonString = newList.toJSON()
+        XCTAssert(jsonString == newJsonString)
+        
+    }
 }

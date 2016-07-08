@@ -219,12 +219,97 @@ public extension ContactList {
 		return myOffset
 	}
 }
-public enum Gender : Int8 {
-	case None, Male, Female
+extension ContactList {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		properties.append("\"lastModified\":\(lastModified)")
+		properties.append("\"entries\":[\(entries.map({$0 == nil ? "null" : $0!.toJSON()}).joinWithSeparator(","))]")
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> ContactList {
+		let result = ContactList()
+		if let lastModified = dict["lastModified"] as? NSNumber {
+			result.lastModified = lastModified.longLongValue
+		}
+		if let entries = dict["entries"] as? NSArray {
+			result.entries = ContiguousArray(entries.map({
+				if let entry = $0 as? NSDictionary {
+					return Contact.fromJSON(entry)
+				}
+				return nil
+			}))
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"ContactList\""
+	}
 }
-public enum Mood : Int8 {
-	case Funny, Serious, Angry, Humble
+		public enum Gender : Int8 {
+			case None, Male, Female
+		}
+		
+		extension Gender {
+			func toJSON() -> String {
+				switch self {
+				case None:
+					return "\"None\""
+				case Male:
+					return "\"Male\""
+				case Female:
+					return "\"Female\""
+				}
+			}
+			static func fromJSON(value : String) -> Gender? {
+			switch value {
+			case "None":
+				return None
+			case "Male":
+				return Male
+			case "Female":
+				return Female
+			default:
+				return nil
+			}
+		}
 }
+		
+		public enum Mood : Int8 {
+			case Funny, Serious, Angry, Humble
+		}
+		
+		extension Mood {
+			func toJSON() -> String {
+				switch self {
+				case Funny:
+					return "\"Funny\""
+				case Serious:
+					return "\"Serious\""
+				case Angry:
+					return "\"Angry\""
+				case Humble:
+					return "\"Humble\""
+				}
+			}
+			static func fromJSON(value : String) -> Mood? {
+			switch value {
+			case "Funny":
+				return Funny
+			case "Serious":
+				return Serious
+			case "Angry":
+				return Angry
+			case "Humble":
+				return Humble
+			default:
+				return nil
+			}
+		}
+}
+		
 public final class Contact {
 	public static var instancePoolMutex : pthread_mutex_t = Contact.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
@@ -667,6 +752,83 @@ public extension Contact {
 		return myOffset
 	}
 }
+extension Contact {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let name = name{
+			properties.append("\"name\":\"\(name)\"")
+		}
+		if let birthday = birthday{
+			properties.append("\"birthday\":\(birthday.toJSON())")
+		}
+		if let gender = gender{
+			properties.append("\"gender\":\(gender.toJSON())")
+		}
+		let tags_List = tags.map({$0 == nil ? "null" : "\"\($0!)\""}).joinWithSeparator(",")
+		properties.append("\"tags\":[\(tags_List)]")
+		properties.append("\"addressEntries\":[\(addressEntries.map({$0 == nil ? "null" : $0!.toJSON()}).joinWithSeparator(","))]")
+		if let currentLoccation = currentLoccation{
+			properties.append("\"currentLoccation\":\(currentLoccation.toJSON())")
+		}
+		properties.append("\"previousLocations\":[\(previousLocations.map({$0 == nil ? "null" : $0!.toJSON()}).joinWithSeparator(","))]")
+		properties.append("\"moods\":[\(moods.map({$0 == nil ? "null" : $0!.toJSON()}).joinWithSeparator(","))]")
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> Contact {
+		let result = Contact()
+		if let name = dict["name"] as? NSString {
+			result.name = name as String
+		}
+		if let birthday = dict["birthday"] as? NSDictionary {
+			result.birthday = Date.fromJSON(birthday)
+		}
+		if let gender = dict["gender"] as? NSString {
+			result.gender = Gender.fromJSON(gender as String)
+		}
+		if let tags = dict["tags"] as? NSArray {
+			result.tags = ContiguousArray(tags.map({
+				if let entry = $0 as? NSString {
+					return entry as String
+				}
+				return nil
+			}))
+		}
+		if let addressEntries = dict["addressEntries"] as? NSArray {
+			result.addressEntries = ContiguousArray(addressEntries.map({
+				if let entry = $0 as? NSDictionary {
+					return AddressEntry.fromJSON(entry)
+				}
+				return nil
+			}))
+		}
+		if let currentLoccation = dict["currentLoccation"] as? NSDictionary {
+			result.currentLoccation = GeoLocation.fromJSON(currentLoccation)
+		}
+		if let previousLocations = dict["previousLocations"] as? NSArray {
+			result.previousLocations = ContiguousArray(previousLocations.map({
+				if let entry = $0 as? NSDictionary {
+					return GeoLocation.fromJSON(entry)
+				}
+				return nil
+			}))
+		}
+		if let moods = dict["moods"] as? NSArray {
+			result.moods = ContiguousArray(moods.map({
+				if let entry = $0 as? NSString {
+					return Mood.fromJSON(entry as String)
+				}
+				return nil
+			}))
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"Contact\""
+	}
+}
 public final class Date {
 	public static var instancePoolMutex : pthread_mutex_t = Date.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
@@ -790,11 +952,52 @@ public extension Date {
 		return myOffset
 	}
 }
+extension Date {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		properties.append("\"day\":\(day)")
+		properties.append("\"month\":\(month)")
+		properties.append("\"year\":\(year)")
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> Date {
+		let result = Date()
+		if let day = dict["day"] as? NSNumber {
+			result.day = day.charValue
+		}
+		if let month = dict["month"] as? NSNumber {
+			result.month = month.charValue
+		}
+		if let year = dict["year"] as? NSNumber {
+			result.year = year.shortValue
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"Date\""
+	}
+}
 public struct S1 : Scalar {
 	public let i : Int32
 }
 public func ==(v1:S1, v2:S1) -> Bool {
 	return  v1.i==v2.i
+}
+
+extension S1 {
+	public func toJSON() -> String{
+		let iProperty = "\"i\":\(i)"
+		return "{\(iProperty)}"
+	}
+	
+	public static func fromJSON(dict : NSDictionary) -> S1 {
+		return S1(
+		i: (dict["i"] as! NSNumber).intValue
+		)
+	}
 }
 public struct GeoLocation : Scalar {
 	public let latitude : Float64
@@ -804,6 +1007,25 @@ public struct GeoLocation : Scalar {
 }
 public func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
 	return  v1.latitude==v2.latitude &&  v1.longitude==v2.longitude &&  v1.elevation==v2.elevation &&  v1.s==v2.s
+}
+
+extension GeoLocation {
+	public func toJSON() -> String{
+		let latitudeProperty = "\"latitude\":\(latitude)"
+		let longitudeProperty = "\"longitude\":\(longitude)"
+		let elevationProperty = "\"elevation\":\(elevation)"
+		let sProperty = "\"s\":\(s.toJSON())"
+		return "{\(latitudeProperty),\(longitudeProperty),\(elevationProperty),\(sProperty)}"
+	}
+	
+	public static func fromJSON(dict : NSDictionary) -> GeoLocation {
+		return GeoLocation(
+		latitude: (dict["latitude"] as! NSNumber).doubleValue,
+		longitude: (dict["longitude"] as! NSNumber).doubleValue,
+		elevation: (dict["elevation"] as! NSNumber).floatValue,
+		s: S1.fromJSON(dict["s"] as! NSDictionary)
+		)
+	}
 }
 public final class AddressEntry {
 	public static var instancePoolMutex : pthread_mutex_t = AddressEntry.setupInstancePoolMutex()
@@ -913,6 +1135,32 @@ public extension AddressEntry {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
+	}
+}
+extension AddressEntry {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		properties.append("\"order\":\(order)")
+		if let address = address{
+			properties.append("\"address\":\(address.toJSON()),\"address_type\":\(address.jsonTypeName())")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> AddressEntry {
+		let result = AddressEntry()
+		if let order = dict["order"] as? NSNumber {
+			result.order = order.intValue
+		}
+		if let address = dict["address"] as? NSDictionary, let address_type = dict["address_type"] as? NSString {
+			result.address = fromJSON_Address(address, typeName: address_type as String)
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"AddressEntry\""
 	}
 }
 public final class PostalAddress {
@@ -1150,6 +1398,44 @@ public extension PostalAddress {
 		return myOffset
 	}
 }
+extension PostalAddress {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let country = country{
+			properties.append("\"country\":\"\(country)\"")
+		}
+		if let city = city{
+			properties.append("\"city\":\"\(city)\"")
+		}
+		properties.append("\"postalCode\":\(postalCode)")
+		if let streetAndNumber = streetAndNumber{
+			properties.append("\"streetAndNumber\":\"\(streetAndNumber)\"")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> PostalAddress {
+		let result = PostalAddress()
+		if let country = dict["country"] as? NSString {
+			result.country = country as String
+		}
+		if let city = dict["city"] as? NSString {
+			result.city = city as String
+		}
+		if let postalCode = dict["postalCode"] as? NSNumber {
+			result.postalCode = postalCode.intValue
+		}
+		if let streetAndNumber = dict["streetAndNumber"] as? NSString {
+			result.streetAndNumber = streetAndNumber as String
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"PostalAddress\""
+	}
+}
 public final class EmailAddress {
 	public static var instancePoolMutex : pthread_mutex_t = EmailAddress.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
@@ -1279,6 +1565,28 @@ public extension EmailAddress {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
+	}
+}
+extension EmailAddress {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let mailto = mailto{
+			properties.append("\"mailto\":\"\(mailto)\"")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> EmailAddress {
+		let result = EmailAddress()
+		if let mailto = dict["mailto"] as? NSString {
+			result.mailto = mailto as String
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"EmailAddress\""
 	}
 }
 public final class WebAddress {
@@ -1412,6 +1720,28 @@ public extension WebAddress {
 		return myOffset
 	}
 }
+extension WebAddress {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let url = url{
+			properties.append("\"url\":\"\(url)\"")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> WebAddress {
+		let result = WebAddress()
+		if let url = dict["url"] as? NSString {
+			result.url = url as String
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"WebAddress\""
+	}
+}
 public final class TelephoneNumber {
 	public static var instancePoolMutex : pthread_mutex_t = TelephoneNumber.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
@@ -1543,7 +1873,33 @@ public extension TelephoneNumber {
 		return myOffset
 	}
 }
-public protocol Address{}
+extension TelephoneNumber {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let number = number{
+			properties.append("\"number\":\"\(number)\"")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> TelephoneNumber {
+		let result = TelephoneNumber()
+		if let number = dict["number"] as? NSString {
+			result.number = number as String
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"TelephoneNumber\""
+	}
+}
+public protocol Address{
+	static func fromJSON(dict : NSDictionary) -> Self
+	func toJSON() -> String
+	func jsonTypeName() -> String
+}
 public protocol Address_LazyAccess{}
 public protocol Address_Fast{}
 extension PostalAddress : Address {}
@@ -1571,6 +1927,15 @@ private func create_Address(reader : FlatBufferReader, propertyIndex : Int, obje
 	case 2 : return EmailAddress.create(reader, objectOffset: caseObjectOffset)
 	case 3 : return WebAddress.create(reader, objectOffset: caseObjectOffset)
 	case 4 : return TelephoneNumber.create(reader, objectOffset: caseObjectOffset)
+	default : return nil
+	}
+}
+private func fromJSON_Address(dict : NSDictionary, typeName : String) -> Address? {
+	switch typeName {
+	case "PostalAddress" : return PostalAddress.fromJSON(dict)
+	case "EmailAddress" : return EmailAddress.fromJSON(dict)
+	case "WebAddress" : return WebAddress.fromJSON(dict)
+	case "TelephoneNumber" : return TelephoneNumber.fromJSON(dict)
 	default : return nil
 	}
 }
@@ -1643,22 +2008,6 @@ private func performLateBindings(builder : FlatBufferBuilder) {
 public typealias Offset = Int32
 
 public protocol Scalar : Equatable {}
-
-extension Scalar {
-    var littleEndian : Self {
-        switch self {
-        case let v as Int16 : return v.littleEndian as! Self
-        case let v as UInt16 : return v.littleEndian as! Self
-        case let v as Int32 : return v.littleEndian as! Self
-        case let v as UInt32 : return v.littleEndian as! Self
-        case let v as Int64 : return v.littleEndian as! Self
-        case let v as UInt64 : return v.littleEndian as! Self
-        case let v as Int : return v.littleEndian as! Self
-        case let v as UInt : return v.littleEndian as! Self
-        default : return self
-        }
-    }
-}
 
 extension Bool : Scalar {}
 extension Int8 : Scalar {}
@@ -2198,6 +2547,10 @@ public final class FlatBufferReaderFast {
 }
 
 
+
+
+
+
 public final class FlatBufferFileReader {
     
     public var config : BinaryReadConfig
@@ -2415,9 +2768,6 @@ public final class FlatBufferBuilder {
     
     public func put<T : Scalar>(value : T){
         var v = value
-        if UInt32(CFByteOrderGetCurrent()) == CFByteOrderBigEndian.rawValue{
-            v = value.littleEndian
-        }
         let c = strideofValue(v)
         if c > 8 {
             align(8, additionalBytes: c)
@@ -2485,9 +2835,6 @@ public final class FlatBufferBuilder {
     
     private func put<T : Scalar>(value : T, at index : Int){
         var v = value
-        if UInt32(CFByteOrderGetCurrent()) == CFByteOrderBigEndian.rawValue{
-            v = value.littleEndian
-        }
         let c = strideofValue(v)
         withUnsafePointer(&v){
             _data.advancedBy(index + leftCursor).assignFrom(UnsafeMutablePointer<UInt8>($0), count: c)

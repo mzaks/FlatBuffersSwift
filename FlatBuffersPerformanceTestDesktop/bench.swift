@@ -3,9 +3,35 @@
 
 import Foundation
 
-public enum Enum : Int16 {
-	case Apples, Pears, Bananas
+		public enum Enum : Int16 {
+			case Apples, Pears, Bananas
+		}
+		
+		extension Enum {
+			func toJSON() -> String {
+				switch self {
+				case Apples:
+					return "\"Apples\""
+				case Pears:
+					return "\"Pears\""
+				case Bananas:
+					return "\"Bananas\""
+				}
+			}
+			static func fromJSON(value : String) -> Enum? {
+			switch value {
+			case "Apples":
+				return Apples
+			case "Pears":
+				return Pears
+			case "Bananas":
+				return Bananas
+			default:
+				return nil
+			}
+		}
 }
+		
 public struct Foo : Scalar {
 	public let id : UInt64
 	public let count : Int16
@@ -15,6 +41,25 @@ public struct Foo : Scalar {
 public func ==(v1:Foo, v2:Foo) -> Bool {
 	return  v1.id==v2.id &&  v1.count==v2.count &&  v1.prefix==v2.prefix &&  v1.length==v2.length
 }
+
+extension Foo {
+	public func toJSON() -> String{
+		let idProperty = "\"id\":\(id)"
+		let countProperty = "\"count\":\(count)"
+		let prefixProperty = "\"prefix\":\(prefix)"
+		let lengthProperty = "\"length\":\(length)"
+		return "{\(idProperty),\(countProperty),\(prefixProperty),\(lengthProperty)}"
+	}
+	
+	public static func fromJSON(dict : NSDictionary) -> Foo {
+		return Foo(
+		id: (dict["id"] as! NSNumber).unsignedLongLongValue,
+		count: (dict["count"] as! NSNumber).shortValue,
+		prefix: (dict["prefix"] as! NSNumber).charValue,
+		length: (dict["length"] as! NSNumber).unsignedIntValue
+		)
+	}
+}
 public struct Bar : Scalar {
 	public let parent : Foo
 	public let time : Int32
@@ -23,6 +68,25 @@ public struct Bar : Scalar {
 }
 public func ==(v1:Bar, v2:Bar) -> Bool {
 	return  v1.parent==v2.parent &&  v1.time==v2.time &&  v1.ratio==v2.ratio &&  v1.size==v2.size
+}
+
+extension Bar {
+	public func toJSON() -> String{
+		let parentProperty = "\"parent\":\(parent.toJSON())"
+		let timeProperty = "\"time\":\(time)"
+		let ratioProperty = "\"ratio\":\(ratio)"
+		let sizeProperty = "\"size\":\(size)"
+		return "{\(parentProperty),\(timeProperty),\(ratioProperty),\(sizeProperty)}"
+	}
+	
+	public static func fromJSON(dict : NSDictionary) -> Bar {
+		return Bar(
+		parent: Foo.fromJSON(dict["parent"] as! NSDictionary),
+		time: (dict["time"] as! NSNumber).intValue,
+		ratio: (dict["ratio"] as! NSNumber).floatValue,
+		size: (dict["size"] as! NSNumber).unsignedShortValue
+		)
+	}
 }
 public final class FooBar {
 	public static var instancePoolMutex : pthread_mutex_t = FooBar.setupInstancePoolMutex()
@@ -206,6 +270,42 @@ public extension FooBar {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
+	}
+}
+extension FooBar {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let sibling = sibling{
+			properties.append("\"sibling\":\(sibling.toJSON())")
+		}
+		if let name = name{
+			properties.append("\"name\":\"\(name)\"")
+		}
+		properties.append("\"rating\":\(rating)")
+		properties.append("\"postfix\":\(postfix)")
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> FooBar {
+		let result = FooBar()
+		if let sibling = dict["sibling"] as? NSDictionary {
+			result.sibling = Bar.fromJSON(sibling)
+		}
+		if let name = dict["name"] as? NSString {
+			result.name = name as String
+		}
+		if let rating = dict["rating"] as? NSNumber {
+			result.rating = rating.doubleValue
+		}
+		if let postfix = dict["postfix"] as? NSNumber {
+			result.postfix = postfix.unsignedCharValue
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"FooBar\""
 	}
 }
 public final class FooBarContainer {
@@ -493,6 +593,47 @@ public extension FooBarContainer {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
+	}
+}
+extension FooBarContainer {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		properties.append("\"list\":[\(list.map({$0 == nil ? "null" : $0!.toJSON()}).joinWithSeparator(","))]")
+		properties.append("\"initialized\":\(initialized)")
+		if let fruit = fruit{
+			properties.append("\"fruit\":\(fruit.toJSON())")
+		}
+		if let location = location{
+			properties.append("\"location\":\"\(location)\"")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> FooBarContainer {
+		let result = FooBarContainer()
+		if let list = dict["list"] as? NSArray {
+			result.list = ContiguousArray(list.map({
+				if let entry = $0 as? NSDictionary {
+					return FooBar.fromJSON(entry)
+				}
+				return nil
+			}))
+		}
+		if let initialized = dict["initialized"] as? NSNumber {
+			result.initialized = initialized.boolValue
+		}
+		if let fruit = dict["fruit"] as? NSString {
+			result.fruit = Enum.fromJSON(fruit as String)
+		}
+		if let location = dict["location"] as? NSString {
+			result.location = location as String
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"FooBarContainer\""
 	}
 }
 private func performLateBindings(builder : FlatBufferBuilder) {

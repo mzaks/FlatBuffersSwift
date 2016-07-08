@@ -12,22 +12,6 @@ public typealias Offset = Int32
 
 public protocol Scalar : Equatable {}
 
-extension Scalar {
-    var littleEndian : Self {
-        switch self {
-        case let v as Int16 : return v.littleEndian as! Self
-        case let v as UInt16 : return v.littleEndian as! Self
-        case let v as Int32 : return v.littleEndian as! Self
-        case let v as UInt32 : return v.littleEndian as! Self
-        case let v as Int64 : return v.littleEndian as! Self
-        case let v as UInt64 : return v.littleEndian as! Self
-        case let v as Int : return v.littleEndian as! Self
-        case let v as UInt : return v.littleEndian as! Self
-        default : return self
-        }
-    }
-}
-
 extension Bool : Scalar {}
 extension Int8 : Scalar {}
 extension UInt8 : Scalar {}

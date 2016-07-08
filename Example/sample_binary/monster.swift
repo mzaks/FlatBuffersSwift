@@ -4,9 +4,35 @@
 import Foundation
 
 import FlatBuffersSwift
-public enum Color : Int8 {
-	case Red = 0, Green, Blue = 2
+		public enum Color : Int8 {
+			case Red = 0, Green, Blue = 2
+		}
+		
+		extension Color {
+			func toJSON() -> String {
+				switch self {
+				case Red:
+					return "\"Red\""
+				case Green:
+					return "\"Green\""
+				case Blue:
+					return "\"Blue\""
+				}
+			}
+			static func fromJSON(value : String) -> Color? {
+			switch value {
+			case "Red":
+				return Red
+			case "Green":
+				return Green
+			case "Blue":
+				return Blue
+			default:
+				return nil
+			}
+		}
 }
+		
 public struct Vec3 : Scalar {
 	public let x : Float32
 	public let y : Float32
@@ -14,6 +40,23 @@ public struct Vec3 : Scalar {
 }
 public func ==(v1:Vec3, v2:Vec3) -> Bool {
 	return  v1.x==v2.x &&  v1.y==v2.y &&  v1.z==v2.z
+}
+
+extension Vec3 {
+	public func toJSON() -> String{
+		let xProperty = "\"x\":\(x)"
+		let yProperty = "\"y\":\(y)"
+		let zProperty = "\"z\":\(z)"
+		return "{\(xProperty),\(yProperty),\(zProperty)}"
+	}
+	
+	public static func fromJSON(dict : NSDictionary) -> Vec3 {
+		return Vec3(
+		x: (dict["x"] as! NSNumber).floatValue,
+		y: (dict["y"] as! NSNumber).floatValue,
+		z: (dict["z"] as! NSNumber).floatValue
+		)
+	}
 }
 public final class Monster {
 	public static var instancePoolMutex : pthread_mutex_t = Monster.setupInstancePoolMutex()
@@ -428,6 +471,75 @@ public extension Monster {
 		return myOffset
 	}
 }
+extension Monster {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let pos = pos{
+			properties.append("\"pos\":\(pos.toJSON())")
+		}
+		properties.append("\"mana\":\(mana)")
+		properties.append("\"hp\":\(hp)")
+		if let name = name{
+			properties.append("\"name\":\"\(name)\"")
+		}
+		properties.append("\"inventory\":[\(inventory.map({String($0)}).joinWithSeparator(","))]")
+		if let color = color{
+			properties.append("\"color\":\(color.toJSON())")
+		}
+		properties.append("\"weapons\":[\(weapons.map({$0 == nil ? "null" : $0!.toJSON()}).joinWithSeparator(","))]")
+		if let equipped = equipped{
+			properties.append("\"equipped\":\(equipped.toJSON()),\"equipped_type\":\(equipped.jsonTypeName())")
+		}
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> Monster {
+		let result = Monster()
+		if let pos = dict["pos"] as? NSDictionary {
+			result.pos = Vec3.fromJSON(pos)
+		}
+		if let mana = dict["mana"] as? NSNumber {
+			result.mana = mana.shortValue
+		}
+		if let hp = dict["hp"] as? NSNumber {
+			result.hp = hp.shortValue
+		}
+		if let name = dict["name"] as? NSString {
+			result.name = name as String
+		}
+		if let friendly = dict["friendly"] as? NSNumber {
+			result.__friendly = friendly.boolValue
+		}
+		if let inventory = dict["inventory"] as? NSArray {
+			result.inventory = ContiguousArray(inventory.map({
+				if let entry = $0 as? NSNumber {
+					return entry.unsignedCharValue
+				}
+				return 0
+			}))
+		}
+		if let color = dict["color"] as? NSString {
+			result.color = Color.fromJSON(color as String)
+		}
+		if let weapons = dict["weapons"] as? NSArray {
+			result.weapons = ContiguousArray(weapons.map({
+				if let entry = $0 as? NSDictionary {
+					return Weapon.fromJSON(entry)
+				}
+				return nil
+			}))
+		}
+		if let equipped = dict["equipped"] as? NSDictionary, let equipped_type = dict["equipped_type"] as? NSString {
+			result.equipped = fromJSON_Equipment(equipped, typeName: equipped_type as String)
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"Monster\""
+	}
+}
 public final class Weapon {
 	public static var instancePoolMutex : pthread_mutex_t = Weapon.setupInstancePoolMutex()
 	public static var maxInstanceCacheSize : UInt = 0
@@ -573,7 +685,37 @@ public extension Weapon {
 		return myOffset
 	}
 }
-public protocol Equipment{}
+extension Weapon {
+	public func toJSON() -> String{
+		var properties : [String] = []
+		if let name = name{
+			properties.append("\"name\":\"\(name)\"")
+		}
+		properties.append("\"damage\":\(damage)")
+		
+		return "{\(properties.joinWithSeparator(","))}"
+	}
+
+	public static func fromJSON(dict : NSDictionary) -> Weapon {
+		let result = Weapon()
+		if let name = dict["name"] as? NSString {
+			result.name = name as String
+		}
+		if let damage = dict["damage"] as? NSNumber {
+			result.damage = damage.shortValue
+		}
+		return result
+	}
+	
+	public func jsonTypeName() -> String {
+		return "\"Weapon\""
+	}
+}
+public protocol Equipment{
+	static func fromJSON(dict : NSDictionary) -> Self
+	func toJSON() -> String
+	func jsonTypeName() -> String
+}
 public protocol Equipment_LazyAccess{}
 public protocol Equipment_Fast{}
 extension Weapon : Equipment {}
@@ -589,6 +731,12 @@ private func create_Equipment(reader : FlatBufferReader, propertyIndex : Int, ob
 	}
 	switch unionCase {
 	case 1 : return Weapon.create(reader, objectOffset: caseObjectOffset)
+	default : return nil
+	}
+}
+private func fromJSON_Equipment(dict : NSDictionary, typeName : String) -> Equipment? {
+	switch typeName {
+	case "Weapon" : return Weapon.fromJSON(dict)
 	default : return nil
 	}
 }

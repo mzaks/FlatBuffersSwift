@@ -31,6 +31,19 @@ func testRandomContactListToByteArrayAndBackAgain(){
     let after4 = CFAbsoluteTimeGetCurrent()
     print("\((after4 - time4) * 1000.0) ms lazy accessor for \(entriesCount2) entries")
     
+    let time5 = CFAbsoluteTimeGetCurrent()
+    let jsonString = contactList.toJSON()
+    let after5 = CFAbsoluteTimeGetCurrent()
+    print("\((after5 - time5) * 1000.0) ms encode to JSON \(jsonString.utf8.count)")
+    
+    let json = try!NSJSONSerialization.JSONObjectWithData(jsonString.dataUsingEncoding(NSUTF8StringEncoding)!, options: []) as! NSDictionary
+    
+    let time6 = CFAbsoluteTimeGetCurrent()
+    let jsonBasedList = ContactList.fromJSON(json)
+    let entriesCount3 = jsonBasedList.entries.count
+    let after6 = CFAbsoluteTimeGetCurrent()
+    print("\((after6 - time6) * 1000.0) ms decode from JSON \(entriesCount3)")
+    
 //    NSData(bytes: UnsafePointer<UInt8>(data), length: data.count).writeToFile("/Users/mzaks/dev/FlatBuffersSwift/Example/contactList.bin", atomically: true)
 }
 
