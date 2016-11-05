@@ -36,7 +36,6 @@ let p1 = Person(firstName: "Maxim", lastName: "Zaks")
 let p2 = Person(firstName: "Alex", lastName: "Zaks")
 let list = List(people: [p1, p2])
 let data = try?list.toData()
-NSData(bytes: UnsafePointer<UInt8>(fbData), length: fbData.count).writeToFile("list.bin", atomically: true)
 ```
 Decode data very efficiently
 ```swift
