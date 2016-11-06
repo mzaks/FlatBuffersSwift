@@ -1,0 +1,26 @@
+namespace Foo;
+
+table PeopleList {
+    people : [Friend];
+}
+
+table Friend {
+    name : string;
+    friends : [Friend];
+    father : Friend;
+    mother : Friend;
+    lover : Human;
+}
+
+table Male {
+    ref : Friend;
+}
+
+table Female {
+    ref : Friend;
+}
+
+union Human { Male, Female }
+
+file_identifier "TEST";
+root_type PeopleList;

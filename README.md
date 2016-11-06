@@ -30,17 +30,16 @@ root_type List;
 
 ## 3. Use the generated API
 
-Create objects and write them to file
+Create objects and encode them
 ```swift
 let p1 = Person(firstName: "Maxim", lastName: "Zaks")
 let p2 = Person(firstName: "Alex", lastName: "Zaks")
 let list = List(people: [p1, p2])
-let fbData = list.toByteArray
-NSData(bytes: UnsafePointer<UInt8>(fbData), length: fbData.count).writeToFile("list.bin", atomically: true)
+let data = try?list.toData()
 ```
-Read data from file very efficiently (no parsing, lazy instantiation)
+Decode data very efficiently
 ```swift
-let lazyList = List.LazyAccess(data: UnsafePointer((NSData(contentsOfFile: "list.bin")?.bytes)!))
+let newList = List.from(data: data)
 let name = lazyList.people[0]?.firstName
 ```
 
