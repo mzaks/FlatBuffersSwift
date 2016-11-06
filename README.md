@@ -40,7 +40,7 @@ let data = try?list.toData()
 Decode data very efficiently
 ```swift
 let newList = List.from(data: data)
-let name = lazyList.people[0]?.firstName
+let name = newList?.people[0]?.firstName
 ```
 
 # Please check out [Wiki](https://github.com/mzaks/FlatBuffersSwift/wiki) for more information.
