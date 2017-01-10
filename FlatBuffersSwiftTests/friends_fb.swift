@@ -40,7 +40,7 @@ public extension PeopleList {
 }
 public extension PeopleList {
 	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
-		let reader = FBMemoryReader(data: data, cache: cache)
+		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
 		return from(reader: reader)
 	}
 	public static func from(reader : FlatBuffersReader) -> PeopleList? {
@@ -172,7 +172,7 @@ public extension Friend {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.name = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		_result.name = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
 		let offset_friends : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 1)
 		let length_friends = reader.vectorElementCount(vectorOffset: offset_friends)
 		if(length_friends > 0){
@@ -197,7 +197,7 @@ public struct Friend_Direct<T : FlatBuffersReader> : Hashable {
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var friendsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 1))
 	}

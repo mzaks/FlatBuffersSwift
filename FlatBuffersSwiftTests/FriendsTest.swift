@@ -139,7 +139,7 @@ class FriendsTest: XCTestCase {
         
         let data = try!complexList().toData()
         
-        let reader = FBMemoryReader(data: data)
+        let reader = FlatBuffersMemoryReader(data: data)
         
         let newList = PeopleList_Direct(reader)
         
@@ -178,7 +178,7 @@ class FriendsTest: XCTestCase {
         let data = try!complexList().toData()
         
         let fileHandle = writeToFileAndReturnHandle(data)
-        let fileReader = FBFileReader(fileHandle: fileHandle)
+        let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
         let newList = PeopleList.from(reader:fileReader)
         
@@ -210,7 +210,7 @@ class FriendsTest: XCTestCase {
         let data = try!complexList().toData()
         
         let fileHandle = writeToFileAndReturnHandle(data)
-        let reader = FBFileReader(fileHandle: fileHandle)
+        let reader = FlatBuffersFileReader(fileHandle: fileHandle)
         
         let newList = PeopleList_Direct(reader)
         

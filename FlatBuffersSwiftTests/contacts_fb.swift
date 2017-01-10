@@ -43,7 +43,7 @@ public extension ContactList {
 }
 public extension ContactList {
 	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> ContactList? {
-		let reader = FBMemoryReader(data: data, cache: cache)
+		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
 		return from(reader: reader)
 	}
 	public static func from(reader : FlatBuffersReader) -> ContactList? {
@@ -171,7 +171,7 @@ public extension Contact {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.name = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		_result.name = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
 		_result.birthday = Date.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 1))
 		_result.gender = Gender(rawValue: reader.get(objectOffset: objectOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
 		let offset_tags : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 3)
@@ -180,7 +180,7 @@ public extension Contact {
 			var index = 0
 			_result.tags.reserveCapacity(length_tags)
 			while index < length_tags {
-				let element = reader.getStringBuffer(stringOffset: reader.vectorElementOffset(vectorOffset: offset_tags, index: index))?§
+				let element = reader.stringBuffer(stringOffset: reader.vectorElementOffset(vectorOffset: offset_tags, index: index))?§
 				_result.tags.append(element)
 				index += 1
 			}
@@ -203,7 +203,7 @@ public extension Contact {
 			var index = 0
 			_result.previousLocations.reserveCapacity(length_previousLocations)
 			while index < length_previousLocations {
-				let element : GeoLocation? = reader.vectorScalarElement(vectorOffset: offset_previousLocations, index: index)
+				let element : GeoLocation? = reader.vectorElementScalar(vectorOffset: offset_previousLocations, index: index)
 				_result.previousLocations.append(element)
 				index += 1
 			}
@@ -214,7 +214,7 @@ public extension Contact {
 			var index = 0
 			_result.moods.reserveCapacity(length_moods)
 			while index < length_moods {
-				if let raw : Int8 = reader.vectorScalarElement(vectorOffset: offset_moods, index: index){
+				if let raw : Int8 = reader.vectorElementScalar(vectorOffset: offset_moods, index: index){
 					let element : Mood? = Mood(rawValue: raw)
 					_result.moods.append(element)
 				} else {
@@ -233,7 +233,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var birthday : Date_Direct<T>? { get { 
 		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 1) {
 			return Date_Direct(reader: reader, myOffset: offset)
@@ -249,7 +249,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	public func getTagsElement(atIndex index : Int) -> UnsafeBufferPointer<UInt8>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 3)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
-			return reader.getStringBuffer(stringOffset: ofs)
+			return reader.stringBuffer(stringOffset: ofs)
 		}
 		return nil
 	}
@@ -271,7 +271,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	}
 	public func getPreviousLocationsElement(atIndex index : Int) -> GeoLocation? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 6)
-		let result : GeoLocation? = reader.vectorScalarElement(vectorOffset: offsetList, index: index)
+		let result : GeoLocation? = reader.vectorElementScalar(vectorOffset: offsetList, index: index)
 		return result
 	}
 	public var moodsCount : Int {
@@ -279,7 +279,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	}
 	public func getMoodsElement(atIndex index : Int) -> Mood? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 7)
-		guard let rawValue : Int8 = reader.vectorScalarElement(vectorOffset: offsetList, index: index) else {
+		guard let rawValue : Int8 = reader.vectorElementScalar(vectorOffset: offsetList, index: index) else {
 			return nil
 		}
 		return Mood(rawValue: rawValue)
@@ -552,10 +552,10 @@ public extension PostalAddress {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.country = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
-		_result.city = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 1))?§
+		_result.country = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		_result.city = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 1))?§
 		_result.postalCode = reader.get(objectOffset: objectOffset, propertyIndex: 2, defaultValue: 0)
-		_result.streetAndNumber = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 3))?§
+		_result.streetAndNumber = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 3))?§
 		return _result
 	}
 }
@@ -566,12 +566,12 @@ public struct PostalAddress_Direct<T : FlatBuffersReader> : Hashable {
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var country : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
-	public var city : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:1)) } }
+	public var country : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var city : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:1)) } }
 	public var postalCode : Int32 { 
 		get { return reader.get(objectOffset: myOffset, propertyIndex: 2, defaultValue: 0) }
 	}
-	public var streetAndNumber : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:3)) } }
+	public var streetAndNumber : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:3)) } }
 	public var hashValue: Int { return Int(myOffset) }
 }
 public func ==<T>(t1 : PostalAddress_Direct<T>, t2 : PostalAddress_Direct<T>) -> Bool {
@@ -619,7 +619,7 @@ public extension EmailAddress {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.mailto = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		_result.mailto = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
 		return _result
 	}
 }
@@ -630,7 +630,7 @@ public struct EmailAddress_Direct<T : FlatBuffersReader> : Hashable {
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var mailto : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var mailto : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var hashValue: Int { return Int(myOffset) }
 }
 public func ==<T>(t1 : EmailAddress_Direct<T>, t2 : EmailAddress_Direct<T>) -> Bool {
@@ -673,7 +673,7 @@ public extension WebAddress {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.url = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		_result.url = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
 		return _result
 	}
 }
@@ -684,7 +684,7 @@ public struct WebAddress_Direct<T : FlatBuffersReader> : Hashable {
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var url : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var url : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var hashValue: Int { return Int(myOffset) }
 }
 public func ==<T>(t1 : WebAddress_Direct<T>, t2 : WebAddress_Direct<T>) -> Bool {
@@ -727,7 +727,7 @@ public extension TelephoneNumber {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.number = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		_result.number = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
 		return _result
 	}
 }
@@ -738,7 +738,7 @@ public struct TelephoneNumber_Direct<T : FlatBuffersReader> : Hashable {
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var number : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var number : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var hashValue: Int { return Int(myOffset) }
 }
 public func ==<T>(t1 : TelephoneNumber_Direct<T>, t2 : TelephoneNumber_Direct<T>) -> Bool {
