@@ -12,7 +12,7 @@ public final class PeopleList {
 	}
 }
 public extension PeopleList {
-	fileprivate static func create(_ reader : FBReader, objectOffset : Offset?) -> PeopleList? {
+	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> PeopleList? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -24,13 +24,13 @@ public extension PeopleList {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		let offset_people : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 0)
-		let length_people = reader.getVectorElementCount(vectorOffset: offset_people)
+		let offset_people : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 0)
+		let length_people = reader.vectorElementCount(vectorOffset: offset_people)
 		if(length_people > 0){
 			var index = 0
 			_result.people.reserveCapacity(length_people)
 			while index < length_people {
-				let element = Friend.create(reader, objectOffset: reader.getVectorElementOffset(vectorOffset: offset_people, index: index))
+				let element = Friend.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_people, index: index))
 				_result.people.append(element)
 				index += 1
 			}
@@ -39,11 +39,11 @@ public extension PeopleList {
 	}
 }
 public extension PeopleList {
-	public static func from(data : Data,  cache : FBReaderCache? = FBReaderCache()) -> PeopleList? {
+	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
 		let reader = FBMemoryReader(data: data, cache: cache)
 		return from(reader: reader)
 	}
-	public static func from(reader : FBReader) -> PeopleList? {
+	public static func from(reader : FlatBuffersReader) -> PeopleList? {
 		let objectOffset = reader.rootObjectOffset
 		return create(reader, objectOffset : objectOffset)
 	}
@@ -62,7 +62,7 @@ public extension PeopleList {
 	}
 }
 
-public struct PeopleList_Direct<T : FBReader> : Hashable {
+public struct PeopleList_Direct<T : FlatBuffersReader> : Hashable {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
 	fileprivate init(reader: T, myOffset: Offset){
@@ -77,11 +77,11 @@ public struct PeopleList_Direct<T : FBReader> : Hashable {
 		self.myOffset = offest
 	}
 	public var peopleCount : Int {
-		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 0))
+		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 0))
 	}
 	public func getPeopleElement(atIndex index : Int) -> Friend_Direct<T>? {
-		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 0)
-		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
+		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 0)
+		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
 		}
 		return nil
@@ -160,7 +160,7 @@ public final class Friend {
 	}
 }
 public extension Friend {
-	fileprivate static func create(_ reader : FBReader, objectOffset : Offset?) -> Friend? {
+	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> Friend? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -172,50 +172,50 @@ public extension Friend {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.name = reader.getStringBuffer(stringOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 0))?§
-		let offset_friends : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 1)
-		let length_friends = reader.getVectorElementCount(vectorOffset: offset_friends)
+		_result.name = reader.getStringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
+		let offset_friends : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 1)
+		let length_friends = reader.vectorElementCount(vectorOffset: offset_friends)
 		if(length_friends > 0){
 			var index = 0
 			_result.friends.reserveCapacity(length_friends)
 			while index < length_friends {
-				let element = Friend.create(reader, objectOffset: reader.getVectorElementOffset(vectorOffset: offset_friends, index: index))
+				let element = Friend.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_friends, index: index))
 				_result.friends.append(element)
 				index += 1
 			}
 		}
-		_result.father = Friend.create(reader, objectOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 2))
-		_result.mother = Friend.create(reader, objectOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 3))
+		_result.father = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 2))
+		_result.mother = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 3))
 		_result.lover = create_Human(reader, propertyIndex: 4, objectOffset: objectOffset)
 		return _result
 	}
 }
-public struct Friend_Direct<T : FBReader> : Hashable {
+public struct Friend_Direct<T : FlatBuffersReader> : Hashable {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
 	fileprivate init(reader: T, myOffset: Offset){
 		self.reader = reader
 		self.myOffset = myOffset
 	}
-	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.getOffset(objectOffset: myOffset, propertyIndex:0)) } }
+	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var friendsCount : Int {
-		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 1))
+		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 1))
 	}
 	public func getFriendsElement(atIndex index : Int) -> Friend_Direct<T>? {
-		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 1)
-		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
+		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
+		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
 		}
 		return nil
 	}
 	public var father : Friend_Direct<T>? { get { 
-		if let offset = reader.getOffset(objectOffset: myOffset, propertyIndex: 2) {
+		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 2) {
 			return Friend_Direct(reader: reader, myOffset: offset)
 		}
 		return nil
 	} }
 	public var mother : Friend_Direct<T>? { get { 
-		if let offset = reader.getOffset(objectOffset: myOffset, propertyIndex: 3) {
+		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 3) {
 			return Friend_Direct(reader: reader, myOffset: offset)
 		}
 		return nil
@@ -317,7 +317,7 @@ public final class Male {
 	}
 }
 public extension Male {
-	fileprivate static func create(_ reader : FBReader, objectOffset : Offset?) -> Male? {
+	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> Male? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -329,11 +329,11 @@ public extension Male {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.ref = Friend.create(reader, objectOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 0))
+		_result.ref = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))
 		return _result
 	}
 }
-public struct Male_Direct<T : FBReader> : Hashable {
+public struct Male_Direct<T : FlatBuffersReader> : Hashable {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
 	fileprivate init(reader: T, myOffset: Offset){
@@ -341,7 +341,7 @@ public struct Male_Direct<T : FBReader> : Hashable {
 		self.myOffset = myOffset
 	}
 	public var ref : Friend_Direct<T>? { get { 
-		if let offset = reader.getOffset(objectOffset: myOffset, propertyIndex: 0) {
+		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 0) {
 			return Friend_Direct(reader: reader, myOffset: offset)
 		}
 		return nil
@@ -388,7 +388,7 @@ public final class Female {
 	}
 }
 public extension Female {
-	fileprivate static func create(_ reader : FBReader, objectOffset : Offset?) -> Female? {
+	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> Female? {
 		guard let objectOffset = objectOffset else {
 			return nil
 		}
@@ -400,11 +400,11 @@ public extension Female {
 		if let cache = reader.cache {
 			cache.objectPool[objectOffset] = _result
 		}
-		_result.ref = Friend.create(reader, objectOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 0))
+		_result.ref = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))
 		return _result
 	}
 }
-public struct Female_Direct<T : FBReader> : Hashable {
+public struct Female_Direct<T : FlatBuffersReader> : Hashable {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
 	fileprivate init(reader: T, myOffset: Offset){
@@ -412,7 +412,7 @@ public struct Female_Direct<T : FBReader> : Hashable {
 		self.myOffset = myOffset
 	}
 	public var ref : Friend_Direct<T>? { get { 
-		if let offset = reader.getOffset(objectOffset: myOffset, propertyIndex: 0) {
+		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 0) {
 			return Friend_Direct(reader: reader, myOffset: offset)
 		}
 		return nil
@@ -457,12 +457,12 @@ extension Male : Human {}
 extension Male_Direct : Human_Direct {}
 extension Female : Human {}
 extension Female_Direct : Human_Direct {}
-fileprivate func create_Human(_ reader : FBReader, propertyIndex : Int, objectOffset : Offset?) -> Human? {
+fileprivate func create_Human(_ reader : FlatBuffersReader, propertyIndex : Int, objectOffset : Offset?) -> Human? {
 	guard let objectOffset = objectOffset else {
 		return nil
 	}
 	let unionCase : Int8 = reader.get(objectOffset: objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
-	guard let caseObjectOffset : Offset = reader.getOffset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
+	guard let caseObjectOffset : Offset = reader.offset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
 		return nil
 	}
 	switch unionCase {
@@ -472,12 +472,12 @@ fileprivate func create_Human(_ reader : FBReader, propertyIndex : Int, objectOf
 	}
 }
 
-fileprivate func create_Human_Direct<T : FBReader>(_ reader : T, propertyIndex : Int, objectOffset : Offset?) -> Human_Direct? {
+fileprivate func create_Human_Direct<T : FlatBuffersReader>(_ reader : T, propertyIndex : Int, objectOffset : Offset?) -> Human_Direct? {
 	guard let objectOffset = objectOffset else {
 		return nil
 	}
 	let unionCase : Int8 = reader.get(objectOffset: objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
-	guard let caseObjectOffset : Offset = reader.getOffset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
+	guard let caseObjectOffset : Offset = reader.offset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
 		return nil
 	}
 	switch unionCase {

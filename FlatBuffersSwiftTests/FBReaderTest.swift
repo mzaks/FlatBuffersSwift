@@ -9,7 +9,7 @@
 import XCTest
 @testable import FlatBuffersSwift
 
-class FBReaderTest: XCTestCase {
+class FlatBuffersReaderTest: XCTestCase {
     
     func testReadDirect() {
         
@@ -20,7 +20,7 @@ class FBReaderTest: XCTestCase {
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 16)
         
-        let stringOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let stringOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(stringOffset, 28)
         
         let stringBuffer = reader.getStringBuffer(stringOffset: stringOffset)
@@ -44,19 +44,19 @@ class FBReaderTest: XCTestCase {
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 12)
         
-        let sVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 0)
+        let sVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 0)
         XCTAssertEqual(sVectorOffset, 32)
         
-        let sVectorLength = reader.getVectorElementCount(vectorOffset: sVectorOffset)
+        let sVectorLength = reader.vectorElementCount(vectorOffset: sVectorOffset)
         XCTAssertEqual(sVectorLength, 3)
         
-        let sOffset1 = reader.getVectorElementOffset(vectorOffset: sVectorOffset!, index: 0)
+        let sOffset1 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 0)
         XCTAssertEqual(sOffset1, 48)
         
-        let sOffset2 = reader.getVectorElementOffset(vectorOffset: sVectorOffset!, index: 1)
+        let sOffset2 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 1)
         XCTAssertEqual(sOffset2, 56)
         
-        let sOffset3 = reader.getVectorElementOffset(vectorOffset: sVectorOffset!, index: 2)
+        let sOffset3 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 2)
         XCTAssertEqual(sOffset3, 64)
         
         let stringBuffer1 = reader.getStringBuffer(stringOffset: sOffset1)
@@ -68,16 +68,16 @@ class FBReaderTest: XCTestCase {
         let stringBuffer3 = reader.getStringBuffer(stringOffset: sOffset3)
         XCTAssertEqual(stringBuffer3?§, "max1")
         
-        let bVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let bVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(bVectorOffset, 24)
         
-        let bVectorLength = reader.getVectorElementCount(vectorOffset: bVectorOffset)
+        let bVectorLength = reader.vectorElementCount(vectorOffset: bVectorOffset)
         XCTAssertEqual(bVectorLength, 2)
         
-        let b1 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 0)
+        let b1 : Bool? = reader.vectorScalarElement(vectorOffset: bVectorOffset!, index: 0)
         XCTAssertEqual(b1, false)
         
-        let b2 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 1)
+        let b2 : Bool? = reader.vectorScalarElement(vectorOffset: bVectorOffset!, index: 1)
         XCTAssertEqual(b2, true)
     }
     
@@ -117,7 +117,7 @@ class FBReaderTest: XCTestCase {
         let reader = FBMemoryReader(data: data)
         
         let root = reader.rootObjectOffset
-        let o = reader.getOffset(objectOffset: root!, propertyIndex: -1)
+        let o = reader.offset(objectOffset: root!, propertyIndex: -1)
         
         XCTAssertNil(o)
     }
@@ -147,7 +147,7 @@ class FBReaderTest: XCTestCase {
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 16)
         
-        let stringOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let stringOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(stringOffset, 28)
         
         let stringBuffer = reader.getStringBuffer(stringOffset: stringOffset)
@@ -181,19 +181,19 @@ class FBReaderTest: XCTestCase {
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 12)
         
-        let sVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 0)
+        let sVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 0)
         XCTAssertEqual(sVectorOffset, 32)
         
-        let sVectorLength = reader.getVectorElementCount(vectorOffset: sVectorOffset)
+        let sVectorLength = reader.vectorElementCount(vectorOffset: sVectorOffset)
         XCTAssertEqual(sVectorLength, 3)
         
-        let sOffset1 = reader.getVectorElementOffset(vectorOffset: sVectorOffset!, index: 0)
+        let sOffset1 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 0)
         XCTAssertEqual(sOffset1, 48)
         
-        let sOffset2 = reader.getVectorElementOffset(vectorOffset: sVectorOffset!, index: 1)
+        let sOffset2 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 1)
         XCTAssertEqual(sOffset2, 56)
         
-        let sOffset3 = reader.getVectorElementOffset(vectorOffset: sVectorOffset!, index: 2)
+        let sOffset3 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 2)
         XCTAssertEqual(sOffset3, 64)
         
         let stringBuffer1 = reader.getStringBuffer(stringOffset: sOffset1)
@@ -205,16 +205,16 @@ class FBReaderTest: XCTestCase {
         let stringBuffer3 = reader.getStringBuffer(stringOffset: sOffset3)
         XCTAssertEqual(stringBuffer3?§, "max1")
         
-        let bVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let bVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(bVectorOffset, 24)
         
-        let bVectorLength = reader.getVectorElementCount(vectorOffset: bVectorOffset)
+        let bVectorLength = reader.vectorElementCount(vectorOffset: bVectorOffset)
         XCTAssertEqual(bVectorLength, 2)
         
-        let b1 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 0)
+        let b1 : Bool? = reader.vectorScalarElement(vectorOffset: bVectorOffset!, index: 0)
         XCTAssertEqual(b1, false)
         
-        let b2 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 1)
+        let b2 : Bool? = reader.vectorScalarElement(vectorOffset: bVectorOffset!, index: 1)
         XCTAssertEqual(b2, true)
     }
     

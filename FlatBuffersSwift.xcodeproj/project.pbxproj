@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0B57C1291DCE98F00074EE0E /* FlatBufferReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */; };
+		0B57C1291DCE98F00074EE0E /* FlatBuffersReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBuffersReader.swift */; };
 		0B57C12B1DCE99650074EE0E /* BuilderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C12A1DCE99650074EE0E /* BuilderTest.swift */; };
 		0B57C12D1DCE9A2D0074EE0E /* FBReaderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C12C1DCE9A2D0074EE0E /* FBReaderTest.swift */; };
 		0B57C12F1DCE9AA80074EE0E /* contacts.fbs in Resources */ = {isa = PBXBuildFile; fileRef = 0B57C12E1DCE9AA80074EE0E /* contacts.fbs */; };
@@ -16,7 +16,7 @@
 		0B57C1351DCE9C490074EE0E /* friends_fb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1331DCE9C490074EE0E /* friends_fb.swift */; };
 		0B57C1371DCE9C970074EE0E /* ContactsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1361DCE9C970074EE0E /* ContactsTest.swift */; };
 		0B57C1391DCE9CF80074EE0E /* FriendsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1381DCE9CF80074EE0E /* FriendsTest.swift */; };
-		0B62C1F31C43F6A2002500FE /* FlatBufferBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C1F01C43F1CD002500FE /* FlatBufferBuilder.swift */; };
+		0B62C1F31C43F6A2002500FE /* FlatBuffersBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C1F01C43F1CD002500FE /* FlatBuffersBuilder.swift */; };
 		0BA0E8491C32B62200B896B7 /* FlatBuffersSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0BE327781CD69BA00067DAC8 /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
 /* End PBXBuildFile section */
@@ -40,13 +40,13 @@
 		0B57C1331DCE9C490074EE0E /* friends_fb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = friends_fb.swift; sourceTree = "<group>"; };
 		0B57C1361DCE9C970074EE0E /* ContactsTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsTest.swift; sourceTree = "<group>"; };
 		0B57C1381DCE9CF80074EE0E /* FriendsTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendsTest.swift; sourceTree = "<group>"; };
-		0B62C1F01C43F1CD002500FE /* FlatBufferBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBufferBuilder.swift; sourceTree = "<group>"; };
+		0B62C1F01C43F1CD002500FE /* FlatBuffersBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffersBuilder.swift; sourceTree = "<group>"; };
 		0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FlatBuffersSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlatBuffersSwift.h; sourceTree = "<group>"; };
 		0BA0E84A1C32B62200B896B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0BA0E84F1C32B62200B896B7 /* FlatBuffersSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlatBuffersSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BA0E8561C32B62200B896B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBufferReader.swift; sourceTree = "<group>"; };
+		0BA0E86A1C32B6AD00B896B7 /* FlatBuffersReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffersReader.swift; sourceTree = "<group>"; };
 		85EE88611CDE83E00030231F /* generate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = generate.sh; sourceTree = SOURCE_ROOT; };
 		85EE88621CDE84640030231F /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 		85EE887C1CE5128E0030231F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
@@ -94,8 +94,8 @@
 		0BA0E8471C32B62200B896B7 /* FlatBuffersSwift */ = {
 			isa = PBXGroup;
 			children = (
-				0B62C1F01C43F1CD002500FE /* FlatBufferBuilder.swift */,
-				0BA0E86A1C32B6AD00B896B7 /* FlatBufferReader.swift */,
+				0B62C1F01C43F1CD002500FE /* FlatBuffersBuilder.swift */,
+				0BA0E86A1C32B6AD00B896B7 /* FlatBuffersReader.swift */,
 				0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */,
 				0BA0E84A1C32B62200B896B7 /* Info.plist */,
 			);
@@ -242,8 +242,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0B57C1291DCE98F00074EE0E /* FlatBufferReader.swift in Sources */,
-				0B62C1F31C43F6A2002500FE /* FlatBufferBuilder.swift in Sources */,
+				0B57C1291DCE98F00074EE0E /* FlatBuffersReader.swift in Sources */,
+				0B62C1F31C43F6A2002500FE /* FlatBuffersBuilder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
