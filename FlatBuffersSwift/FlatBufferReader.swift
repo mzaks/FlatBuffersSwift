@@ -9,9 +9,11 @@
 import Foundation
 
 public protocol FBReader {
-    func fromByteArray<T : Scalar>(position : Int) throws -> T
-    func buffer(position : Int, length : Int) throws -> UnsafeBufferPointer<UInt8>
+    
     var cache : FBReaderCache? {get}
+
+    func getScalar<T : Scalar>(at offset: Int) throws -> T
+    func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8>
     func isEqual(other : FBReader) -> Bool
 }
 
@@ -37,16 +39,16 @@ public extension FBReader {
         }
         do {
             let offset = Int(objectOffset)
-            let localOffset : Int32 = try fromByteArray(position: offset)
+            let localOffset : Int32 = try getScalar(at: offset)
             let vTableOffset : Int = offset - Int(localOffset)
-            let vTableLength : Int16 = try fromByteArray(position: vTableOffset)
-            let objectLength : Int16 = try fromByteArray(position: vTableOffset + 2)
+            let vTableLength : Int16 = try getScalar(at: vTableOffset)
+            let objectLength : Int16 = try getScalar(at: vTableOffset + 2)
             let positionInVTable = 4 + propertyIndex * 2
             if(vTableLength<=Int16(positionInVTable)) {
                 return 0
             }
             let propertyStart = vTableOffset + positionInVTable
-            let propertyOffset : Int16 = try fromByteArray(position: propertyStart)
+            let propertyOffset : Int16 = try getScalar(at: propertyStart)
             if(objectLength<=propertyOffset) {
                 return 0
             }
@@ -65,7 +67,7 @@ public extension FBReader {
         
         let position = objectOffset + propertyOffset
         do {
-            let localObjectOffset : Int32 = try fromByteArray(position: Int(position))
+            let localObjectOffset : Int32 = try getScalar(at: Int(position))
             let offset = position + localObjectOffset
             
             if localObjectOffset == 0 {
@@ -84,7 +86,7 @@ public extension FBReader {
         }
         let vectorPosition = Int(vectorOffset)
         do {
-            let length2 : Int32 = try fromByteArray(position: vectorPosition)
+            let length2 : Int32 = try getScalar(at: vectorPosition)
             return Int(length2)
         } catch {
             return 0
@@ -103,7 +105,7 @@ public extension FBReader {
         }
         let valueStartPosition = Int(vectorOffset + MemoryLayout<Int32>.stride + (index * MemoryLayout<Int32>.stride))
         do {
-            let localOffset : Int32 = try fromByteArray(position: valueStartPosition)
+            let localOffset : Int32 = try getScalar(at: valueStartPosition)
             if(localOffset == 0){
                 return nil
             }
@@ -127,7 +129,7 @@ public extension FBReader {
         let valueStartPosition = Int(vectorOffset + MemoryLayout<Int32>.stride + (index * MemoryLayout<T>.stride))
         
         do {
-            return try fromByteArray(position: valueStartPosition) as T
+            return try getScalar(at: valueStartPosition) as T
         } catch {
             return nil
         }
@@ -140,7 +142,7 @@ public extension FBReader {
         }
         let position = Int(objectOffset + propertyOffset)
         do {
-            return try fromByteArray(position: position)
+            return try getScalar(at: position)
         } catch {
             return defaultValue
         }
@@ -153,7 +155,7 @@ public extension FBReader {
         }
         let position = Int(objectOffset + propertyOffset)
         do {
-            return try fromByteArray(position: position) as T
+            return try getScalar(at: position) as T
         } catch {
             return nil
         }
@@ -165,10 +167,10 @@ public extension FBReader {
         }
         let stringPosition = Int(stringOffset)
         do {
-            let stringLength : Int32 = try fromByteArray(position: stringPosition)
+            let stringLength : Int32 = try getScalar(at: stringPosition)
             let stringCharactersPosition = stringPosition + MemoryLayout<Int32>.stride
             
-            return try buffer(position: stringCharactersPosition, length: Int(stringLength))
+            return try bytes(at: stringCharactersPosition, length: Int(stringLength))
         } catch {
             return nil
         }
@@ -176,7 +178,7 @@ public extension FBReader {
     
     public var rootObjectOffset : Offset? {
         do {
-            return try fromByteArray(position: 0) as Offset
+            return try getScalar(at: 0) as Offset
         } catch {
             return nil
         }
@@ -205,19 +207,19 @@ public struct FBMemoryReader : FBReader {
         self.buffer = UnsafeRawPointer(pointer)
     }
     
-    public func fromByteArray<T : Scalar>(position : Int) throws -> T {
-        if position + MemoryLayout<T>.stride > count || position < 0 {
+    public func getScalar<T : Scalar>(at offset: Int) throws -> T {
+        if offset + MemoryLayout<T>.stride > count || offset < 0 {
             throw FBReaderError.outOfBufferBounds
         }
         
-        return buffer.load(fromByteOffset: position, as: T.self)
+        return buffer.load(fromByteOffset: offset, as: T.self)
     }
     
-    public func buffer(position : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
-        if Int(position + length) > count {
+    public func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
+        if Int(offset + length) > count {
             throw FBReaderError.outOfBufferBounds
         }
-        let pointer = buffer.advanced(by:position).bindMemory(to: UInt8.self, capacity: length)
+        let pointer = buffer.advanced(by:offset).bindMemory(to: UInt8.self, capacity: length)
         return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(length))
     }
     
@@ -242,8 +244,8 @@ public struct FBFileReader : FBReader {
         self.cache = cache
     }
     
-    public func fromByteArray<T : Scalar>(position : Int) throws -> T {
-        let seekPosition = UInt64(position)
+    public func getScalar<T : Scalar>(at offset: Int) throws -> T {
+        let seekPosition = UInt64(offset)
         if seekPosition + UInt64(MemoryLayout<T>.stride) > fileSize {
             throw FBReaderError.outOfBufferBounds
         }
@@ -259,11 +261,11 @@ public struct FBFileReader : FBReader {
         throw FBReaderError.outOfBufferBounds
     }
     
-    public func buffer(position : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
-        if UInt64(position + length) > fileSize {
+    public func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
+        if UInt64(offset + length) > fileSize {
             throw FBReaderError.outOfBufferBounds
         }
-        fileHandle.seek(toFileOffset: UInt64(position))
+        fileHandle.seek(toFileOffset: UInt64(offset))
         let data = fileHandle.readData(ofLength:Int(length))
         let pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
         let t : UnsafeMutableBufferPointer<UInt8> = UnsafeMutableBufferPointer(start: pointer, count: length)
