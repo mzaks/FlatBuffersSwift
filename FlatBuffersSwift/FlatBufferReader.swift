@@ -11,16 +11,32 @@ import Foundation
 public protocol FBReader {
     var cache : FBReaderCache? {get}
 
-    /// **Returns** a scalar value at a given offset from the buffer
+    /**
+     Access a scalar value directly from the underlying reader buffer.
+     
+     - parameters:
+         - offset: The offset to read from in the buffer
+     
+     - Returns: a scalar value at a given offset from the buffer.
+     */
     func getScalar<T : Scalar>(at offset: Int) throws -> T
-    /// **Returns** a direct pointer to a subrange from the underlying reader buffer
+
+    /**
+     Access a subrange from the underlying reader buffer
+     
+     - parameters:
+     - offset: The offset to read from in the buffer
+     - length: The amount of data to include from the buffer
+     
+     - Returns: a direct pointer to a subrange from the underlying reader buffer.
+     */
     func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8>
     func isEqual(other : FBReader) -> Bool
 }
 
 
 fileprivate enum FBReaderError : Error {
-    case outOfBufferBounds /// Trying to address outside of the bounds of the underlying buffer
+    case outOfBufferBounds     /// Trying to address outside of the bounds of the underlying buffer
     case canNotSetProperty
 }
 
@@ -33,7 +49,15 @@ public class FBReaderCache {
 }
 
 public extension FBReader {
-    /// **Returns** the object-local offset of a given property by looking it up in the vtable
+    /**
+     Retrieve the offset of a property from the vtable.
+     
+     - parameters:
+         - objectOffset: The offset of the object
+         - propertyIndex: The property to extract
+     
+     - Returns: the object-local offset of a given property by looking it up in the vtable
+     */
     private func getPropertyOffset(objectOffset : Offset, propertyIndex : Int) -> Int {
         guard propertyIndex >= 0 else {
             return 0
@@ -201,14 +225,32 @@ public struct FBMemoryReader : FBReader {
     public let cache : FBReaderCache?
     private let buffer : UnsafeRawPointer
     
-    /// Initialize the reader directly from a raw memory buffer
+    /**
+     Initializes the reader directly from a raw memory buffer.
+     
+     - parameters:
+         - buffer: A raw pointer to the underlying data to be parsed
+         - count: The size of the data buffer
+         - cache: An optional cache of reader objects for reuse
+     
+     - Returns: A FB reader ready for use.
+     */
     public init(buffer : UnsafeRawPointer, count : Int, cache : FBReaderCache? = FBReaderCache()) {
         self.buffer = buffer
         self.count = count
         self.cache = cache
     }
     
-    /// Initialize the reader from a Data object, will probably keep a copy after https://github.com/mzaks/FlatBuffersSwift/issues/73 is resolved
+    /**
+     Initializes the reader from a Data object.
+     This method will probably keep a copy after https://github.com/mzaks/FlatBuffersSwift/issues/73 is resolved
+     - parameters:
+         - data: A Data object holding the data to be parsed, the contents may be copied, for performance sensitive implementations, 
+                 the UnsafeRawsPointer initializer should be used.
+         - cache: An optional cache of reader objects for reuse
+     
+     - Returns: A FB reader ready for use.
+     */
     public init(data : Data, cache : FBReaderCache? = FBReaderCache()) {
         self.count = data.count
         self.cache = cache
