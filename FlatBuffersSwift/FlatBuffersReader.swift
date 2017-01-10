@@ -220,7 +220,7 @@ public extension FlatBuffersReader {
     }
     
     /**
-     Retrieve a scalar optional value (return nill if unavailable)
+     Retrieve a scalar optional value (return nil if unavailable)
      
      - parameters:
          - objectOffset: The offset of the object
