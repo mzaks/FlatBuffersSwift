@@ -44,13 +44,13 @@ public struct FBBuildConfig {
 }
 
 public enum FBBuildError : Error {
-    case ObjectIsNotClosed
-    case NoOpenObject
-    case PropertyIndexIsInvalid
-    case OffsetIsTooBig
-    case CursorIsInvalid
-    case BadFileIdentifier
-    case UnsupportedType
+    case objectIsNotClosed
+    case noOpenObject
+    case propertyIndexIsInvalid
+    case offsetIsTooBig
+    case cursorIsInvalid
+    case badFileIdentifier
+    case unsupportedType
 }
 
 public final class FBBuilder {
@@ -131,7 +131,7 @@ public final class FBBuilder {
             return cursor
         }
         guard offset <= Int32(cursor) else {
-            throw FBBuildError.OffsetIsTooBig
+            throw FBBuildError.offsetIsTooBig
         }
         
         if offset == Int32(0) {
@@ -146,10 +146,10 @@ public final class FBBuilder {
     
     public func replaceOffset(offset : Offset, atCursor jumpCursor: Int) throws{
         guard offset <= Int32(cursor) else {
-            throw FBBuildError.OffsetIsTooBig
+            throw FBBuildError.offsetIsTooBig
         }
         guard jumpCursor <= cursor else {
-            throw FBBuildError.CursorIsInvalid
+            throw FBBuildError.cursorIsInvalid
         }
         let _offset = Int32(jumpCursor) - offset;
         
@@ -162,7 +162,7 @@ public final class FBBuilder {
     
     public func openObject(numOfProperties : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.ObjectIsNotClosed
+            throw FBBuildError.objectIsNotClosed
         }
         currentVTable.removeAll(keepingCapacity: true)
         currentVTable.reserveCapacity(numOfProperties)
@@ -175,10 +175,10 @@ public final class FBBuilder {
     @discardableResult
     public func addPropertyOffsetToOpenObject(propertyIndex : Int, offset : Offset) throws -> Int{
         guard objectStart > -1 else {
-            throw FBBuildError.NoOpenObject
+            throw FBBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
-            throw FBBuildError.PropertyIndexIsInvalid
+            throw FBBuildError.propertyIndexIsInvalid
         }
         _ = try putOffset(offset: offset)
         currentVTable[propertyIndex] = Int32(cursor)
@@ -187,10 +187,10 @@ public final class FBBuilder {
     
     public func addPropertyToOpenObject<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
         guard objectStart > -1 else {
-            throw FBBuildError.NoOpenObject
+            throw FBBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
-            throw FBBuildError.PropertyIndexIsInvalid
+            throw FBBuildError.propertyIndexIsInvalid
         }
         
         if(config.forceDefaults == false && value == defaultValue) {
@@ -203,17 +203,17 @@ public final class FBBuilder {
     
     public func addCurrentOffsetAsPropertyToOpenObject(propertyIndex : Int) throws {
         guard objectStart > -1 else {
-            throw FBBuildError.NoOpenObject
+            throw FBBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
-            throw FBBuildError.PropertyIndexIsInvalid
+            throw FBBuildError.propertyIndexIsInvalid
         }
         currentVTable[propertyIndex] = Int32(cursor)
     }
     
     public func closeObject() throws -> Offset {
         guard objectStart > -1 else {
-            throw FBBuildError.NoOpenObject
+            throw FBBuildError.noOpenObject
         }
         align(size: 4, additionalBytes: 0)
         increaseCapacity(size: 4)
@@ -277,7 +277,7 @@ public final class FBBuilder {
     public func startVector(count : Int, elementSize : Int) throws{
         align(size: 4, additionalBytes: count * elementSize)
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.ObjectIsNotClosed
+            throw FBBuildError.objectIsNotClosed
         }
         vectorNumElems = Int32(count)
     }
@@ -291,7 +291,7 @@ public final class FBBuilder {
     private var stringCache : [String:Offset] = [:]
     public func createString(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.ObjectIsNotClosed
+            throw FBBuildError.objectIsNotClosed
         }
         guard let value = value else {
             return 0
@@ -332,10 +332,10 @@ public final class FBBuilder {
     
     public func finish(offset : Offset, fileIdentifier : String?) throws -> Void {
         guard offset <= Int32(cursor) else {
-            throw FBBuildError.OffsetIsTooBig
+            throw FBBuildError.offsetIsTooBig
         }
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.ObjectIsNotClosed
+            throw FBBuildError.objectIsNotClosed
         }
         var prefixLength = 4
         if let fileIdentifier = fileIdentifier {
@@ -344,7 +344,7 @@ public final class FBBuilder {
             let utf8View = fileIdentifier.utf8
             let count = utf8View.count
             guard count == 4 else {
-                throw FBBuildError.BadFileIdentifier
+                throw FBBuildError.badFileIdentifier
             }
             for c in utf8View.lazy.reversed() {
                 put(value: c)

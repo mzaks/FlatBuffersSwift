@@ -17,8 +17,8 @@ public protocol FBReader {
 
 
 fileprivate enum FBReaderError : Error {
-    case OutOfBufferBounds
-    case CanNotSetProperty
+    case outOfBufferBounds
+    case canNotSetProperty
 }
 
 public class FBReaderCache {
@@ -207,7 +207,7 @@ public struct FBMemoryReader : FBReader {
     
     public func fromByteArray<T : Scalar>(position : Int) throws -> T {
         if position + MemoryLayout<T>.stride > count || position < 0 {
-            throw FBReaderError.OutOfBufferBounds
+            throw FBReaderError.outOfBufferBounds
         }
         
         return buffer.load(fromByteOffset: position, as: T.self)
@@ -215,7 +215,7 @@ public struct FBMemoryReader : FBReader {
     
     public func buffer(position : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
         if Int(position + length) > count {
-            throw FBReaderError.OutOfBufferBounds
+            throw FBReaderError.outOfBufferBounds
         }
         let pointer = buffer.advanced(by:position).bindMemory(to: UInt8.self, capacity: length)
         return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(length))
@@ -245,7 +245,7 @@ public struct FBFileReader : FBReader {
     public func fromByteArray<T : Scalar>(position : Int) throws -> T {
         let seekPosition = UInt64(position)
         if seekPosition + UInt64(MemoryLayout<T>.stride) > fileSize {
-            throw FBReaderError.OutOfBufferBounds
+            throw FBReaderError.outOfBufferBounds
         }
         fileHandle.seek(toFileOffset: seekPosition)
         let data = fileHandle.readData(ofLength:MemoryLayout<T>.stride)
@@ -256,12 +256,12 @@ public struct FBFileReader : FBReader {
             pointer.deinitialize()
             return result
         }
-        throw FBReaderError.OutOfBufferBounds
+        throw FBReaderError.outOfBufferBounds
     }
     
     public func buffer(position : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
         if UInt64(position + length) > fileSize {
-            throw FBReaderError.OutOfBufferBounds
+            throw FBReaderError.outOfBufferBounds
         }
         fileHandle.seek(toFileOffset: UInt64(position))
         let data = fileHandle.readData(ofLength:Int(length))
