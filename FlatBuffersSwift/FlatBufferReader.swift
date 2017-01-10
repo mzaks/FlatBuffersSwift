@@ -9,17 +9,18 @@
 import Foundation
 
 public protocol FBReader {
-    
     var cache : FBReaderCache? {get}
 
+    /// **Returns** a scalar value at a given offset from the buffer
     func getScalar<T : Scalar>(at offset: Int) throws -> T
+    /// **Returns** a direct pointer to a subrange from the underlying reader buffer
     func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8>
     func isEqual(other : FBReader) -> Bool
 }
 
 
 fileprivate enum FBReaderError : Error {
-    case outOfBufferBounds
+    case outOfBufferBounds /// Trying to address outside of the bounds of the underlying buffer
     case canNotSetProperty
 }
 
@@ -32,7 +33,7 @@ public class FBReaderCache {
 }
 
 public extension FBReader {
-    
+    /// **Returns** the object-local offset of a given property by looking it up in the vtable
     private func getPropertyOffset(objectOffset : Offset, propertyIndex : Int) -> Int {
         guard propertyIndex >= 0 else {
             return 0
@@ -58,6 +59,7 @@ public extension FBReader {
         }
     }
     
+    /// **Returns** the final offset in the reader buffer to access a given property for a given object-offset
     public func getOffset(objectOffset : Offset, propertyIndex : Int) -> Offset? {
         
         let propertyOffset = getPropertyOffset(objectOffset: objectOffset, propertyIndex: propertyIndex)
@@ -80,7 +82,8 @@ public extension FBReader {
         
     }
     
-    public func getVectorLength(vectorOffset : Offset?) -> Int {
+    /// **Returns** the length of vector
+    public func getVectorElementCount(vectorOffset : Offset?) -> Int {
         guard let vectorOffset = vectorOffset else {
             return 0
         }
@@ -93,14 +96,15 @@ public extension FBReader {
         }
     }
     
-    public func getVectorOffsetElement(vectorOffset : Offset?, index : Int) -> Offset? {
+    /// **Returns** the offset in the buffer for a given vector element
+    public func getVectorElementOffset(vectorOffset : Offset?, index : Int) -> Offset? {
         guard let vectorOffset = vectorOffset else {
             return nil
         }
         guard index >= 0 else{
             return nil
         }
-        guard index < getVectorLength(vectorOffset: vectorOffset) else {
+        guard index < getVectorElementCount(vectorOffset: vectorOffset) else {
             return nil
         }
         let valueStartPosition = Int(vectorOffset + MemoryLayout<Int32>.stride + (index * MemoryLayout<Int32>.stride))
@@ -115,6 +119,7 @@ public extension FBReader {
         }
     }
     
+    /// **Returns** a scalar value directly from a vector for a given index
     public func getVectorScalarElement<T : Scalar>(vectorOffset : Offset?, index : Int) -> T? {
         guard let vectorOffset = vectorOffset else {
             return nil
@@ -122,7 +127,7 @@ public extension FBReader {
         guard index >= 0 else{
             return nil
         }
-        guard index < getVectorLength(vectorOffset: vectorOffset) else {
+        guard index < getVectorElementCount(vectorOffset: vectorOffset) else {
             return nil
         }
         
@@ -134,7 +139,8 @@ public extension FBReader {
             return nil
         }
     }
-    
+
+    /// **Returns** a scalar value directly from a vector for a given index
     public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int, defaultValue : T) -> T {
         let propertyOffset = getPropertyOffset(objectOffset: objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -148,6 +154,7 @@ public extension FBReader {
         }
     }
     
+    /// **Returns** a scalar value for a given property from an object
     public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int) -> T? {
         let propertyOffset = getPropertyOffset(objectOffset: objectOffset, propertyIndex: propertyIndex)
         if propertyOffset == 0 {
@@ -161,6 +168,7 @@ public extension FBReader {
         }
     }
     
+    /// **Returns** a buffer pointer to the subrange of the reader buffer occupied by a string
     public func getStringBuffer(stringOffset : Offset?) -> UnsafeBufferPointer<UInt8>? {
         guard let stringOffset = stringOffset else {
             return nil
@@ -176,6 +184,7 @@ public extension FBReader {
         }
     }
     
+    /// **Returns** the offset for the root table object
     public var rootObjectOffset : Offset? {
         do {
             return try getScalar(at: 0) as Offset
@@ -185,18 +194,21 @@ public extension FBReader {
     }
 }
 
+/// A FlatBuffers reader subclass that by default reads directly from a memory buffer, but also supports initialization from Data objects for convenience
 public struct FBMemoryReader : FBReader {
     
     private let count : Int
     public let cache : FBReaderCache?
     private let buffer : UnsafeRawPointer
     
+    /// Initialize the reader directly from a raw memory buffer
     public init(buffer : UnsafeRawPointer, count : Int, cache : FBReaderCache? = FBReaderCache()) {
         self.buffer = buffer
         self.count = count
         self.cache = cache
     }
     
+    /// Initialize the reader from a Data object, will probably keep a copy after https://github.com/mzaks/FlatBuffersSwift/issues/73 is resolved
     public init(data : Data, cache : FBReaderCache? = FBReaderCache()) {
         self.count = data.count
         self.cache = cache
@@ -231,6 +243,7 @@ public struct FBMemoryReader : FBReader {
     }
 }
 
+/// A FlatBuffers reader subclass that reads directly from a file handle
 public struct FBFileReader : FBReader {
     
     private let fileSize : UInt64

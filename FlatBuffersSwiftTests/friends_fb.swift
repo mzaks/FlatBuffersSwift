@@ -25,12 +25,12 @@ public extension PeopleList {
 			cache.objectPool[objectOffset] = _result
 		}
 		let offset_people : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 0)
-		let length_people = reader.getVectorLength(vectorOffset: offset_people)
+		let length_people = reader.getVectorElementCount(vectorOffset: offset_people)
 		if(length_people > 0){
 			var index = 0
 			_result.people.reserveCapacity(length_people)
 			while index < length_people {
-				let element = Friend.create(reader, objectOffset: reader.getVectorOffsetElement(vectorOffset: offset_people, index: index))
+				let element = Friend.create(reader, objectOffset: reader.getVectorElementOffset(vectorOffset: offset_people, index: index))
 				_result.people.append(element)
 				index += 1
 			}
@@ -77,11 +77,11 @@ public struct PeopleList_Direct<T : FBReader> : Hashable {
 		self.myOffset = offest
 	}
 	public var peopleCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 0))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 0))
 	}
 	public func getPeopleElement(atIndex index : Int) -> Friend_Direct<T>? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 0)
-		if let ofs = reader.getVectorOffsetElement(vectorOffset: offsetList, index: index) {
+		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
 		}
 		return nil
@@ -174,12 +174,12 @@ public extension Friend {
 		}
 		_result.name = reader.getStringBuffer(stringOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 0))?§
 		let offset_friends : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 1)
-		let length_friends = reader.getVectorLength(vectorOffset: offset_friends)
+		let length_friends = reader.getVectorElementCount(vectorOffset: offset_friends)
 		if(length_friends > 0){
 			var index = 0
 			_result.friends.reserveCapacity(length_friends)
 			while index < length_friends {
-				let element = Friend.create(reader, objectOffset: reader.getVectorOffsetElement(vectorOffset: offset_friends, index: index))
+				let element = Friend.create(reader, objectOffset: reader.getVectorElementOffset(vectorOffset: offset_friends, index: index))
 				_result.friends.append(element)
 				index += 1
 			}
@@ -199,11 +199,11 @@ public struct Friend_Direct<T : FBReader> : Hashable {
 	}
 	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.getStringBuffer(stringOffset: reader.getOffset(objectOffset: myOffset, propertyIndex:0)) } }
 	public var friendsCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 1))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 1))
 	}
 	public func getFriendsElement(atIndex index : Int) -> Friend_Direct<T>? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 1)
-		if let ofs = reader.getVectorOffsetElement(vectorOffset: offsetList, index: index) {
+		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
 		}
 		return nil

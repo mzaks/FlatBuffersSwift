@@ -28,12 +28,12 @@ public extension ContactList {
 		}
 		_result.lastModified = reader.get(objectOffset: objectOffset, propertyIndex: 0, defaultValue: 0)
 		let offset_entries : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 1)
-		let length_entries = reader.getVectorLength(vectorOffset: offset_entries)
+		let length_entries = reader.getVectorElementCount(vectorOffset: offset_entries)
 		if(length_entries > 0){
 			var index = 0
 			_result.entries.reserveCapacity(length_entries)
 			while index < length_entries {
-				let element = Contact.create(reader, objectOffset: reader.getVectorOffsetElement(vectorOffset: offset_entries, index: index))
+				let element = Contact.create(reader, objectOffset: reader.getVectorElementOffset(vectorOffset: offset_entries, index: index))
 				_result.entries.append(element)
 				index += 1
 			}
@@ -82,11 +82,11 @@ public struct ContactList_Direct<T : FBReader> : Hashable {
 		get { return reader.get(objectOffset: myOffset, propertyIndex: 0, defaultValue: 0) }
 	}
 	public var entriesCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 1))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 1))
 	}
 	public func getEntriesElement(atIndex index : Int) -> Contact_Direct<T>? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 1)
-		if let ofs = reader.getVectorOffsetElement(vectorOffset: offsetList, index: index) {
+		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Contact_Direct<T>(reader: reader, myOffset: ofs)
 		}
 		return nil
@@ -175,30 +175,30 @@ public extension Contact {
 		_result.birthday = Date.create(reader, objectOffset: reader.getOffset(objectOffset: objectOffset, propertyIndex: 1))
 		_result.gender = Gender(rawValue: reader.get(objectOffset: objectOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
 		let offset_tags : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 3)
-		let length_tags = reader.getVectorLength(vectorOffset: offset_tags)
+		let length_tags = reader.getVectorElementCount(vectorOffset: offset_tags)
 		if(length_tags > 0){
 			var index = 0
 			_result.tags.reserveCapacity(length_tags)
 			while index < length_tags {
-				let element = reader.getStringBuffer(stringOffset: reader.getVectorOffsetElement(vectorOffset: offset_tags, index: index))?§
+				let element = reader.getStringBuffer(stringOffset: reader.getVectorElementOffset(vectorOffset: offset_tags, index: index))?§
 				_result.tags.append(element)
 				index += 1
 			}
 		}
 		let offset_addressEntries : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 4)
-		let length_addressEntries = reader.getVectorLength(vectorOffset: offset_addressEntries)
+		let length_addressEntries = reader.getVectorElementCount(vectorOffset: offset_addressEntries)
 		if(length_addressEntries > 0){
 			var index = 0
 			_result.addressEntries.reserveCapacity(length_addressEntries)
 			while index < length_addressEntries {
-				let element = AddressEntry.create(reader, objectOffset: reader.getVectorOffsetElement(vectorOffset: offset_addressEntries, index: index))
+				let element = AddressEntry.create(reader, objectOffset: reader.getVectorElementOffset(vectorOffset: offset_addressEntries, index: index))
 				_result.addressEntries.append(element)
 				index += 1
 			}
 		}
 		_result.currentLoccation = reader.get(objectOffset: objectOffset, propertyIndex: 5)
 		let offset_previousLocations : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 6)
-		let length_previousLocations = reader.getVectorLength(vectorOffset: offset_previousLocations)
+		let length_previousLocations = reader.getVectorElementCount(vectorOffset: offset_previousLocations)
 		if(length_previousLocations > 0){
 			var index = 0
 			_result.previousLocations.reserveCapacity(length_previousLocations)
@@ -209,7 +209,7 @@ public extension Contact {
 			}
 		}
 		let offset_moods : Offset? = reader.getOffset(objectOffset: objectOffset, propertyIndex: 7)
-		let length_moods = reader.getVectorLength(vectorOffset: offset_moods)
+		let length_moods = reader.getVectorElementCount(vectorOffset: offset_moods)
 		if(length_moods > 0){
 			var index = 0
 			_result.moods.reserveCapacity(length_moods)
@@ -244,21 +244,21 @@ public struct Contact_Direct<T : FBReader> : Hashable {
 		get { return Gender(rawValue: reader.get(objectOffset: myOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue)) }
 	}
 	public var tagsCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 3))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 3))
 	}
 	public func getTagsElement(atIndex index : Int) -> UnsafeBufferPointer<UInt8>? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 3)
-		if let ofs = reader.getVectorOffsetElement(vectorOffset: offsetList, index: index) {
+		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
 			return reader.getStringBuffer(stringOffset: ofs)
 		}
 		return nil
 	}
 	public var addressEntriesCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 4))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 4))
 	}
 	public func getAddressEntriesElement(atIndex index : Int) -> AddressEntry_Direct<T>? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 4)
-		if let ofs = reader.getVectorOffsetElement(vectorOffset: offsetList, index: index) {
+		if let ofs = reader.getVectorElementOffset(vectorOffset: offsetList, index: index) {
 			return AddressEntry_Direct<T>(reader: reader, myOffset: ofs)
 		}
 		return nil
@@ -267,7 +267,7 @@ public struct Contact_Direct<T : FBReader> : Hashable {
 		get { return reader.get(objectOffset: myOffset, propertyIndex: 5)}
 	}
 	public var previousLocationsCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 6))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 6))
 	}
 	public func getPreviousLocationsElement(atIndex index : Int) -> GeoLocation? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 6)
@@ -275,7 +275,7 @@ public struct Contact_Direct<T : FBReader> : Hashable {
 		return result
 	}
 	public var moodsCount : Int {
-		return reader.getVectorLength(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 7))
+		return reader.getVectorElementCount(vectorOffset: reader.getOffset(objectOffset: myOffset, propertyIndex: 7))
 	}
 	public func getMoodsElement(atIndex index : Int) -> Mood? {
 		let offsetList = reader.getOffset(objectOffset: myOffset, propertyIndex: 7)
