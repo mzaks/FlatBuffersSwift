@@ -220,7 +220,7 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Start an object update sequence
+     Start an object construction sequence
      
      - parameters:
          - numOfProperties: The number of properties we will update
