@@ -53,14 +53,14 @@ public extension ContactList {
 }
 
 public extension ContactList {
-	public func encode(withBuilder builder : FBBuilder) throws -> Void {
+	public func encode(withBuilder builder : FlatBuffersBuilder) throws -> Void {
 		let offset = try addToByteArray(builder)
 		try builder.finish(offset: offset, fileIdentifier: nil)
 	}
-	public func toData(withConfig config : FBBuildConfig = FBBuildConfig()) throws -> Data {
-		let builder = FBBuilder(config: config)
+	public func toData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
+		let builder = FlatBuffersBuilder(config: config)
 		try encode(withBuilder: builder)
-		return builder.data
+		return builder.makeData
 	}
 }
 
@@ -97,7 +97,7 @@ public func ==<T>(t1 : ContactList_Direct<T>, t2 : ContactList_Direct<T>) -> Boo
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension ContactList {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -290,7 +290,7 @@ public func ==<T>(t1 : Contact_Direct<T>, t2 : Contact_Direct<T>) -> Bool {
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension Contact {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -435,7 +435,7 @@ public func ==<T>(t1 : Date_Direct<T>, t2 : Date_Direct<T>) -> Bool {
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension Date {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -506,7 +506,7 @@ public func ==<T>(t1 : AddressEntry_Direct<T>, t2 : AddressEntry_Direct<T>) -> B
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension AddressEntry {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -578,7 +578,7 @@ public func ==<T>(t1 : PostalAddress_Direct<T>, t2 : PostalAddress_Direct<T>) ->
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension PostalAddress {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -637,7 +637,7 @@ public func ==<T>(t1 : EmailAddress_Direct<T>, t2 : EmailAddress_Direct<T>) -> B
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension EmailAddress {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -691,7 +691,7 @@ public func ==<T>(t1 : WebAddress_Direct<T>, t2 : WebAddress_Direct<T>) -> Bool 
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension WebAddress {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -745,7 +745,7 @@ public func ==<T>(t1 : TelephoneNumber_Direct<T>, t2 : TelephoneNumber_Direct<T>
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension TelephoneNumber {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -813,7 +813,7 @@ private func unionCase_Address(_ union : Address?) -> Int8 {
 	default : return 0
 	}
 }
-fileprivate func addToByteArray_Address(_ builder : FBBuilder, union : Address?) throws -> Offset {
+fileprivate func addToByteArray_Address(_ builder : FlatBuffersBuilder, union : Address?) throws -> Offset {
 	switch union {
 	case let u as PostalAddress : return try u.addToByteArray(builder)
 	case let u as EmailAddress : return try u.addToByteArray(builder)

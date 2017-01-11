@@ -237,7 +237,7 @@ class FlatBuffersReaderTest: XCTestCase {
     }
     
     func createSimpleObject() -> Data {
-        let fbb = FBBuilder(config:FBBuildConfig(
+        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -251,13 +251,13 @@ class FlatBuffersReaderTest: XCTestCase {
         try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
-        let data = fbb.data
+        let data = fbb.makeData
         
         return data
     }
     
     func createObjectWithVectors() -> Data{
-        let fbb = FBBuilder(config:FBBuildConfig(
+        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -285,7 +285,7 @@ class FlatBuffersReaderTest: XCTestCase {
         try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: bVectorOffset)
         let oOffset = try! fbb.closeObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
-        let data = fbb.data
+        let data = fbb.makeData
         
         return data
     }

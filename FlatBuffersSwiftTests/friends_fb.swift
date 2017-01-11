@@ -50,15 +50,15 @@ public extension PeopleList {
 }
 
 public extension PeopleList {
-	public func encode(withBuilder builder : FBBuilder) throws -> Void {
+	public func encode(withBuilder builder : FlatBuffersBuilder) throws -> Void {
 		let offset = try addToByteArray(builder)
 		try performLateBindings(builder)
 		try builder.finish(offset: offset, fileIdentifier: "TEST")
 	}
-	public func toData(withConfig config : FBBuildConfig = FBBuildConfig()) throws -> Data {
-		let builder = FBBuilder(config: config)
+	public func toData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
+		let builder = FlatBuffersBuilder(config: config)
 		try encode(withBuilder: builder)
-		return builder.data
+		return builder.makeData
 	}
 }
 
@@ -92,7 +92,7 @@ public func ==<T>(t1 : PeopleList_Direct<T>, t2 : PeopleList_Direct<T>) -> Bool 
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension PeopleList {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -229,7 +229,7 @@ public func ==<T>(t1 : Friend_Direct<T>, t2 : Friend_Direct<T>) -> Bool {
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension Friend {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -352,7 +352,7 @@ public func ==<T>(t1 : Male_Direct<T>, t2 : Male_Direct<T>) -> Bool {
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension Male {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -423,7 +423,7 @@ public func ==<T>(t1 : Female_Direct<T>, t2 : Female_Direct<T>) -> Bool {
 	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
 }
 public extension Female {
-	fileprivate func addToByteArray(_ builder : FBBuilder) throws -> Offset {
+	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.config.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
@@ -493,14 +493,14 @@ private func unionCase_Human(_ union : Human?) -> Int8 {
 	default : return 0
 	}
 }
-fileprivate func addToByteArray_Human(_ builder : FBBuilder, union : Human?) throws -> Offset {
+fileprivate func addToByteArray_Human(_ builder : FlatBuffersBuilder, union : Human?) throws -> Offset {
 	switch union {
 	case let u as Male : return try u.addToByteArray(builder)
 	case let u as Female : return try u.addToByteArray(builder)
 	default : return 0
 	}
 }
-private func performLateBindings(_ builder : FBBuilder) throws {
+private func performLateBindings(_ builder : FlatBuffersBuilder) throws {
 	for binding in builder.deferedBindings {
 		switch binding.object {
 		case let object as PeopleList: try builder.replaceOffset(offset: object.addToByteArray(builder), atCursor: binding.cursor)

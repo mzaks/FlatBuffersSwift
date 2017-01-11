@@ -5,6 +5,7 @@
 //  Created by Maxim Zaks on 27.10.16.
 //  Copyright © 2016 Maxim Zaks. All rights reserved.
 //
+// See https://github.com/mzaks/FlatBuffersSwift/graphs/contributors for contributors.
 
 import Foundation
 
@@ -26,7 +27,8 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
-public struct FBBuildConfig {
+/// Various configuration settings for the builder
+public struct FlatBuffersBuildConfig {
     public let initialCapacity : Int
     public let uniqueStrings : Bool
     public let uniqueTables : Bool
@@ -43,7 +45,7 @@ public struct FBBuildConfig {
     }
 }
 
-public enum FBBuildError : Error {
+public enum FlatBuffersBuildError : Error {
     case objectIsNotClosed
     case noOpenObject
     case propertyIndexIsInvalid
@@ -53,10 +55,11 @@ public enum FBBuildError : Error {
     case unsupportedType
 }
 
-public final class FBBuilder {
+/// A FlatBuffers builder that supports the generation of flatbuffers 'wire' format from an object graph
+public final class FlatBuffersBuilder {
     
-    private var _config : FBBuildConfig
-    public var config : FBBuildConfig { return _config }
+    private var _config : FlatBuffersBuildConfig
+    public var config : FlatBuffersBuildConfig { return _config }
     private var capacity : Int
     private var _data : UnsafeMutableRawPointer
     private var minalign = 1;
@@ -73,14 +76,30 @@ public final class FBBuilder {
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
     public var deferedBindings : ContiguousArray<(object:Any, cursor:Int)> = []
-    
-    public init(config : FBBuildConfig = FBBuildConfig()) {
+
+    /**
+     Initializes the builder
+     
+     - parameters:
+         - config: The configuration settings to use for this builder.
+     
+     - Returns: A FlatBuffers builder ready for use.
+     */
+    public init(config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) {
         self._config = config
         self.capacity = config.initialCapacity
         _data = UnsafeMutableRawPointer.allocate(bytes: capacity, alignedTo: minalign)
     }
     
-    public var data : Data {
+    /**
+     Allocates, initializes and returns a Data object from the builder backing store
+     
+     - parameters:
+     - config: The configuration settings to use for this builder.
+     
+     - Returns: A FlatBuffers builder ready for use.
+     */
+    public var makeData : Data {
         return Data(bytes:_data.advanced(by:leftCursor), count: cursor)
     }
     
@@ -131,7 +150,7 @@ public final class FBBuilder {
             return cursor
         }
         guard offset <= Int32(cursor) else {
-            throw FBBuildError.offsetIsTooBig
+            throw FlatBuffersBuildError.offsetIsTooBig
         }
         
         if offset == Int32(0) {
@@ -146,10 +165,10 @@ public final class FBBuilder {
     
     public func replaceOffset(offset : Offset, atCursor jumpCursor: Int) throws{
         guard offset <= Int32(cursor) else {
-            throw FBBuildError.offsetIsTooBig
+            throw FlatBuffersBuildError.offsetIsTooBig
         }
         guard jumpCursor <= cursor else {
-            throw FBBuildError.cursorIsInvalid
+            throw FlatBuffersBuildError.cursorIsInvalid
         }
         let _offset = Int32(jumpCursor) - offset;
         
@@ -162,7 +181,7 @@ public final class FBBuilder {
     
     public func openObject(numOfProperties : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.objectIsNotClosed
+            throw FlatBuffersBuildError.objectIsNotClosed
         }
         currentVTable.removeAll(keepingCapacity: true)
         currentVTable.reserveCapacity(numOfProperties)
@@ -175,10 +194,10 @@ public final class FBBuilder {
     @discardableResult
     public func addPropertyOffsetToOpenObject(propertyIndex : Int, offset : Offset) throws -> Int{
         guard objectStart > -1 else {
-            throw FBBuildError.noOpenObject
+            throw FlatBuffersBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
-            throw FBBuildError.propertyIndexIsInvalid
+            throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
         _ = try putOffset(offset: offset)
         currentVTable[propertyIndex] = Int32(cursor)
@@ -187,10 +206,10 @@ public final class FBBuilder {
     
     public func addPropertyToOpenObject<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
         guard objectStart > -1 else {
-            throw FBBuildError.noOpenObject
+            throw FlatBuffersBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
-            throw FBBuildError.propertyIndexIsInvalid
+            throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
         
         if(config.forceDefaults == false && value == defaultValue) {
@@ -203,17 +222,17 @@ public final class FBBuilder {
     
     public func addCurrentOffsetAsPropertyToOpenObject(propertyIndex : Int) throws {
         guard objectStart > -1 else {
-            throw FBBuildError.noOpenObject
+            throw FlatBuffersBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
-            throw FBBuildError.propertyIndexIsInvalid
+            throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
         currentVTable[propertyIndex] = Int32(cursor)
     }
     
     public func closeObject() throws -> Offset {
         guard objectStart > -1 else {
-            throw FBBuildError.noOpenObject
+            throw FlatBuffersBuildError.noOpenObject
         }
         align(size: 4, additionalBytes: 0)
         increaseCapacity(size: 4)
@@ -277,7 +296,7 @@ public final class FBBuilder {
     public func startVector(count : Int, elementSize : Int) throws{
         align(size: 4, additionalBytes: count * elementSize)
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.objectIsNotClosed
+            throw FlatBuffersBuildError.objectIsNotClosed
         }
         vectorNumElems = Int32(count)
     }
@@ -291,7 +310,7 @@ public final class FBBuilder {
     private var stringCache : [String:Offset] = [:]
     public func createString(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.objectIsNotClosed
+            throw FlatBuffersBuildError.objectIsNotClosed
         }
         guard let value = value else {
             return 0
@@ -332,10 +351,10 @@ public final class FBBuilder {
     
     public func finish(offset : Offset, fileIdentifier : String?) throws -> Void {
         guard offset <= Int32(cursor) else {
-            throw FBBuildError.offsetIsTooBig
+            throw FlatBuffersBuildError.offsetIsTooBig
         }
         guard objectStart == -1 && vectorNumElems == -1 else {
-            throw FBBuildError.objectIsNotClosed
+            throw FlatBuffersBuildError.objectIsNotClosed
         }
         var prefixLength = 4
         if let fileIdentifier = fileIdentifier {
@@ -344,7 +363,7 @@ public final class FBBuilder {
             let utf8View = fileIdentifier.utf8
             let count = utf8View.count
             guard count == 4 else {
-                throw FBBuildError.badFileIdentifier
+                throw FlatBuffersBuildError.badFileIdentifier
             }
             for c in utf8View.lazy.reversed() {
                 put(value: c)
