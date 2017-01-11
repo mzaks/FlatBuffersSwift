@@ -245,10 +245,10 @@ class FlatBuffersReaderTest: XCTestCase {
             forceDefaults : false,
             nullTerminatedUTF8 : false)
         )
-        let sOffset = try! fbb.append(value: "max")
+        let sOffset = try! fbb.insert(value: "max")
         try! fbb.startObject(numOfProperties: 3)
-        try! fbb.append(propertyIndex: 0, value: true, defaultValue: false)
-        try! fbb.append(propertyIndex: 1, offset: sOffset)
+        try! fbb.insert(propertyIndex: 0, value: true, defaultValue: false)
+        try! fbb.insert(propertyIndex: 1, offset: sOffset)
         let oOffset = try! fbb.endObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
         let data = fbb.makeData
@@ -265,24 +265,24 @@ class FlatBuffersReaderTest: XCTestCase {
             forceDefaults : false,
             nullTerminatedUTF8 : false)
         )
-        let sOffset1 = try! fbb.append(value: "max1")
-        let sOffset2 = try! fbb.append(value: "max2")
-        let sOffset3 = try! fbb.append(value: "max3")
+        let sOffset1 = try! fbb.insert(value: "max1")
+        let sOffset2 = try! fbb.insert(value: "max2")
+        let sOffset3 = try! fbb.insert(value: "max3")
         
         try! fbb.startVector(count: 3, elementSize: 4)
-        try!fbb.append(offset: sOffset1)
-        try!fbb.append(offset: sOffset2)
-        try!fbb.append(offset: sOffset3)
+        try!fbb.insert(offset: sOffset1)
+        try!fbb.insert(offset: sOffset2)
+        try!fbb.insert(offset: sOffset3)
         let sVectorOffset = fbb.endVector()
         
         try! fbb.startVector(count: 2, elementSize: 1)
-        fbb.append(value: true)
-        fbb.append(value: false)
+        fbb.insert(value: true)
+        fbb.insert(value: false)
         let bVectorOffset = fbb.endVector()
         
         try! fbb.startObject(numOfProperties: 2)
-        try! fbb.append(propertyIndex: 0, offset: sVectorOffset)
-        try! fbb.append(propertyIndex: 1, offset: bVectorOffset)
+        try! fbb.insert(propertyIndex: 0, offset: sVectorOffset)
+        try! fbb.insert(propertyIndex: 1, offset: bVectorOffset)
         let oOffset = try! fbb.endObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
         let data = fbb.makeData

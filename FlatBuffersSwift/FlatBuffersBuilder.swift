@@ -144,12 +144,12 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Append a scalar value to the buffer
+     Add a scalar value to the buffer
      
      - parameters:
          - value: The value to add to the buffer
      */
-    public func append<T : Scalar>(value : T){
+    public func insert<T : Scalar>(value : T){
         let c = MemoryLayout.stride(ofValue: value)
         if c > 8 {
             align(size: 8, additionalBytes: c)
@@ -164,15 +164,15 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Make offset relative and append it to the buffer
+     Make offset relative and add it to the buffer
      
      - parameters:
          - offset: The offset to transform and add to the buffer
      */
     @discardableResult
-    public func append(offset : Offset?) throws -> Int {
+    public func insert(offset : Offset?) throws -> Int {
         guard let offset = offset else {
-            append(value: Offset(0))
+            insert(value: Offset(0))
             return cursor
         }
         guard offset <= Int32(cursor) else {
@@ -180,12 +180,12 @@ public final class FlatBuffersBuilder {
         }
         
         if offset == Int32(0) {
-            append(value: Offset(0))
+            insert(value: Offset(0))
             return cursor
         }
         align(size: 4, additionalBytes: 0)
         let _offset = Int32(cursor) - offset + MemoryLayout<Int32>.stride;
-        append(value: _offset)
+        insert(value: _offset)
         return cursor
     }
   
@@ -238,7 +238,7 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Append an offset into the buffer for the currently open object
+     Add an offset into the buffer for the currently open object
      
      - parameters:
          - propertyIndex: The index of the property to update
@@ -247,20 +247,20 @@ public final class FlatBuffersBuilder {
      - Returns: The current cursor position (Note: What is the use case of the return value?)
      */
     @discardableResult
-    public func append(propertyIndex : Int, offset : Offset) throws -> Int{
+    public func insert(propertyIndex : Int, offset : Offset) throws -> Int{
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
             throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
-        _ = try append(offset: offset)
+        _ = try insert(offset: offset)
         currentVTable[propertyIndex] = Int32(cursor)
         return cursor
     }
  
     /**
-     Append an scalar into the buffer for the currently open object
+     Add a scalar into the buffer for the currently open object
      
      - parameters:
          - propertyIndex: The index of the property to update
@@ -268,7 +268,7 @@ public final class FlatBuffersBuilder {
          - defaultValue: If configured to skip default values, a value 
         matching this default value will not be written to the buffer.
      */
-    public func append<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
+    public func insert<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -280,17 +280,17 @@ public final class FlatBuffersBuilder {
             return
         }
         
-        append(value: value)
+        insert(value: value)
         currentVTable[propertyIndex] = Int32(cursor)
     }
     
     /**
-     Append the current cursor position into the buffer for the currently open object
+     Add the current cursor position into the buffer for the currently open object
      
      - parameters:
          - propertyIndex: The index of the property to update
      */
-    public func appendCurrentOffsetAsProperty(propertyIndex : Int) throws {
+    public func insertCurrentOffsetAsProperty(propertyIndex : Int) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -318,14 +318,14 @@ public final class FlatBuffersBuilder {
         while(index>=0) {
             // Offset relative to the start of the table.
             let off = Int16(currentVTable[index] != 0 ? Int32(vtableloc) - currentVTable[index] : 0);
-            append(value: off);
+            insert(value: off);
             index -= 1
         }
         
         let numberOfstandardFields = 2
         
-        append(value: Int16(Int32(vtableloc) - objectStart)); // standard field 1: lenght of the object data
-        append(value: Int16((currentVTable.count + numberOfstandardFields) * MemoryLayout<Int16>.stride)); // standard field 2: length of vtable and standard fields them selves
+        insert(value: Int16(Int32(vtableloc) - objectStart)); // standard field 1: lenght of the object data
+        insert(value: Int16((currentVTable.count + numberOfstandardFields) * MemoryLayout<Int16>.stride)); // standard field 2: length of vtable and standard fields them selves
         
         // search if we already have same vtable
         let vtableDataLength = cursor - vtableloc
@@ -385,7 +385,7 @@ public final class FlatBuffersBuilder {
      Finish vector update operation
      */
     public func endVector() -> Offset {
-        append(value: vectorNumElems)
+        insert(value: vectorNumElems)
         vectorNumElems = -1
         return Int32(cursor)
     }
@@ -393,14 +393,14 @@ public final class FlatBuffersBuilder {
     private var stringCache : [String:Offset] = [:]
  
     /**
-     Append a string to the buffer
+     Add a string to the buffer
      
      - parameters:
          - value: The string to add to the buffer
 
      - Returns: The current cursor position (Note: What is the use case of the return value?)
     */
-    public func append(value : String?) throws -> Offset {
+    public func insert(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBuffersBuildError.objectIsNotClosed
         }
@@ -420,18 +420,18 @@ public final class FlatBuffersBuilder {
             align(size: 4, additionalBytes: length)
             reserveAdditionalCapacity(size: length)
             for c in utf8View.lazy.reversed() {
-                append(value: c)
+                insert(value: c)
             }
-            append(value: Int32(length - 1))
+            insert(value: Int32(length - 1))
         } else {
             let utf8View = value.utf8
             let length = utf8View.count
             align(size: 4, additionalBytes: length)
             reserveAdditionalCapacity(size: length)
             for c in utf8View.lazy.reversed() {
-                append(value: c)
+                insert(value: c)
             }
-            append(value: Int32(length))
+            insert(value: Int32(length))
         }
         
         let o = Offset(cursor)
@@ -458,7 +458,7 @@ public final class FlatBuffersBuilder {
                 throw FlatBuffersBuildError.badFileIdentifier
             }
             for c in utf8View.lazy.reversed() {
-                append(value: c)
+                insert(value: c)
             }
         } else {
             align(size: minalign, additionalBytes: prefixLength)
@@ -466,6 +466,6 @@ public final class FlatBuffersBuilder {
         
         let v = (Int32(cursor + 4) - offset)
         
-        append(value: v)
+        insert(value: v)
     }
 }
