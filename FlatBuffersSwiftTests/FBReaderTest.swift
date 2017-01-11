@@ -245,11 +245,11 @@ class FlatBuffersReaderTest: XCTestCase {
             forceDefaults : false,
             nullTerminatedUTF8 : false)
         )
-        let sOffset = try! fbb.createString(value: "max")
-        try! fbb.openObject(numOfProperties: 3)
-        try! fbb.appendToObject(propertyIndex: 0, value: true, defaultValue: false)
-        try! fbb.appendToObject(propertyIndex: 1, offset: sOffset)
-        let oOffset = try! fbb.closeObject()
+        let sOffset = try! fbb.append(value: "max")
+        try! fbb.startObject(numOfProperties: 3)
+        try! fbb.append(propertyIndex: 0, value: true, defaultValue: false)
+        try! fbb.append(propertyIndex: 1, offset: sOffset)
+        let oOffset = try! fbb.endObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
         let data = fbb.makeData
         
@@ -265,9 +265,9 @@ class FlatBuffersReaderTest: XCTestCase {
             forceDefaults : false,
             nullTerminatedUTF8 : false)
         )
-        let sOffset1 = try! fbb.createString(value: "max1")
-        let sOffset2 = try! fbb.createString(value: "max2")
-        let sOffset3 = try! fbb.createString(value: "max3")
+        let sOffset1 = try! fbb.append(value: "max1")
+        let sOffset2 = try! fbb.append(value: "max2")
+        let sOffset3 = try! fbb.append(value: "max3")
         
         try! fbb.startVector(count: 3, elementSize: 4)
         try!fbb.append(offset: sOffset1)
@@ -280,10 +280,10 @@ class FlatBuffersReaderTest: XCTestCase {
         fbb.append(value: false)
         let bVectorOffset = fbb.endVector()
         
-        try! fbb.openObject(numOfProperties: 2)
-        try! fbb.appendToObject(propertyIndex: 0, offset: sVectorOffset)
-        try! fbb.appendToObject(propertyIndex: 1, offset: bVectorOffset)
-        let oOffset = try! fbb.closeObject()
+        try! fbb.startObject(numOfProperties: 2)
+        try! fbb.append(propertyIndex: 0, offset: sVectorOffset)
+        try! fbb.append(propertyIndex: 1, offset: bVectorOffset)
+        let oOffset = try! fbb.endObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
         let data = fbb.makeData
         

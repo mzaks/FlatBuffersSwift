@@ -132,11 +132,11 @@ public extension PeopleList {
 			}
 			offset0 = builder.endVector()
 		}
-		try builder.openObject(numOfProperties: 1)
+		try builder.startObject(numOfProperties: 1)
 		if people.count > 0 {
-			try builder.appendToObject(propertyIndex: 0, offset: offset0)
+			try builder.append(propertyIndex: 0, offset: offset0)
 		}
-		let myOffset =  try builder.closeObject()
+		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
@@ -272,17 +272,17 @@ public extension Friend {
 			}
 			offset1 = builder.endVector()
 		}
-		let offset0 = try builder.createString(value: name)
-		try builder.openObject(numOfProperties: 6)
+		let offset0 = try builder.append(value: name)
+		try builder.startObject(numOfProperties: 6)
 		if let object = lover {
-			let cursor4 = try builder.appendToObject(propertyIndex: 5, offset: offset4)
+			let cursor4 = try builder.append(propertyIndex: 5, offset: offset4)
 			if offset4 == 0 {
 				builder.deferedBindings.append((object: object, cursor: cursor4))
 			}
-			try builder.appendToObject(propertyIndex: 4, value : unionCase_Human(object), defaultValue : 0)
+			try builder.append(propertyIndex: 4, value : unionCase_Human(object), defaultValue : 0)
 		}
 		if mother != nil {
-			let cursor3 = try builder.appendToObject(propertyIndex: 3, offset: offset3)
+			let cursor3 = try builder.append(propertyIndex: 3, offset: offset3)
 			if offset3 == 0 {
 				if let object = mother {
 					builder.deferedBindings.append((object: object, cursor: cursor3))
@@ -290,7 +290,7 @@ public extension Friend {
 			}
 		}
 		if father != nil {
-			let cursor2 = try builder.appendToObject(propertyIndex: 2, offset: offset2)
+			let cursor2 = try builder.append(propertyIndex: 2, offset: offset2)
 			if offset2 == 0 {
 				if let object = father {
 					builder.deferedBindings.append((object: object, cursor: cursor2))
@@ -298,10 +298,10 @@ public extension Friend {
 			}
 		}
 		if friends.count > 0 {
-			try builder.appendToObject(propertyIndex: 1, offset: offset1)
+			try builder.append(propertyIndex: 1, offset: offset1)
 		}
-		try builder.appendToObject(propertyIndex: 0, offset: offset0)
-		let myOffset =  try builder.closeObject()
+		try builder.append(propertyIndex: 0, offset: offset0)
+		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
@@ -363,16 +363,16 @@ public extension Male {
 		}
 		builder.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.openObject(numOfProperties: 1)
+		try builder.startObject(numOfProperties: 1)
 		if ref != nil {
-			let cursor0 = try builder.appendToObject(propertyIndex: 0, offset: offset0)
+			let cursor0 = try builder.append(propertyIndex: 0, offset: offset0)
 			if offset0 == 0 {
 				if let object = ref {
 					builder.deferedBindings.append((object: object, cursor: cursor0))
 				}
 			}
 		}
-		let myOffset =  try builder.closeObject()
+		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
@@ -434,16 +434,16 @@ public extension Female {
 		}
 		builder.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.openObject(numOfProperties: 1)
+		try builder.startObject(numOfProperties: 1)
 		if ref != nil {
-			let cursor0 = try builder.appendToObject(propertyIndex: 0, offset: offset0)
+			let cursor0 = try builder.append(propertyIndex: 0, offset: offset0)
 			if offset0 == 0 {
 				if let object = ref {
 					builder.deferedBindings.append((object: object, cursor: cursor0))
 				}
 			}
 		}
-		let myOffset =  try builder.closeObject()
+		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}

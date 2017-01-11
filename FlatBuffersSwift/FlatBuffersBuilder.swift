@@ -225,7 +225,7 @@ public final class FlatBuffersBuilder {
      - parameters:
          - numOfProperties: The number of properties we will update
      */
-    public func openObject(numOfProperties : Int) throws {
+    public func startObject(numOfProperties : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBuffersBuildError.objectIsNotClosed
         }
@@ -238,7 +238,7 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Append an offset into the buffer for the current object
+     Append an offset into the buffer for the currently open object
      
      - parameters:
          - propertyIndex: The index of the property to update
@@ -247,7 +247,7 @@ public final class FlatBuffersBuilder {
      - Returns: The current cursor position (Note: What is the use case of the return value?)
      */
     @discardableResult
-    public func appendToObject(propertyIndex : Int, offset : Offset) throws -> Int{
+    public func append(propertyIndex : Int, offset : Offset) throws -> Int{
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -260,7 +260,7 @@ public final class FlatBuffersBuilder {
     }
  
     /**
-     Append an scalar into the buffer for the current object
+     Append an scalar into the buffer for the currently open object
      
      - parameters:
          - propertyIndex: The index of the property to update
@@ -268,7 +268,7 @@ public final class FlatBuffersBuilder {
          - defaultValue: If configured to skip default values, a value 
         matching this default value will not be written to the buffer.
      */
-    public func appendToObject<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
+    public func append<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -285,12 +285,12 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Append the current cursor position into the buffer for the current object
+     Append the current cursor position into the buffer for the currently open object
      
      - parameters:
          - propertyIndex: The index of the property to update
      */
-    public func appenCurrentOffsetAsPropertyToObject(propertyIndex : Int) throws {
+    public func appendCurrentOffsetAsProperty(propertyIndex : Int) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -303,7 +303,7 @@ public final class FlatBuffersBuilder {
     /**
      Close the current open object.
      */
-    public func closeObject() throws -> Offset {
+    public func endObject() throws -> Offset {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -366,6 +366,13 @@ public final class FlatBuffersBuilder {
         return Offset(vtableloc)
     }
     
+    /**
+     Start a vector update operation
+     
+     - parameters:
+         - count: The number of elements in the vector
+         - elementSize: The size of the vector elements
+     */
     public func startVector(count : Int, elementSize : Int) throws{
         align(size: 4, additionalBytes: count * elementSize)
         guard objectStart == -1 && vectorNumElems == -1 else {
@@ -374,6 +381,9 @@ public final class FlatBuffersBuilder {
         vectorNumElems = Int32(count)
     }
     
+    /**
+     Finish vector update operation
+     */
     public func endVector() -> Offset {
         append(value: vectorNumElems)
         vectorNumElems = -1
@@ -381,7 +391,16 @@ public final class FlatBuffersBuilder {
     }
     
     private var stringCache : [String:Offset] = [:]
-    public func createString(value : String?) throws -> Offset {
+ 
+    /**
+     Append a string to the buffer
+     
+     - parameters:
+         - value: The string to add to the buffer
+
+     - Returns: The current cursor position (Note: What is the use case of the return value?)
+    */
+    public func append(value : String?) throws -> Offset {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBuffersBuildError.objectIsNotClosed
         }
