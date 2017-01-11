@@ -121,9 +121,9 @@ public extension ContactList {
 		}
 		try builder.startObject(numOfProperties: 2)
 		if entries.count > 0 {
-			try builder.insert(propertyIndex: 1, offset: offset1)
+            try builder.insert(offset: offset1, toStartedObjectAt:1)
 		}
-		try builder.insert(propertyIndex: 0, value : lastModified, defaultValue : 0)
+		try builder.insert(value : lastModified, defaultValue : 0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -356,26 +356,26 @@ public extension Contact {
 		let offset0 = try builder.insert(value: name)
 		try builder.startObject(numOfProperties: 8)
 		if moods.count > 0 {
-			try builder.insert(propertyIndex: 7, offset: offset7)
+			try builder.insert(offset: offset7, toStartedObjectAt: 7)
 		}
 		if previousLocations.count > 0 {
-			try builder.insert(propertyIndex: 6, offset: offset6)
+			try builder.insert(offset: offset6, toStartedObjectAt: 6)
 		}
 		if let currentLoccation = currentLoccation {
 			builder.insert(value: currentLoccation)
-			try builder.insertCurrentOffsetAsProperty(propertyIndex: 5)
+			try builder.insertCurrentOffsetAsProperty(toStartedObjectAt: 5)
 		}
 		if addressEntries.count > 0 {
-			try builder.insert(propertyIndex: 4, offset: offset4)
+			try builder.insert(offset: offset4, toStartedObjectAt: 4)
 		}
 		if tags.count > 0 {
-			try builder.insert(propertyIndex: 3, offset: offset3)
+			try builder.insert(offset: offset3, toStartedObjectAt: 3)
 		}
-		try builder.insert(propertyIndex: 2, value : gender?.rawValue ?? 0, defaultValue : 0)
+        try builder.insert(value : gender?.rawValue ?? 0, defaultValue : 0, toStartedObjectAt: 2)
 		if birthday != nil {
-			try builder.insert(propertyIndex: 1, offset: offset1)
+			try builder.insert(offset: offset1, toStartedObjectAt: 1)
 		}
-		try builder.insert(propertyIndex: 0, offset: offset0)
+		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -442,9 +442,9 @@ public extension Date {
 			}
 		}
 		try builder.startObject(numOfProperties: 3)
-		try builder.insert(propertyIndex: 2, value : year, defaultValue : 0)
-		try builder.insert(propertyIndex: 1, value : month, defaultValue : 0)
-		try builder.insert(propertyIndex: 0, value : day, defaultValue : 0)
+        try builder.insert(value : year, defaultValue : 0, toStartedObjectAt: 2)
+        try builder.insert(value : month, defaultValue : 0, toStartedObjectAt: 1)
+        try builder.insert(value : day, defaultValue : 0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -515,10 +515,10 @@ public extension AddressEntry {
 		let offset1 = try addToByteArray_Address(builder, union: address)
 		try builder.startObject(numOfProperties: 3)
 		if let object = address {
-			try builder.insert(propertyIndex: 2, offset: offset1)
-			try builder.insert(propertyIndex: 1, value : unionCase_Address(object), defaultValue : 0)
+			try builder.insert(offset: offset1, toStartedObjectAt: 2)
+            try builder.insert(value : unionCase_Address(object), defaultValue : 0, toStartedObjectAt: 1)
 		}
-		try builder.insert(propertyIndex: 0, value : order, defaultValue : 0)
+        try builder.insert(value : order, defaultValue : 0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -588,10 +588,10 @@ public extension PostalAddress {
 		let offset1 = try builder.insert(value: city)
 		let offset0 = try builder.insert(value: country)
 		try builder.startObject(numOfProperties: 4)
-		try builder.insert(propertyIndex: 3, offset: offset3)
-		try builder.insert(propertyIndex: 2, value : postalCode, defaultValue : 0)
-		try builder.insert(propertyIndex: 1, offset: offset1)
-		try builder.insert(propertyIndex: 0, offset: offset0)
+		try builder.insert(offset: offset3, toStartedObjectAt: 3)
+        try builder.insert(value : postalCode, defaultValue : 0, toStartedObjectAt: 2)
+		try builder.insert(offset: offset1, toStartedObjectAt: 1)
+		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -645,7 +645,7 @@ public extension EmailAddress {
 		}
 		let offset0 = try builder.insert(value: mailto)
 		try builder.startObject(numOfProperties: 1)
-		try builder.insert(propertyIndex: 0, offset: offset0)
+		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -699,7 +699,7 @@ public extension WebAddress {
 		}
 		let offset0 = try builder.insert(value: url)
 		try builder.startObject(numOfProperties: 1)
-		try builder.insert(propertyIndex: 0, offset: offset0)
+		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -753,7 +753,7 @@ public extension TelephoneNumber {
 		}
 		let offset0 = try builder.insert(value: number)
 		try builder.startObject(numOfProperties: 1)
-		try builder.insert(propertyIndex: 0, offset: offset0)
+		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset

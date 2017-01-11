@@ -247,7 +247,7 @@ public final class FlatBuffersBuilder {
      - Returns: The current cursor position (Note: What is the use case of the return value?)
      */
     @discardableResult
-    public func insert(propertyIndex : Int, offset : Offset) throws -> Int{
+    public func insert(offset : Offset, toStartedObjectAt propertyIndex : Int) throws -> Int{
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -268,7 +268,7 @@ public final class FlatBuffersBuilder {
          - defaultValue: If configured to skip default values, a value 
         matching this default value will not be written to the buffer.
      */
-    public func insert<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
+    public func insert<T : Scalar>(value : T, defaultValue : T, toStartedObjectAt propertyIndex : Int) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -290,7 +290,7 @@ public final class FlatBuffersBuilder {
      - parameters:
          - propertyIndex: The index of the property to update
      */
-    public func insertCurrentOffsetAsProperty(propertyIndex : Int) throws {
+    public func insertCurrentOffsetAsProperty(toStartedObjectAt propertyIndex : Int) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
