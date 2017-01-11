@@ -91,7 +91,7 @@ class ContactsTest: XCTestCase {
         
         XCTAssertNotNil(data)
         
-        let reader = FBMemoryReader(data: data!)
+        let reader = FlatBuffersMemoryReader(data: data!)
         
         let readContactList = ContactList_Direct(reader)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
@@ -115,20 +115,20 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i1.addressEntriesCount, 4)
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 0)?.order, 0)
-        let mailto = (i1.getAddressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FBMemoryReader>)?.mailto?§
+        let mailto = (i1.getAddressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FlatBuffersMemoryReader>)?.mailto?§
         XCTAssertEqual(mailto, "bla@bla.io")
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 1)?.order, 1)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBMemoryReader>)?.country?§, "DE")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBMemoryReader>)?.city?§, "Berlin")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBMemoryReader>)?.postalCode, 13000)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBMemoryReader>)?.streetAndNumber?§, "Balstr, 23")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.country?§, "DE")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.city?§, "Berlin")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.postalCode, 13000)
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.streetAndNumber?§, "Balstr, 23")
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 2)?.order, 2)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FBMemoryReader>)?.url?§, "http://slkf.com")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FlatBuffersMemoryReader>)?.url?§, "http://slkf.com")
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 3)?.order, 3)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FBMemoryReader>)?.number?§, "+4923452425")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FlatBuffersMemoryReader>)?.number?§, "+4923452425")
         
         XCTAssertEqual(i1.currentLoccation, GeoLocation(latitude: 23.7, longitude: 34.45, elevation: 45.98))
         
@@ -162,7 +162,7 @@ class ContactsTest: XCTestCase {
         XCTAssertNotNil(data)
         
         let fileHandle = writeToFileAndReturnHandle(data)
-        let fileReader = FBFileReader(fileHandle: fileHandle)
+        let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
         let readContactList = ContactList.from(reader: fileReader)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
@@ -237,7 +237,7 @@ class ContactsTest: XCTestCase {
         XCTAssertNotNil(data)
         
         let fileHandle = writeToFileAndReturnHandle(data)
-        let fileReader = FBFileReader(fileHandle: fileHandle)
+        let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
         let readContactList = ContactList_Direct(fileReader)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
@@ -261,20 +261,20 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i1.addressEntriesCount, 4)
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 0)?.order, 0)
-        let mailto = (i1.getAddressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FBFileReader>)?.mailto?§
+        let mailto = (i1.getAddressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FlatBuffersFileReader>)?.mailto?§
         XCTAssertEqual(mailto, "bla@bla.io")
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 1)?.order, 1)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBFileReader>)?.country?§, "DE")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBFileReader>)?.city?§, "Berlin")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBFileReader>)?.postalCode, 13000)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FBFileReader>)?.streetAndNumber?§, "Balstr, 23")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.country?§, "DE")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.city?§, "Berlin")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.postalCode, 13000)
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.streetAndNumber?§, "Balstr, 23")
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 2)?.order, 2)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FBFileReader>)?.url?§, "http://slkf.com")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FlatBuffersFileReader>)?.url?§, "http://slkf.com")
         
         XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 3)?.order, 3)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FBFileReader>)?.number?§, "+4923452425")
+        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FlatBuffersFileReader>)?.number?§, "+4923452425")
         
         XCTAssertEqual(i1.currentLoccation, GeoLocation(latitude: 23.7, longitude: 34.45, elevation: 45.98))
         
