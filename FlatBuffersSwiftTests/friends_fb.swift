@@ -118,7 +118,7 @@ public extension PeopleList {
 			index = people.count - 1
 			var deferedBindingCursors : [Int : Int] = [:]
 			while(index >= 0){
-				let cursor = try builder.putOffset(offset: offsets[index])
+				let cursor = try builder.append(offset: offsets[index])
 				if offsets[index] == 0 {
 					deferedBindingCursors[index] = cursor
 				}
@@ -258,7 +258,7 @@ public extension Friend {
 			index = friends.count - 1
 			var deferedBindingCursors : [Int : Int] = [:]
 			while(index >= 0){
-				let cursor = try builder.putOffset(offset: offsets[index])
+				let cursor = try builder.append(offset: offsets[index])
 				if offsets[index] == 0 {
 					deferedBindingCursors[index] = cursor
 				}
@@ -503,10 +503,10 @@ fileprivate func addToByteArray_Human(_ builder : FlatBuffersBuilder, union : Hu
 private func performLateBindings(_ builder : FlatBuffersBuilder) throws {
 	for binding in builder.deferedBindings {
 		switch binding.object {
-		case let object as PeopleList: try builder.replaceOffset(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Friend: try builder.replaceOffset(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Male: try builder.replaceOffset(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Female: try builder.replaceOffset(offset: object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as PeopleList: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as Friend: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as Male: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
+		case let object as Female: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
 		default: continue
 		}
 	}

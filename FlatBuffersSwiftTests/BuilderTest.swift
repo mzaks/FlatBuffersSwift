@@ -26,11 +26,11 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutOneBytePrimitives() {
-        builder.put(value: true)
-        builder.put(value: false)
-        builder.put(value: Int8(-12))
-        builder.put(value: Int8(12))
-        builder.put(value: UInt8(13))
+        builder.append(value: true)
+        builder.append(value: false)
+        builder.append(value: Int8(-12))
+        builder.append(value: Int8(12))
+        builder.append(value: UInt8(13))
         
         assertByte(with: 13)
         assertByte(with: 12)
@@ -40,9 +40,9 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutTwoBytePrimitives() {
-        builder.put(value: Int16(-12))
-        builder.put(value: Int16(12))
-        builder.put(value: UInt16(13))
+        builder.append(value: Int16(-12))
+        builder.append(value: Int16(12))
+        builder.append(value: UInt16(13))
         
         assertByte(with: 13)
         assertByte(with: 0)
@@ -53,9 +53,9 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutFourBytePrimitives() {
-        builder.put(value: Int32(-12))
-        builder.put(value: Int32(12))
-        builder.put(value: UInt32(13))
+        builder.append(value: Int32(-12))
+        builder.append(value: Int32(12))
+        builder.append(value: UInt32(13))
         
         assertByte(with: 13)
         assertByte(with: 0)
@@ -73,9 +73,9 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutEightBytePrimitives() {
-        builder.put(value: Int(-12))
-        builder.put(value: Int(12))
-        builder.put(value: UInt(13))
+        builder.append(value: Int(-12))
+        builder.append(value: Int(12))
+        builder.append(value: UInt(13))
         
         assertByte(with: 13)
         assertByte(with: 0)
@@ -104,8 +104,8 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutFourByteFloat() {
-        builder.put(value: Float32(12.5))
-        builder.put(value: Float32(-12.5))
+        builder.append(value: Float32(12.5))
+        builder.append(value: Float32(-12.5))
         
         assertByte(with: 0)
         assertByte(with: 0)
@@ -119,8 +119,8 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutEightByteFloat() {
-        builder.put(value: Float64(12.5))
-        builder.put(value: Float64(-12.5))
+        builder.append(value: Float64(12.5))
+        builder.append(value: Float64(-12.5))
         
         assertByte(with: 0)
         assertByte(with: 0)
@@ -141,7 +141,7 @@ class BuilderTest: XCTestCase {
     }
     
     func testPutStruct() {
-        builder.put(value: S1(i1: 9999, i2: 13))
+        builder.append(value: S1(i1: 9999, i2: 13))
         
         assertByte(with: 15)
         assertByte(with: 39)
@@ -156,13 +156,13 @@ class BuilderTest: XCTestCase {
     }
     
     func testPrimitiveAlingment() {
-        builder.put(value: true)
-        builder.put(value: Int32(16))
-        builder.put(value: Int16(7))
-        builder.put(value: Int16(8))
-        builder.put(value: Int(15))
-        builder.put(value: Float32(2.5))
-        builder.put(value: Float32(3.5))
+        builder.append(value: true)
+        builder.append(value: Int32(16))
+        builder.append(value: Int16(7))
+        builder.append(value: Int16(8))
+        builder.append(value: Int(15))
+        builder.append(value: Float32(2.5))
+        builder.append(value: Float32(3.5))
         
         assertByte(with: 0)
         assertByte(with: 0)
@@ -198,8 +198,8 @@ class BuilderTest: XCTestCase {
     }
     
     func testAlignmentWithStruct(){
-        builder.put(value: Int16(45))
-        builder.put(value: S1(i1: 9999, i2: 11))
+        builder.append(value: Int16(45))
+        builder.append(value: S1(i1: 9999, i2: 11))
         
         
         assertByte(with: 15)
@@ -257,7 +257,7 @@ class BuilderTest: XCTestCase {
     }
     
     func testStringWithPrimitives(){
-        builder.put(value: Int16(25))
+        builder.append(value: Int16(25))
         let o = try!builder.createString(value: "maxim")
         
         
@@ -280,9 +280,9 @@ class BuilderTest: XCTestCase {
     }
     
     func testStringWithPrimitivesAndFinish(){
-        builder.put(value: Int16(25))
+        builder.append(value: Int16(25))
         let o = try!builder.createString(value: "maxim")
-        builder.put(value: true)
+        builder.append(value: true)
         try!builder.finish(offset: o, fileIdentifier: nil)
         
         XCTAssertEqual(o, 12)
@@ -313,9 +313,9 @@ class BuilderTest: XCTestCase {
     }
     
     func testStringWithPrimitivesAndFinishWithFileIdentifier(){
-        builder.put(value: Int16(25))
+        builder.append(value: Int16(25))
         let o = try!builder.createString(value: "maxim")
-        builder.put(value: true)
+        builder.append(value: true)
         try!builder.finish(offset: o, fileIdentifier: "test")
         
         XCTAssertEqual(o, 12)
@@ -522,7 +522,7 @@ class BuilderTest: XCTestCase {
         try!builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: s)
         let cursor = try!builder.addPropertyOffsetToOpenObject(propertyIndex: 2, offset: 0)
         let o = try!builder.closeObject()
-        try!builder.replaceOffset(offset: o, atCursor: cursor)
+        try!builder.update(offset: o, atCursor: cursor)
         try!builder.finish(offset: o, fileIdentifier: nil)
         
         assertByte(with: 16)
@@ -573,7 +573,7 @@ class BuilderTest: XCTestCase {
     func testObjectWithStruct(){
         try!builder.openObject(numOfProperties: 2)
         try!builder.addPropertyToOpenObject(propertyIndex: 1, value: UInt8(35), defaultValue: 0)
-        builder.put(value: S1(i1: 45, i2: 78))
+        builder.append(value: S1(i1: 45, i2: 78))
         try! builder.addCurrentOffsetAsPropertyToOpenObject(propertyIndex: 0)
         let o = try!builder.closeObject()
         try!builder.finish(offset: o, fileIdentifier: nil)
@@ -610,8 +610,8 @@ class BuilderTest: XCTestCase {
     
     func testObjectWithVectorOfInt16(){
         try!builder.startVector(count: 2, elementSize: 2)
-        builder.put(value: Int16(15))
-        builder.put(value: Int16(19))
+        builder.append(value: Int16(15))
+        builder.append(value: Int16(19))
         let v = builder.endVector()
         try!builder.openObject(numOfProperties: 1)
         try! builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: v)
@@ -652,8 +652,8 @@ class BuilderTest: XCTestCase {
     
     func testObjectWithVectorOfBoolean(){
         try!builder.startVector(count: 2, elementSize: 1)
-        builder.put(value: true)
-        builder.put(value: false)
+        builder.append(value: true)
+        builder.append(value: false)
         let v = builder.endVector()
         try!builder.openObject(numOfProperties: 1)
         try! builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: v)
@@ -693,8 +693,8 @@ class BuilderTest: XCTestCase {
     
     func testObjectWithVectorOfStructs(){
         try!builder.startVector(count: 2, elementSize: 1)
-        builder.put(value: S1(i1: 12, i2: 19))
-        builder.put(value: S1(i1: 13, i2: 17))
+        builder.append(value: S1(i1: 12, i2: 19))
+        builder.append(value: S1(i1: 13, i2: 17))
         let v = builder.endVector()
         try!builder.openObject(numOfProperties: 1)
         try! builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: v)
@@ -767,8 +767,8 @@ class BuilderTest: XCTestCase {
         let o2 = try!builder.closeObject()
         
         try!builder.startVector(count: 2, elementSize: 1)
-        try!builder.putOffset(offset: o1)
-        try!builder.putOffset(offset: o2)
+        try!builder.append(offset: o1)
+        try!builder.append(offset: o2)
         let v = builder.endVector()
         
         try!builder.openObject(numOfProperties: 1)
@@ -865,8 +865,8 @@ class BuilderTest: XCTestCase {
         let o2 = try!builder.closeObject()
         
         try!builder.startVector(count: 2, elementSize: 1)
-        try!builder.putOffset(offset: o1)
-        try!builder.putOffset(offset: o2)
+        try!builder.append(offset: o1)
+        try!builder.append(offset: o2)
         let v = builder.endVector()
         
         try!builder.openObject(numOfProperties: 1)
@@ -951,8 +951,8 @@ class BuilderTest: XCTestCase {
         let o2 = try!builder.closeObject()
         
         try!builder.startVector(count: 2, elementSize: 1)
-        try!builder.putOffset(offset: o1)
-        try!builder.putOffset(offset: o2)
+        try!builder.append(offset: o1)
+        try!builder.append(offset: o2)
         let v = builder.endVector()
         
         try!builder.openObject(numOfProperties: 1)
@@ -1036,15 +1036,15 @@ class BuilderTest: XCTestCase {
     
     func testObjectWithVectorToSelf(){
         try!builder.startVector(count: 2, elementSize: 2)
-        let c1 = try!builder.putOffset(offset: nil)
-        let c2 = try!builder.putOffset(offset: nil)
+        let c1 = try!builder.append(offset: nil)
+        let c2 = try!builder.append(offset: nil)
         let v = builder.endVector()
         try!builder.openObject(numOfProperties: 1)
         try! builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: v)
         let o = try!builder.closeObject()
         
-        try!builder.replaceOffset(offset: o, atCursor: c1)
-        try!builder.replaceOffset(offset: o, atCursor: c2)
+        try!builder.update(offset: o, atCursor: c1)
+        try!builder.update(offset: o, atCursor: c2)
         
         try!builder.finish(offset: o, fileIdentifier: nil)
         
@@ -1087,7 +1087,7 @@ class BuilderTest: XCTestCase {
     func testPutBadOffset(){
         var itThrows = false
         do {
-            try builder.putOffset(offset: 12)
+            try builder.append(offset: 12)
         } catch {
             itThrows = true
         }
@@ -1097,7 +1097,7 @@ class BuilderTest: XCTestCase {
     func testReplaceWithBadOffset(){
         var itThrows = false
         do {
-            try builder.replaceOffset(offset: 12, atCursor: 0)
+            try builder.update(offset: 12, atCursor: 0)
         } catch {
             itThrows = true
         }
@@ -1107,7 +1107,7 @@ class BuilderTest: XCTestCase {
     func testReplaceWithBadCursor(){
         var itThrows = false
         do {
-            try builder.replaceOffset(offset: 0, atCursor: 12)
+            try builder.update(offset: 0, atCursor: 12)
         } catch {
             itThrows = true
         }

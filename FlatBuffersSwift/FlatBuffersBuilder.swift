@@ -92,18 +92,25 @@ public final class FlatBuffersBuilder {
     }
     
     /**
-     Allocates, initializes and returns a Data object from the builder backing store
+     Allocates and returns a Data object initialized from the builder backing store
      
-     - parameters:
-     - config: The configuration settings to use for this builder.
-     
-     - Returns: A FlatBuffers builder ready for use.
+     - Returns: A Data object initilized with the data from the builder backing store
      */
     public var makeData : Data {
         return Data(bytes:_data.advanced(by:leftCursor), count: cursor)
     }
     
-    private func increaseCapacity(size : Int){
+    /**
+     Reserve enough space to store at a minimum size more data and resize the 
+     underlying buffer if needed. 
+     
+     The data should be consumed by the builder immediately after reservation.
+     
+     - parameters:
+         - size: The additional size that will be consumed by the builder 
+                 immedieatly after the call
+     */
+    private func reserveAdditionalCapacity(size : Int){
         guard leftCursor <= size else {
             return
         }
@@ -119,17 +126,30 @@ public final class FlatBuffersBuilder {
         _data = newData
     }
     
+    /**
+     Perform alignment for a value of a given size by performing padding in advance
+     of actually putting the value to the buffer.
+     
+     - parameters:
+         - size: xxx
+         - additionalBytes: xxx
+     */
     private func align(size : Int, additionalBytes : Int){
         if size > minalign {
             minalign = size
         }
         let alignSize = ((~(cursor + additionalBytes)) + 1) & (size - 1)
-        increaseCapacity(size: alignSize)
+        reserveAdditionalCapacity(size: alignSize)
         cursor += alignSize
-        
     }
     
-    public func put<T : Scalar>(value : T){
+    /**
+     Append a scalar value to the buffer
+     
+     - parameters:
+         - value: The value to add to the buffer
+     */
+    public func append<T : Scalar>(value : T){
         let c = MemoryLayout.stride(ofValue: value)
         if c > 8 {
             align(size: 8, additionalBytes: c)
@@ -137,16 +157,22 @@ public final class FlatBuffersBuilder {
             align(size: c, additionalBytes: 0)
         }
         
-        increaseCapacity(size: c)
+        reserveAdditionalCapacity(size: c)
         
         _data.storeBytes(of: value, toByteOffset: leftCursor-c, as: T.self)
         cursor += c
     }
     
+    /**
+     Make offset relative and append it to the buffer
+     
+     - parameters:
+         - offset: The offset to transform and add to the buffer
+     */
     @discardableResult
-    public func putOffset(offset : Offset?) throws -> Int { // make offset relative and put it into byte buffer
+    public func append(offset : Offset?) throws -> Int {
         guard let offset = offset else {
-            put(value: Offset(0))
+            append(value: Offset(0))
             return cursor
         }
         guard offset <= Int32(cursor) else {
@@ -154,16 +180,23 @@ public final class FlatBuffersBuilder {
         }
         
         if offset == Int32(0) {
-            put(value: Offset(0))
+            append(value: Offset(0))
             return cursor
         }
         align(size: 4, additionalBytes: 0)
         let _offset = Int32(cursor) - offset + MemoryLayout<Int32>.stride;
-        put(value: _offset)
+        append(value: _offset)
         return cursor
     }
-    
-    public func replaceOffset(offset : Offset, atCursor jumpCursor: Int) throws{
+  
+    /**
+     Update an offset in place
+     
+     - parameters:
+         - offset: The new offset to transform and add to the buffer
+         - atCursor: The position to put the new offset to
+     */
+    public func update(offset : Offset, atCursor jumpCursor: Int) throws{
         guard offset <= Int32(cursor) else {
             throw FlatBuffersBuildError.offsetIsTooBig
         }
@@ -174,8 +207,15 @@ public final class FlatBuffersBuilder {
         
         _data.storeBytes(of: _offset, toByteOffset: capacity - jumpCursor, as: Int32.self)
     }
-    
-    private func put<T : Scalar>(value : T, at index : Int) {
+ 
+    /**
+     Update a scalar in place
+     
+     - parameters:
+         - value: The new value 
+         - index: The position to modify
+     */
+    private func update<T : Scalar>(value : T, at index : Int) {
         _data.storeBytes(of: value, toByteOffset: index + leftCursor, as: T.self)
     }
     
@@ -199,7 +239,7 @@ public final class FlatBuffersBuilder {
         guard propertyIndex >= 0 && propertyIndex < currentVTable.count else {
             throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
-        _ = try putOffset(offset: offset)
+        _ = try append(offset: offset)
         currentVTable[propertyIndex] = Int32(cursor)
         return cursor
     }
@@ -216,7 +256,7 @@ public final class FlatBuffersBuilder {
             return
         }
         
-        put(value: value)
+        append(value: value)
         currentVTable[propertyIndex] = Int32(cursor)
     }
     
@@ -235,7 +275,7 @@ public final class FlatBuffersBuilder {
             throw FlatBuffersBuildError.noOpenObject
         }
         align(size: 4, additionalBytes: 0)
-        increaseCapacity(size: 4)
+        reserveAdditionalCapacity(size: 4)
         cursor += 4 // Will be set to vtable offset afterwards
         
         let vtableloc = cursor
@@ -245,14 +285,14 @@ public final class FlatBuffersBuilder {
         while(index>=0) {
             // Offset relative to the start of the table.
             let off = Int16(currentVTable[index] != 0 ? Int32(vtableloc) - currentVTable[index] : 0);
-            put(value: off);
+            append(value: off);
             index -= 1
         }
         
         let numberOfstandardFields = 2
         
-        put(value: Int16(Int32(vtableloc) - objectStart)); // standard field 1: lenght of the object data
-        put(value: Int16((currentVTable.count + numberOfstandardFields) * MemoryLayout<Int16>.stride)); // standard field 2: length of vtable and standard fields them selves
+        append(value: Int16(Int32(vtableloc) - objectStart)); // standard field 1: lenght of the object data
+        append(value: Int16((currentVTable.count + numberOfstandardFields) * MemoryLayout<Int16>.stride)); // standard field 2: length of vtable and standard fields them selves
         
         // search if we already have same vtable
         let vtableDataLength = cursor - vtableloc
@@ -286,7 +326,7 @@ public final class FlatBuffersBuilder {
         
         let indexLocation = cursor - vtableloc
         
-        put(value: Int32(foundVTableOffset), at: indexLocation)
+        update(value: Int32(foundVTableOffset), at: indexLocation)
         
         objectStart = -1
         
@@ -302,7 +342,7 @@ public final class FlatBuffersBuilder {
     }
     
     public func endVector() -> Offset {
-        put(value: vectorNumElems)
+        append(value: vectorNumElems)
         vectorNumElems = -1
         return Int32(cursor)
     }
@@ -326,20 +366,20 @@ public final class FlatBuffersBuilder {
             let utf8View = value.utf8CString
             let length = utf8View.count
             align(size: 4, additionalBytes: length)
-            increaseCapacity(size: length)
+            reserveAdditionalCapacity(size: length)
             for c in utf8View.lazy.reversed() {
-                put(value: c)
+                append(value: c)
             }
-            put(value: Int32(length - 1))
+            append(value: Int32(length - 1))
         } else {
             let utf8View = value.utf8
             let length = utf8View.count
             align(size: 4, additionalBytes: length)
-            increaseCapacity(size: length)
+            reserveAdditionalCapacity(size: length)
             for c in utf8View.lazy.reversed() {
-                put(value: c)
+                append(value: c)
             }
-            put(value: Int32(length))
+            append(value: Int32(length))
         }
         
         let o = Offset(cursor)
@@ -366,7 +406,7 @@ public final class FlatBuffersBuilder {
                 throw FlatBuffersBuildError.badFileIdentifier
             }
             for c in utf8View.lazy.reversed() {
-                put(value: c)
+                append(value: c)
             }
         } else {
             align(size: minalign, additionalBytes: prefixLength)
@@ -374,6 +414,6 @@ public final class FlatBuffersBuilder {
         
         let v = (Int32(cursor + 4) - offset)
         
-        put(value: v)
+        append(value: v)
     }
 }

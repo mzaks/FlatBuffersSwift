@@ -114,7 +114,7 @@ public extension ContactList {
 			try builder.startVector(count: entries.count, elementSize: MemoryLayout<Offset>.stride)
 			index = entries.count - 1
 			while(index >= 0){
-				try builder.putOffset(offset: offsets[index])
+				try builder.append(offset: offsets[index])
 				index -= 1
 			}
 			offset1 = builder.endVector()
@@ -302,7 +302,7 @@ public extension Contact {
 			var index = moods.count - 1
 			while(index >= 0){
 				if let value = moods[index]?.rawValue {
-					builder.put(value: value)
+					builder.append(value: value)
 				}
 				index -= 1
 			}
@@ -314,7 +314,7 @@ public extension Contact {
 			var index = previousLocations.count - 1
 			while(index >= 0){
 				if let value = previousLocations[index] {
-					builder.put(value: value)
+					builder.append(value: value)
 				}
 				index -= 1
 			}
@@ -331,7 +331,7 @@ public extension Contact {
 			try builder.startVector(count: addressEntries.count, elementSize: MemoryLayout<Offset>.stride)
 			index = addressEntries.count - 1
 			while(index >= 0){
-				try builder.putOffset(offset: offsets[index])
+				try builder.append(offset: offsets[index])
 				index -= 1
 			}
 			offset4 = builder.endVector()
@@ -347,7 +347,7 @@ public extension Contact {
 			try builder.startVector(count: tags.count, elementSize: MemoryLayout<Offset>.stride)
 			index = tags.count - 1
 			while(index >= 0){
-				try builder.putOffset(offset: offsets[index])
+				try builder.append(offset: offsets[index])
 				index -= 1
 			}
 			offset3 = builder.endVector()
@@ -362,7 +362,7 @@ public extension Contact {
 			try builder.addPropertyOffsetToOpenObject(propertyIndex: 6, offset: offset6)
 		}
 		if let currentLoccation = currentLoccation {
-			builder.put(value: currentLoccation)
+			builder.append(value: currentLoccation)
 			try builder.addCurrentOffsetAsPropertyToOpenObject(propertyIndex: 5)
 		}
 		if addressEntries.count > 0 {

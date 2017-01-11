@@ -270,14 +270,14 @@ class FlatBuffersReaderTest: XCTestCase {
         let sOffset3 = try! fbb.createString(value: "max3")
         
         try! fbb.startVector(count: 3, elementSize: 4)
-        try!fbb.putOffset(offset: sOffset1)
-        try!fbb.putOffset(offset: sOffset2)
-        try!fbb.putOffset(offset: sOffset3)
+        try!fbb.append(offset: sOffset1)
+        try!fbb.append(offset: sOffset2)
+        try!fbb.append(offset: sOffset3)
         let sVectorOffset = fbb.endVector()
         
         try! fbb.startVector(count: 2, elementSize: 1)
-        fbb.put(value: true)
-        fbb.put(value: false)
+        fbb.append(value: true)
+        fbb.append(value: false)
         let bVectorOffset = fbb.endVector()
         
         try! fbb.openObject(numOfProperties: 2)
