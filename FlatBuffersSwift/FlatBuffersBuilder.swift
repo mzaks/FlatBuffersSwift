@@ -219,6 +219,12 @@ public final class FlatBuffersBuilder {
         _data.storeBytes(of: value, toByteOffset: index + leftCursor, as: T.self)
     }
     
+    /**
+     Start an object update sequence
+     
+     - parameters:
+         - numOfProperties: The number of properties we will update
+     */
     public func openObject(numOfProperties : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBuffersBuildError.objectIsNotClosed
@@ -231,8 +237,17 @@ public final class FlatBuffersBuilder {
         objectStart = Int32(cursor)
     }
     
+    /**
+     Append an offset into the buffer for the current object
+     
+     - parameters:
+         - propertyIndex: The index of the property to update
+         - offset: The offsetnumber of properties we will update
+
+     - Returns: The current cursor position (Note: What is the use case of the return value?)
+     */
     @discardableResult
-    public func addPropertyOffsetToOpenObject(propertyIndex : Int, offset : Offset) throws -> Int{
+    public func appendToObject(propertyIndex : Int, offset : Offset) throws -> Int{
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -243,8 +258,17 @@ public final class FlatBuffersBuilder {
         currentVTable[propertyIndex] = Int32(cursor)
         return cursor
     }
-    
-    public func addPropertyToOpenObject<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
+ 
+    /**
+     Append an scalar into the buffer for the current object
+     
+     - parameters:
+         - propertyIndex: The index of the property to update
+         - value: The value to append
+         - defaultValue: If configured to skip default values, a value 
+        matching this default value will not be written to the buffer.
+     */
+    public func appendToObject<T : Scalar>(propertyIndex : Int, value : T, defaultValue : T) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -260,7 +284,13 @@ public final class FlatBuffersBuilder {
         currentVTable[propertyIndex] = Int32(cursor)
     }
     
-    public func addCurrentOffsetAsPropertyToOpenObject(propertyIndex : Int) throws {
+    /**
+     Append the current cursor position into the buffer for the current object
+     
+     - parameters:
+         - propertyIndex: The index of the property to update
+     */
+    public func appenCurrentOffsetAsPropertyToObject(propertyIndex : Int) throws {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -269,7 +299,10 @@ public final class FlatBuffersBuilder {
         }
         currentVTable[propertyIndex] = Int32(cursor)
     }
-    
+  
+    /**
+     Close the current open object.
+     */
     public func closeObject() throws -> Offset {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject

@@ -247,8 +247,8 @@ class FlatBuffersReaderTest: XCTestCase {
         )
         let sOffset = try! fbb.createString(value: "max")
         try! fbb.openObject(numOfProperties: 3)
-        try! fbb.addPropertyToOpenObject(propertyIndex: 0, value: true, defaultValue: false)
-        try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: sOffset)
+        try! fbb.appendToObject(propertyIndex: 0, value: true, defaultValue: false)
+        try! fbb.appendToObject(propertyIndex: 1, offset: sOffset)
         let oOffset = try! fbb.closeObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
         let data = fbb.makeData
@@ -281,8 +281,8 @@ class FlatBuffersReaderTest: XCTestCase {
         let bVectorOffset = fbb.endVector()
         
         try! fbb.openObject(numOfProperties: 2)
-        try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: sVectorOffset)
-        try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: bVectorOffset)
+        try! fbb.appendToObject(propertyIndex: 0, offset: sVectorOffset)
+        try! fbb.appendToObject(propertyIndex: 1, offset: bVectorOffset)
         let oOffset = try! fbb.closeObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
         let data = fbb.makeData

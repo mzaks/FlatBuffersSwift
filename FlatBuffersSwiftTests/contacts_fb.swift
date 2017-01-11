@@ -121,9 +121,9 @@ public extension ContactList {
 		}
 		try builder.openObject(numOfProperties: 2)
 		if entries.count > 0 {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: offset1)
+			try builder.appendToObject(propertyIndex: 1, offset: offset1)
 		}
-		try builder.addPropertyToOpenObject(propertyIndex: 0, value : lastModified, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 0, value : lastModified, defaultValue : 0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -356,26 +356,26 @@ public extension Contact {
 		let offset0 = try builder.createString(value: name)
 		try builder.openObject(numOfProperties: 8)
 		if moods.count > 0 {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 7, offset: offset7)
+			try builder.appendToObject(propertyIndex: 7, offset: offset7)
 		}
 		if previousLocations.count > 0 {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 6, offset: offset6)
+			try builder.appendToObject(propertyIndex: 6, offset: offset6)
 		}
 		if let currentLoccation = currentLoccation {
 			builder.append(value: currentLoccation)
-			try builder.addCurrentOffsetAsPropertyToOpenObject(propertyIndex: 5)
+			try builder.appenCurrentOffsetAsPropertyToObject(propertyIndex: 5)
 		}
 		if addressEntries.count > 0 {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 4, offset: offset4)
+			try builder.appendToObject(propertyIndex: 4, offset: offset4)
 		}
 		if tags.count > 0 {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 3, offset: offset3)
+			try builder.appendToObject(propertyIndex: 3, offset: offset3)
 		}
-		try builder.addPropertyToOpenObject(propertyIndex: 2, value : gender?.rawValue ?? 0, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 2, value : gender?.rawValue ?? 0, defaultValue : 0)
 		if birthday != nil {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: offset1)
+			try builder.appendToObject(propertyIndex: 1, offset: offset1)
 		}
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: offset0)
+		try builder.appendToObject(propertyIndex: 0, offset: offset0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -442,9 +442,9 @@ public extension Date {
 			}
 		}
 		try builder.openObject(numOfProperties: 3)
-		try builder.addPropertyToOpenObject(propertyIndex: 2, value : year, defaultValue : 0)
-		try builder.addPropertyToOpenObject(propertyIndex: 1, value : month, defaultValue : 0)
-		try builder.addPropertyToOpenObject(propertyIndex: 0, value : day, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 2, value : year, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 1, value : month, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 0, value : day, defaultValue : 0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -515,10 +515,10 @@ public extension AddressEntry {
 		let offset1 = try addToByteArray_Address(builder, union: address)
 		try builder.openObject(numOfProperties: 3)
 		if let object = address {
-			try builder.addPropertyOffsetToOpenObject(propertyIndex: 2, offset: offset1)
-			try builder.addPropertyToOpenObject(propertyIndex: 1, value : unionCase_Address(object), defaultValue : 0)
+			try builder.appendToObject(propertyIndex: 2, offset: offset1)
+			try builder.appendToObject(propertyIndex: 1, value : unionCase_Address(object), defaultValue : 0)
 		}
-		try builder.addPropertyToOpenObject(propertyIndex: 0, value : order, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 0, value : order, defaultValue : 0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -588,10 +588,10 @@ public extension PostalAddress {
 		let offset1 = try builder.createString(value: city)
 		let offset0 = try builder.createString(value: country)
 		try builder.openObject(numOfProperties: 4)
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 3, offset: offset3)
-		try builder.addPropertyToOpenObject(propertyIndex: 2, value : postalCode, defaultValue : 0)
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: offset1)
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: offset0)
+		try builder.appendToObject(propertyIndex: 3, offset: offset3)
+		try builder.appendToObject(propertyIndex: 2, value : postalCode, defaultValue : 0)
+		try builder.appendToObject(propertyIndex: 1, offset: offset1)
+		try builder.appendToObject(propertyIndex: 0, offset: offset0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -645,7 +645,7 @@ public extension EmailAddress {
 		}
 		let offset0 = try builder.createString(value: mailto)
 		try builder.openObject(numOfProperties: 1)
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: offset0)
+		try builder.appendToObject(propertyIndex: 0, offset: offset0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -699,7 +699,7 @@ public extension WebAddress {
 		}
 		let offset0 = try builder.createString(value: url)
 		try builder.openObject(numOfProperties: 1)
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: offset0)
+		try builder.appendToObject(propertyIndex: 0, offset: offset0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
@@ -753,7 +753,7 @@ public extension TelephoneNumber {
 		}
 		let offset0 = try builder.createString(value: number)
 		try builder.openObject(numOfProperties: 1)
-		try builder.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: offset0)
+		try builder.appendToObject(propertyIndex: 0, offset: offset0)
 		let myOffset =  try builder.closeObject()
 		if builder.config.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
