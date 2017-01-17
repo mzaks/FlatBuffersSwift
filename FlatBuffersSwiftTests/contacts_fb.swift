@@ -42,11 +42,11 @@ public extension ContactList {
 	}
 }
 public extension ContactList {
-	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> ContactList? {
+	public static func makeContactList(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> ContactList? {
 		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
-		return from(reader: reader)
+		return makeContactList(reader: reader)
 	}
-	public static func from(reader : FlatBuffersReader) -> ContactList? {
+	public static func makeContactList(reader : FlatBuffersReader) -> ContactList? {
 		let objectOffset = reader.rootObjectOffset
 		return create(reader, objectOffset : objectOffset)
 	}
@@ -57,7 +57,7 @@ public extension ContactList {
 		let offset = try addToByteArray(builder)
 		try builder.finish(offset: offset, fileIdentifier: nil)
 	}
-	public func toData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
+	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
 		let builder = FlatBuffersBuilder(config: config)
 		try encode(withBuilder: builder)
 		return builder.makeData

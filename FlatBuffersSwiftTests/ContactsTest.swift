@@ -14,11 +14,11 @@ class ContactsTest: XCTestCase {
     func testToDataFromData() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         
         XCTAssertNotNil(data)
         
-        let readContactList = ContactList.from(data: data!)!
+        let readContactList = ContactList.makeContactList(data: data!)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
         XCTAssertEqual(readContactList.entries.count, 2)
         
@@ -87,7 +87,7 @@ class ContactsTest: XCTestCase {
     func testToDataDirectRead() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         
         XCTAssertNotNil(data)
         
@@ -158,13 +158,13 @@ class ContactsTest: XCTestCase {
     func testToFileFromFile() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         XCTAssertNotNil(data)
         
         let fileHandle = writeToFileAndReturnHandle(data)
         let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
-        let readContactList = ContactList.from(reader: fileReader)!
+        let readContactList = ContactList.makeContactList(reader: fileReader)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
         XCTAssertEqual(readContactList.entries.count, 2)
         
@@ -232,7 +232,7 @@ class ContactsTest: XCTestCase {
     func testToFileDirectRead() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         
         XCTAssertNotNil(data)
         

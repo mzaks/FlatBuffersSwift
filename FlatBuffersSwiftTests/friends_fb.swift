@@ -39,11 +39,11 @@ public extension PeopleList {
 	}
 }
 public extension PeopleList {
-	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
+	public static func makePeopleList(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
 		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
-		return from(reader: reader)
+		return makePeopleList(reader: reader)
 	}
-	public static func from(reader : FlatBuffersReader) -> PeopleList? {
+	public static func makePeopleList(reader : FlatBuffersReader) -> PeopleList? {
 		let objectOffset = reader.rootObjectOffset
 		return create(reader, objectOffset : objectOffset)
 	}
@@ -55,7 +55,7 @@ public extension PeopleList {
 		try performLateBindings(builder)
 		try builder.finish(offset: offset, fileIdentifier: "TEST")
 	}
-	public func toData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
+	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
 		let builder = FlatBuffersBuilder(config: config)
 		try encode(withBuilder: builder)
 		return builder.makeData

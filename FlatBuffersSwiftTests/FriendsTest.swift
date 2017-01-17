@@ -18,9 +18,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -34,9 +34,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -52,9 +52,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -70,9 +70,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -92,9 +92,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -108,9 +108,9 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraph(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 5)
         
@@ -137,7 +137,7 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraphDirectRead(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
         let reader = FlatBuffersMemoryReader(data: data)
         
@@ -175,12 +175,12 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraphFromFile(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
         let fileHandle = writeToFileAndReturnHandle(data)
         let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
-        let newList = PeopleList.from(reader:fileReader)
+        let newList = PeopleList.makePeopleList(reader:fileReader)
         
         XCTAssertEqual(newList?.people.count, 5)
         
@@ -207,7 +207,7 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraphDirectReadFromFile(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
         let fileHandle = writeToFileAndReturnHandle(data)
         let reader = FlatBuffersFileReader(fileHandle: fileHandle)
