@@ -145,31 +145,31 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.peopleCount, 5)
         
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 0)?.name?§, "a")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 1)?.name?§, "b")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 2)?.name?§, "c")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 3)?.name?§, "d")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 4)?.name?§, "e")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 0)?.name?§, "a")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 1)?.name?§, "b")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 2)?.name?§, "c")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 3)?.name?§, "d")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 4)?.name?§, "e")
         
-        let a = newList?.getPeopleElement(atIndex: 0)
+        let a = newList?.peopleElement(atIndex: 0)
         XCTAssertEqual(a?.friendsCount, 4)
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 0)?.name?§, "b")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 1)?.name?§, "c")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 2)?.name?§, "d")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 3)?.name?§, "a")
+        XCTAssertEqual(a?.friendsElement(atIndex: 0)?.name?§, "b")
+        XCTAssertEqual(a?.friendsElement(atIndex: 1)?.name?§, "c")
+        XCTAssertEqual(a?.friendsElement(atIndex: 2)?.name?§, "d")
+        XCTAssertEqual(a?.friendsElement(atIndex: 3)?.name?§, "a")
         
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) == a?.getFriendsElement(atIndex: 0))
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 3) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) == a?.friendsElement(atIndex: 0))
+        XCTAssertTrue(newList?.peopleElement(atIndex: 3) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 2) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 2) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 0) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 0) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 1)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 1)
         )
     }
     
@@ -216,31 +216,31 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.peopleCount, 5)
         
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 0)?.name?§, "a")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 1)?.name?§, "b")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 2)?.name?§, "c")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 3)?.name?§, "d")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 4)?.name?§, "e")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 0)?.name?§, "a")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 1)?.name?§, "b")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 2)?.name?§, "c")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 3)?.name?§, "d")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 4)?.name?§, "e")
         
-        let a = newList?.getPeopleElement(atIndex: 0)
+        let a = newList?.peopleElement(atIndex: 0)
         XCTAssertEqual(a?.friendsCount, 4)
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 0)?.name?§, "b")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 1)?.name?§, "c")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 2)?.name?§, "d")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 3)?.name?§, "a")
+        XCTAssertEqual(a?.friendsElement(atIndex: 0)?.name?§, "b")
+        XCTAssertEqual(a?.friendsElement(atIndex: 1)?.name?§, "c")
+        XCTAssertEqual(a?.friendsElement(atIndex: 2)?.name?§, "d")
+        XCTAssertEqual(a?.friendsElement(atIndex: 3)?.name?§, "a")
         
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) == a?.getFriendsElement(atIndex: 0))
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 3) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) == a?.friendsElement(atIndex: 0))
+        XCTAssertTrue(newList?.peopleElement(atIndex: 3) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 2) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 2) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 0) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 0) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 1)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 1)
         )
     }
     

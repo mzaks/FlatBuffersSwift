@@ -79,7 +79,7 @@ public struct PeopleList_Direct<T : FlatBuffersReader> : Hashable {
 	public var peopleCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 0))
 	}
-	public func getPeopleElement(atIndex index : Int) -> Friend_Direct<T>? {
+	public func peopleElement(atIndex index : Int) -> Friend_Direct<T>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 0)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
@@ -201,7 +201,7 @@ public struct Friend_Direct<T : FlatBuffersReader> : Hashable {
 	public var friendsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 1))
 	}
-	public func getFriendsElement(atIndex index : Int) -> Friend_Direct<T>? {
+	public func friendsElement(atIndex index : Int) -> Friend_Direct<T>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
