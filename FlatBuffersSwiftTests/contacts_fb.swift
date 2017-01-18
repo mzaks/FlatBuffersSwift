@@ -42,11 +42,11 @@ public extension ContactList {
 	}
 }
 public extension ContactList {
-	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> ContactList? {
+	public static func makeContactList(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> ContactList? {
 		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
-		return from(reader: reader)
+		return makeContactList(reader: reader)
 	}
-	public static func from(reader : FlatBuffersReader) -> ContactList? {
+	public static func makeContactList(reader : FlatBuffersReader) -> ContactList? {
 		let objectOffset = reader.rootObjectOffset
 		return create(reader, objectOffset : objectOffset)
 	}
@@ -57,7 +57,7 @@ public extension ContactList {
 		let offset = try addToByteArray(builder)
 		try builder.finish(offset: offset, fileIdentifier: nil)
 	}
-	public func toData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
+	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
 		let builder = FlatBuffersBuilder(config: config)
 		try encode(withBuilder: builder)
 		return builder.makeData
@@ -84,7 +84,7 @@ public struct ContactList_Direct<T : FlatBuffersReader> : Hashable {
 	public var entriesCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 1))
 	}
-	public func getEntriesElement(atIndex index : Int) -> Contact_Direct<T>? {
+	public func entriesElement(atIndex index : Int) -> Contact_Direct<T>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Contact_Direct<T>(reader: reader, myOffset: ofs)
@@ -246,7 +246,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	public var tagsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 3))
 	}
-	public func getTagsElement(atIndex index : Int) -> UnsafeBufferPointer<UInt8>? {
+	public func tagsElement(atIndex index : Int) -> UnsafeBufferPointer<UInt8>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 3)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return reader.stringBuffer(stringOffset: ofs)
@@ -256,7 +256,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	public var addressEntriesCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 4))
 	}
-	public func getAddressEntriesElement(atIndex index : Int) -> AddressEntry_Direct<T>? {
+	public func addressEntriesElement(atIndex index : Int) -> AddressEntry_Direct<T>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 4)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return AddressEntry_Direct<T>(reader: reader, myOffset: ofs)
@@ -269,7 +269,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	public var previousLocationsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 6))
 	}
-	public func getPreviousLocationsElement(atIndex index : Int) -> GeoLocation? {
+	public func previousLocationsElement(atIndex index : Int) -> GeoLocation? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 6)
 		let result : GeoLocation? = reader.vectorElementScalar(vectorOffset: offsetList, index: index)
 		return result
@@ -277,7 +277,7 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	public var moodsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 7))
 	}
-	public func getMoodsElement(atIndex index : Int) -> Mood? {
+	public func moodsElement(atIndex index : Int) -> Mood? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 7)
 		guard let rawValue : Int8 = reader.vectorElementScalar(vectorOffset: offsetList, index: index) else {
 			return nil

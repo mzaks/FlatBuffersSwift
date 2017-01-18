@@ -35,11 +35,11 @@ Create objects and encode them
 let p1 = Person(firstName: "Maxim", lastName: "Zaks")
 let p2 = Person(firstName: "Alex", lastName: "Zaks")
 let list = List(people: [p1, p2])
-let data = try?list.toData()
+let data = try?list.makeData()
 ```
 Decode data very efficiently
 ```swift
-let newList = List.from(data: data)
+let newList = List.makePeopleList(data: data)
 let name = newList?.people[0]?.firstName
 ```
 

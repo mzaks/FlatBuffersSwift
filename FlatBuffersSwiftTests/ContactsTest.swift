@@ -14,11 +14,11 @@ class ContactsTest: XCTestCase {
     func testToDataFromData() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         
         XCTAssertNotNil(data)
         
-        let readContactList = ContactList.from(data: data!)!
+        let readContactList = ContactList.makeContactList(data: data!)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
         XCTAssertEqual(readContactList.entries.count, 2)
         
@@ -87,7 +87,7 @@ class ContactsTest: XCTestCase {
     func testToDataDirectRead() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         
         XCTAssertNotNil(data)
         
@@ -97,8 +97,8 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
         XCTAssertEqual(readContactList.entriesCount, 2)
         
-        let i1 = readContactList.getEntriesElement(atIndex: 0)!
-        let i2 = readContactList.getEntriesElement(atIndex: 1)!
+        let i1 = readContactList.entriesElement(atIndex: 0)!
+        let i2 = readContactList.entriesElement(atIndex: 1)!
         
         XCTAssertEqual(i1.name?§, "Maxim")
         XCTAssertEqual(i1.birthday!.day, 12)
@@ -108,40 +108,40 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i1.gender, .Male)
         
         XCTAssertEqual(i1.tagsCount, 3)
-        XCTAssertEqual(i1.getTagsElement(atIndex: 0)?§, "h1")
-        XCTAssertEqual(i1.getTagsElement(atIndex: 1)?§, "h2")
-        XCTAssertEqual(i1.getTagsElement(atIndex: 2)?§, "h3")
+        XCTAssertEqual(i1.tagsElement(atIndex: 0)?§, "h1")
+        XCTAssertEqual(i1.tagsElement(atIndex: 1)?§, "h2")
+        XCTAssertEqual(i1.tagsElement(atIndex: 2)?§, "h3")
         
         XCTAssertEqual(i1.addressEntriesCount, 4)
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 0)?.order, 0)
-        let mailto = (i1.getAddressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FlatBuffersMemoryReader>)?.mailto?§
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 0)?.order, 0)
+        let mailto = (i1.addressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FlatBuffersMemoryReader>)?.mailto?§
         XCTAssertEqual(mailto, "bla@bla.io")
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 1)?.order, 1)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.country?§, "DE")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.city?§, "Berlin")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.postalCode, 13000)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.streetAndNumber?§, "Balstr, 23")
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 1)?.order, 1)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.country?§, "DE")
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.city?§, "Berlin")
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.postalCode, 13000)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersMemoryReader>)?.streetAndNumber?§, "Balstr, 23")
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 2)?.order, 2)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FlatBuffersMemoryReader>)?.url?§, "http://slkf.com")
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 2)?.order, 2)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FlatBuffersMemoryReader>)?.url?§, "http://slkf.com")
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 3)?.order, 3)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FlatBuffersMemoryReader>)?.number?§, "+4923452425")
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 3)?.order, 3)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FlatBuffersMemoryReader>)?.number?§, "+4923452425")
         
         XCTAssertEqual(i1.currentLoccation, GeoLocation(latitude: 23.7, longitude: 34.45, elevation: 45.98))
         
         XCTAssertEqual(i1.previousLocationsCount, 2)
         
-        XCTAssertEqual(i1.getPreviousLocationsElement(atIndex: 0), GeoLocation(latitude: 12.1, longitude: 13.2, elevation: 14.3))
-        XCTAssertEqual(i1.getPreviousLocationsElement(atIndex: 1), GeoLocation(latitude: 22.1, longitude: 23.2, elevation: 24.3))
+        XCTAssertEqual(i1.previousLocationsElement(atIndex: 0), GeoLocation(latitude: 12.1, longitude: 13.2, elevation: 14.3))
+        XCTAssertEqual(i1.previousLocationsElement(atIndex: 1), GeoLocation(latitude: 22.1, longitude: 23.2, elevation: 24.3))
         
         XCTAssertEqual(i1.moodsCount, 3)
         
-        XCTAssertEqual(i1.getMoodsElement(atIndex: 0), Mood.Funny)
-        XCTAssertEqual(i1.getMoodsElement(atIndex: 1), Mood.Humble)
-        XCTAssertEqual(i1.getMoodsElement(atIndex: 2), Mood.Serious)
+        XCTAssertEqual(i1.moodsElement(atIndex: 0), Mood.Funny)
+        XCTAssertEqual(i1.moodsElement(atIndex: 1), Mood.Humble)
+        XCTAssertEqual(i1.moodsElement(atIndex: 2), Mood.Serious)
         
         
         XCTAssertEqual(i2.name?§, "Anonymous")
@@ -152,19 +152,19 @@ class ContactsTest: XCTestCase {
         XCTAssertNil(i2.currentLoccation)
         XCTAssertEqual(i2.previousLocationsCount, 0)
         XCTAssertEqual(i2.moodsCount, 1)
-        XCTAssertEqual(i2.getMoodsElement(atIndex: 0), Mood.Angry)
+        XCTAssertEqual(i2.moodsElement(atIndex: 0), Mood.Angry)
     }
     
     func testToFileFromFile() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         XCTAssertNotNil(data)
         
         let fileHandle = writeToFileAndReturnHandle(data)
         let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
-        let readContactList = ContactList.from(reader: fileReader)!
+        let readContactList = ContactList.makeContactList(reader: fileReader)!
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
         XCTAssertEqual(readContactList.entries.count, 2)
         
@@ -232,7 +232,7 @@ class ContactsTest: XCTestCase {
     func testToFileDirectRead() {
         let contactList = createContactList()
         
-        let data = try?contactList.toData()
+        let data = try?contactList.makeData()
         
         XCTAssertNotNil(data)
         
@@ -243,8 +243,8 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(readContactList.lastModified, 2349873427654)
         XCTAssertEqual(readContactList.entriesCount, 2)
         
-        let i1 = readContactList.getEntriesElement(atIndex: 0)!
-        let i2 = readContactList.getEntriesElement(atIndex: 1)!
+        let i1 = readContactList.entriesElement(atIndex: 0)!
+        let i2 = readContactList.entriesElement(atIndex: 1)!
         
         XCTAssertEqual(i1.name?§, "Maxim")
         XCTAssertEqual(i1.birthday!.day, 12)
@@ -254,40 +254,40 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i1.gender, .Male)
         
         XCTAssertEqual(i1.tagsCount, 3)
-        XCTAssertEqual(i1.getTagsElement(atIndex: 0)?§, "h1")
-        XCTAssertEqual(i1.getTagsElement(atIndex: 1)?§, "h2")
-        XCTAssertEqual(i1.getTagsElement(atIndex: 2)?§, "h3")
+        XCTAssertEqual(i1.tagsElement(atIndex: 0)?§, "h1")
+        XCTAssertEqual(i1.tagsElement(atIndex: 1)?§, "h2")
+        XCTAssertEqual(i1.tagsElement(atIndex: 2)?§, "h3")
         
         XCTAssertEqual(i1.addressEntriesCount, 4)
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 0)?.order, 0)
-        let mailto = (i1.getAddressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FlatBuffersFileReader>)?.mailto?§
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 0)?.order, 0)
+        let mailto = (i1.addressEntriesElement(atIndex: 0)?.address as? EmailAddress_Direct<FlatBuffersFileReader>)?.mailto?§
         XCTAssertEqual(mailto, "bla@bla.io")
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 1)?.order, 1)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.country?§, "DE")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.city?§, "Berlin")
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.postalCode, 13000)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.streetAndNumber?§, "Balstr, 23")
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 1)?.order, 1)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.country?§, "DE")
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.city?§, "Berlin")
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.postalCode, 13000)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 1)?.address as? PostalAddress_Direct<FlatBuffersFileReader>)?.streetAndNumber?§, "Balstr, 23")
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 2)?.order, 2)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FlatBuffersFileReader>)?.url?§, "http://slkf.com")
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 2)?.order, 2)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 2)?.address as? WebAddress_Direct<FlatBuffersFileReader>)?.url?§, "http://slkf.com")
         
-        XCTAssertEqual(i1.getAddressEntriesElement(atIndex: 3)?.order, 3)
-        XCTAssertEqual((i1.getAddressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FlatBuffersFileReader>)?.number?§, "+4923452425")
+        XCTAssertEqual(i1.addressEntriesElement(atIndex: 3)?.order, 3)
+        XCTAssertEqual((i1.addressEntriesElement(atIndex: 3)?.address as? TelephoneNumber_Direct<FlatBuffersFileReader>)?.number?§, "+4923452425")
         
         XCTAssertEqual(i1.currentLoccation, GeoLocation(latitude: 23.7, longitude: 34.45, elevation: 45.98))
         
         XCTAssertEqual(i1.previousLocationsCount, 2)
         
-        XCTAssertEqual(i1.getPreviousLocationsElement(atIndex: 0), GeoLocation(latitude: 12.1, longitude: 13.2, elevation: 14.3))
-        XCTAssertEqual(i1.getPreviousLocationsElement(atIndex: 1), GeoLocation(latitude: 22.1, longitude: 23.2, elevation: 24.3))
+        XCTAssertEqual(i1.previousLocationsElement(atIndex: 0), GeoLocation(latitude: 12.1, longitude: 13.2, elevation: 14.3))
+        XCTAssertEqual(i1.previousLocationsElement(atIndex: 1), GeoLocation(latitude: 22.1, longitude: 23.2, elevation: 24.3))
         
         XCTAssertEqual(i1.moodsCount, 3)
         
-        XCTAssertEqual(i1.getMoodsElement(atIndex: 0), Mood.Funny)
-        XCTAssertEqual(i1.getMoodsElement(atIndex: 1), Mood.Humble)
-        XCTAssertEqual(i1.getMoodsElement(atIndex: 2), Mood.Serious)
+        XCTAssertEqual(i1.moodsElement(atIndex: 0), Mood.Funny)
+        XCTAssertEqual(i1.moodsElement(atIndex: 1), Mood.Humble)
+        XCTAssertEqual(i1.moodsElement(atIndex: 2), Mood.Serious)
         
         
         XCTAssertEqual(i2.name?§, "Anonymous")
@@ -298,7 +298,7 @@ class ContactsTest: XCTestCase {
         XCTAssertNil(i2.currentLoccation)
         XCTAssertEqual(i2.previousLocationsCount, 0)
         XCTAssertEqual(i2.moodsCount, 1)
-        XCTAssertEqual(i2.getMoodsElement(atIndex: 0), Mood.Angry)
+        XCTAssertEqual(i2.moodsElement(atIndex: 0), Mood.Angry)
     }
     
     func createContactList() -> ContactList {

@@ -39,11 +39,11 @@ public extension PeopleList {
 	}
 }
 public extension PeopleList {
-	public static func from(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
+	public static func makePeopleList(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
 		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
-		return from(reader: reader)
+		return makePeopleList(reader: reader)
 	}
-	public static func from(reader : FlatBuffersReader) -> PeopleList? {
+	public static func makePeopleList(reader : FlatBuffersReader) -> PeopleList? {
 		let objectOffset = reader.rootObjectOffset
 		return create(reader, objectOffset : objectOffset)
 	}
@@ -55,7 +55,7 @@ public extension PeopleList {
 		try performLateBindings(builder)
 		try builder.finish(offset: offset, fileIdentifier: "TEST")
 	}
-	public func toData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
+	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
 		let builder = FlatBuffersBuilder(config: config)
 		try encode(withBuilder: builder)
 		return builder.makeData
@@ -79,7 +79,7 @@ public struct PeopleList_Direct<T : FlatBuffersReader> : Hashable {
 	public var peopleCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 0))
 	}
-	public func getPeopleElement(atIndex index : Int) -> Friend_Direct<T>? {
+	public func peopleElement(atIndex index : Int) -> Friend_Direct<T>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 0)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
@@ -201,7 +201,7 @@ public struct Friend_Direct<T : FlatBuffersReader> : Hashable {
 	public var friendsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 1))
 	}
-	public func getFriendsElement(atIndex index : Int) -> Friend_Direct<T>? {
+	public func friendsElement(atIndex index : Int) -> Friend_Direct<T>? {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
 		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
 			return Friend_Direct<T>(reader: reader, myOffset: ofs)
