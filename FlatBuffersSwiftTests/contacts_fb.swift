@@ -57,8 +57,8 @@ public extension ContactList {
 		let offset = try addToByteArray(builder)
 		try builder.finish(offset: offset, fileIdentifier: nil)
 	}
-	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
-		let builder = FlatBuffersBuilder(config: config)
+	public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
+		let builder = FlatBuffersBuilder(options: options)
 		try encode(withBuilder: builder)
 		return builder.makeData
 	}
@@ -98,7 +98,7 @@ public func ==<T>(t1 : ContactList_Direct<T>, t2 : ContactList_Direct<T>) -> Boo
 }
 public extension ContactList {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -119,13 +119,13 @@ public extension ContactList {
 			}
 			offset1 = builder.endVector()
 		}
-		try builder.startObject(numOfProperties: 2)
+		try builder.startObject(withPropertyCount: 2)
 		if entries.count > 0 {
             try builder.insert(offset: offset1, toStartedObjectAt:1)
 		}
 		try builder.insert(value : lastModified, defaultValue : 0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -291,7 +291,7 @@ public func ==<T>(t1 : Contact_Direct<T>, t2 : Contact_Direct<T>) -> Bool {
 }
 public extension Contact {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -354,7 +354,7 @@ public extension Contact {
 		}
 		let offset1 = try birthday?.addToByteArray(builder) ?? 0
 		let offset0 = try builder.insert(value: name)
-		try builder.startObject(numOfProperties: 8)
+		try builder.startObject(withPropertyCount: 8)
 		if moods.count > 0 {
 			try builder.insert(offset: offset7, toStartedObjectAt: 7)
 		}
@@ -377,7 +377,7 @@ public extension Contact {
 		}
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -436,17 +436,17 @@ public func ==<T>(t1 : Date_Direct<T>, t2 : Date_Direct<T>) -> Bool {
 }
 public extension Date {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
 		}
-		try builder.startObject(numOfProperties: 3)
+		try builder.startObject(withPropertyCount: 3)
         try builder.insert(value : year, defaultValue : 0, toStartedObjectAt: 2)
         try builder.insert(value : month, defaultValue : 0, toStartedObjectAt: 1)
         try builder.insert(value : day, defaultValue : 0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -507,20 +507,20 @@ public func ==<T>(t1 : AddressEntry_Direct<T>, t2 : AddressEntry_Direct<T>) -> B
 }
 public extension AddressEntry {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
 		}
 		let offset1 = try addToByteArray_Address(builder, union: address)
-		try builder.startObject(numOfProperties: 3)
+		try builder.startObject(withPropertyCount: 3)
 		if let object = address {
 			try builder.insert(offset: offset1, toStartedObjectAt: 2)
             try builder.insert(value : unionCase_Address(object), defaultValue : 0, toStartedObjectAt: 1)
 		}
         try builder.insert(value : order, defaultValue : 0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -579,7 +579,7 @@ public func ==<T>(t1 : PostalAddress_Direct<T>, t2 : PostalAddress_Direct<T>) ->
 }
 public extension PostalAddress {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -587,13 +587,13 @@ public extension PostalAddress {
 		let offset3 = try builder.insert(value: streetAndNumber)
 		let offset1 = try builder.insert(value: city)
 		let offset0 = try builder.insert(value: country)
-		try builder.startObject(numOfProperties: 4)
+		try builder.startObject(withPropertyCount: 4)
 		try builder.insert(offset: offset3, toStartedObjectAt: 3)
         try builder.insert(value : postalCode, defaultValue : 0, toStartedObjectAt: 2)
 		try builder.insert(offset: offset1, toStartedObjectAt: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -638,16 +638,16 @@ public func ==<T>(t1 : EmailAddress_Direct<T>, t2 : EmailAddress_Direct<T>) -> B
 }
 public extension EmailAddress {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
 		}
 		let offset0 = try builder.insert(value: mailto)
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -692,16 +692,16 @@ public func ==<T>(t1 : WebAddress_Direct<T>, t2 : WebAddress_Direct<T>) -> Bool 
 }
 public extension WebAddress {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
 		}
 		let offset0 = try builder.insert(value: url)
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
@@ -746,16 +746,16 @@ public func ==<T>(t1 : TelephoneNumber_Direct<T>, t2 : TelephoneNumber_Direct<T>
 }
 public extension TelephoneNumber {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
 		}
 		let offset0 = try builder.insert(value: number)
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		return myOffset
