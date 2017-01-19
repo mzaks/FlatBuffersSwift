@@ -16,7 +16,7 @@ class BuilderTest: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        builder = FlatBuffersBuilder(config: FlatBuffersBuildConfig())
+        builder = FlatBuffersBuilder(options: FlatBuffersBuilderOptions())
         byteIndex = 0
     }
     
@@ -237,7 +237,7 @@ class BuilderTest: XCTestCase {
     
     func testNullTerminatedString(){
         
-        builder = FlatBuffersBuilder(config: FlatBuffersBuildConfig(initialCapacity: 1, uniqueStrings: true, uniqueTables: true, uniqueVTables: true, forceDefaults: false, nullTerminatedUTF8: true))
+        builder = FlatBuffersBuilder(options: FlatBuffersBuilderOptions(initialCapacity: 1, uniqueStrings: true, uniqueTables: true, uniqueVTables: true, forceDefaults: false, nullTerminatedUTF8: true))
         
         let o = try!builder.insert(value: "maxim")
         
@@ -449,7 +449,7 @@ class BuilderTest: XCTestCase {
     }
     
     func testObjectWithoutNameReuseAndAge() {
-        builder = FlatBuffersBuilder(config: FlatBuffersBuildConfig(initialCapacity: 1, uniqueStrings: false, uniqueTables: true, uniqueVTables: true, forceDefaults: false, nullTerminatedUTF8: false))
+        builder = FlatBuffersBuilder(options: FlatBuffersBuilderOptions(initialCapacity: 1, uniqueStrings: false, uniqueTables: true, uniqueVTables: true, forceDefaults: false, nullTerminatedUTF8: false))
         let s = try!builder.insert(value: "maxim")
         let s2 = try!builder.insert(value: "maxim")
         try!builder.startObject(numOfProperties: 3)
@@ -939,7 +939,7 @@ class BuilderTest: XCTestCase {
     }
     
     func testObjectWithVectorToOtherTwoObjectsAndVTableWithoutReuese(){
-        builder = FlatBuffersBuilder(config: FlatBuffersBuildConfig(initialCapacity: 1, uniqueStrings: true, uniqueTables: true, uniqueVTables: false, forceDefaults: false, nullTerminatedUTF8: false))
+        builder = FlatBuffersBuilder(options: FlatBuffersBuilderOptions(initialCapacity: 1, uniqueStrings: true, uniqueTables: true, uniqueVTables: false, forceDefaults: false, nullTerminatedUTF8: false))
         try!builder.startObject(numOfProperties: 2)
         try!builder.insert(value: Int16(12), defaultValue: 0, toStartedObjectAt: 0)
         try!builder.insert(value: Int16(13), defaultValue: 0, toStartedObjectAt: 1)
@@ -1292,7 +1292,7 @@ class BuilderTest: XCTestCase {
     }
     
     func testDefaultValuesForced(){
-        builder = FlatBuffersBuilder(config: FlatBuffersBuildConfig(initialCapacity: 1, uniqueStrings: true, uniqueTables: true, uniqueVTables: true, forceDefaults: true, nullTerminatedUTF8: false))
+        builder = FlatBuffersBuilder(options: FlatBuffersBuilderOptions(initialCapacity: 1, uniqueStrings: true, uniqueTables: true, uniqueVTables: true, forceDefaults: true, nullTerminatedUTF8: false))
         try!builder.startObject(numOfProperties: 2)
         try!builder.insert(value: Int32(12), defaultValue: 0, toStartedObjectAt: 0)
         try!builder.insert(value: Int32(5), defaultValue: 5, toStartedObjectAt: 1)

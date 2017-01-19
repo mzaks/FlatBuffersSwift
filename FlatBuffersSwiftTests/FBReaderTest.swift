@@ -237,7 +237,7 @@ class FlatBuffersReaderTest: XCTestCase {
     }
     
     func createSimpleObject() -> Data {
-        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
+        let fbb = FlatBuffersBuilder(options:FlatBuffersBuilderOptions(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -257,7 +257,7 @@ class FlatBuffersReaderTest: XCTestCase {
     }
     
     func createObjectWithVectors() -> Data{
-        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
+        let fbb = FlatBuffersBuilder(options:FlatBuffersBuilderOptions(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,

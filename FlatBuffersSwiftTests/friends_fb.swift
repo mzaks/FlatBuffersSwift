@@ -55,8 +55,8 @@ public extension PeopleList {
 		try performLateBindings(builder)
 		try builder.finish(offset: offset, fileIdentifier: "TEST")
 	}
-	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
-		let builder = FlatBuffersBuilder(config: config)
+	public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
+		let builder = FlatBuffersBuilder(options: options)
 		try encode(withBuilder: builder)
 		return builder.makeData
 	}
@@ -93,7 +93,7 @@ public func ==<T>(t1 : PeopleList_Direct<T>, t2 : PeopleList_Direct<T>) -> Bool 
 }
 public extension PeopleList {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -137,7 +137,7 @@ public extension PeopleList {
 			try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		}
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
@@ -230,7 +230,7 @@ public func ==<T>(t1 : Friend_Direct<T>, t2 : Friend_Direct<T>) -> Bool {
 }
 public extension Friend {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -302,7 +302,7 @@ public extension Friend {
 		}
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
@@ -353,7 +353,7 @@ public func ==<T>(t1 : Male_Direct<T>, t2 : Male_Direct<T>) -> Bool {
 }
 public extension Male {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -373,7 +373,7 @@ public extension Male {
 			}
 		}
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
@@ -424,7 +424,7 @@ public func ==<T>(t1 : Female_Direct<T>, t2 : Female_Direct<T>) -> Bool {
 }
 public extension Female {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -444,7 +444,7 @@ public extension Female {
 			}
 		}
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
