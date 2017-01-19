@@ -132,7 +132,7 @@ public extension PeopleList {
 			}
 			offset0 = builder.endVector()
 		}
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		if people.count > 0 {
 			try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		}
@@ -273,7 +273,7 @@ public extension Friend {
 			offset1 = builder.endVector()
 		}
 		let offset0 = try builder.insert(value: name)
-		try builder.startObject(numOfProperties: 6)
+		try builder.startObject(withPropertyCount: 6)
 		if let object = lover {
 			let cursor4 = try builder.insert(offset: offset4, toStartedObjectAt: 5)
 			if offset4 == 0 {
@@ -363,7 +363,7 @@ public extension Male {
 		}
 		builder.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		if ref != nil {
 			let cursor0 = try builder.insert(offset: offset0, toStartedObjectAt: 0)
 			if offset0 == 0 {
@@ -434,7 +434,7 @@ public extension Female {
 		}
 		builder.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		if ref != nil {
 			let cursor0 = try builder.insert(offset: offset0, toStartedObjectAt: 0)
 			if offset0 == 0 {

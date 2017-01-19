@@ -222,15 +222,15 @@ public final class FlatBuffersBuilder {
      Start an object construction sequence
      
      - parameters:
-         - numOfProperties: The number of properties we will update
+         - withPropertyCount: The number of properties we will update
      */
-    public func startObject(numOfProperties : Int) throws {
+    public func startObject(withPropertyCount : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBuffersBuildError.objectIsNotClosed
         }
         currentVTable.removeAll(keepingCapacity: true)
-        currentVTable.reserveCapacity(numOfProperties)
-        for _ in 0..<numOfProperties {
+        currentVTable.reserveCapacity(withPropertyCount)
+        for _ in 0..<withPropertyCount {
             currentVTable.append(0)
         }
         objectStart = Int32(cursor)

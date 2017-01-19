@@ -119,7 +119,7 @@ public extension ContactList {
 			}
 			offset1 = builder.endVector()
 		}
-		try builder.startObject(numOfProperties: 2)
+		try builder.startObject(withPropertyCount: 2)
 		if entries.count > 0 {
             try builder.insert(offset: offset1, toStartedObjectAt:1)
 		}
@@ -354,7 +354,7 @@ public extension Contact {
 		}
 		let offset1 = try birthday?.addToByteArray(builder) ?? 0
 		let offset0 = try builder.insert(value: name)
-		try builder.startObject(numOfProperties: 8)
+		try builder.startObject(withPropertyCount: 8)
 		if moods.count > 0 {
 			try builder.insert(offset: offset7, toStartedObjectAt: 7)
 		}
@@ -441,7 +441,7 @@ public extension Date {
 				return myOffset
 			}
 		}
-		try builder.startObject(numOfProperties: 3)
+		try builder.startObject(withPropertyCount: 3)
         try builder.insert(value : year, defaultValue : 0, toStartedObjectAt: 2)
         try builder.insert(value : month, defaultValue : 0, toStartedObjectAt: 1)
         try builder.insert(value : day, defaultValue : 0, toStartedObjectAt: 0)
@@ -513,7 +513,7 @@ public extension AddressEntry {
 			}
 		}
 		let offset1 = try addToByteArray_Address(builder, union: address)
-		try builder.startObject(numOfProperties: 3)
+		try builder.startObject(withPropertyCount: 3)
 		if let object = address {
 			try builder.insert(offset: offset1, toStartedObjectAt: 2)
             try builder.insert(value : unionCase_Address(object), defaultValue : 0, toStartedObjectAt: 1)
@@ -587,7 +587,7 @@ public extension PostalAddress {
 		let offset3 = try builder.insert(value: streetAndNumber)
 		let offset1 = try builder.insert(value: city)
 		let offset0 = try builder.insert(value: country)
-		try builder.startObject(numOfProperties: 4)
+		try builder.startObject(withPropertyCount: 4)
 		try builder.insert(offset: offset3, toStartedObjectAt: 3)
         try builder.insert(value : postalCode, defaultValue : 0, toStartedObjectAt: 2)
 		try builder.insert(offset: offset1, toStartedObjectAt: 1)
@@ -644,7 +644,7 @@ public extension EmailAddress {
 			}
 		}
 		let offset0 = try builder.insert(value: mailto)
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.options.uniqueTables {
@@ -698,7 +698,7 @@ public extension WebAddress {
 			}
 		}
 		let offset0 = try builder.insert(value: url)
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.options.uniqueTables {
@@ -752,7 +752,7 @@ public extension TelephoneNumber {
 			}
 		}
 		let offset0 = try builder.insert(value: number)
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
 		if builder.options.uniqueTables {
