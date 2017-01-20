@@ -188,21 +188,32 @@ public struct FBMemoryReader : FBReader {
     private let count : Int
     public let cache : FBReaderCache?
     private let buffer : UnsafeRawPointer
+    private let originalBuffer : UnsafeMutableBufferPointer<UInt8>!
     
     public init(buffer : UnsafeRawPointer, count : Int, cache : FBReaderCache? = FBReaderCache()) {
         self.buffer = buffer
         self.count = count
         self.cache = cache
+        self.originalBuffer = nil
     }
     
     public init(data : Data, cache : FBReaderCache? = FBReaderCache()) {
         self.count = data.count
         self.cache = cache
-        var pointer : UnsafePointer<UInt8>! = nil
-        data.withUnsafeBytes { (u8Ptr: UnsafePointer<UInt8>) in
-            pointer = u8Ptr
-        }
+        
+        let pointer : UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: data.count)
+        originalBuffer = UnsafeMutableBufferPointer(start: pointer, count: data.count)
+        
+        _ = data.copyBytes(to: originalBuffer)
+        
         self.buffer = UnsafeRawPointer(pointer)
+    }
+    
+    public func freeMemory(){
+        if let originalBuffer = originalBuffer,
+            let pointer = originalBuffer.baseAddress {
+            pointer.deinitialize(count: count)
+        }
     }
     
     public func fromByteArray<T : Scalar>(position : Int) throws -> T {
