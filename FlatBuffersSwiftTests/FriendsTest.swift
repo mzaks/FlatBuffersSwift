@@ -18,9 +18,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -34,9 +34,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -52,9 +52,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -70,9 +70,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -92,9 +92,9 @@ class FriendsTest: XCTestCase {
         
         let list = PeopleList()
         list.people = [f1]
-        let data = try!list.toData()
+        let data = try!list.makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -108,9 +108,9 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraph(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
-        let newList = PeopleList.from(data: data)
+        let newList = PeopleList.makePeopleList(data: data)
         
         XCTAssertEqual(newList?.people.count, 5)
         
@@ -137,50 +137,50 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraphDirectRead(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
-        let reader = FBMemoryReader(data: data)
+        let reader = FlatBuffersMemoryReader(data: data)
         
         let newList = PeopleList_Direct(reader)
         
         XCTAssertEqual(newList?.peopleCount, 5)
         
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 0)?.name?§, "a")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 1)?.name?§, "b")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 2)?.name?§, "c")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 3)?.name?§, "d")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 4)?.name?§, "e")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 0)?.name?§, "a")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 1)?.name?§, "b")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 2)?.name?§, "c")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 3)?.name?§, "d")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 4)?.name?§, "e")
         
-        let a = newList?.getPeopleElement(atIndex: 0)
+        let a = newList?.peopleElement(atIndex: 0)
         XCTAssertEqual(a?.friendsCount, 4)
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 0)?.name?§, "b")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 1)?.name?§, "c")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 2)?.name?§, "d")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 3)?.name?§, "a")
+        XCTAssertEqual(a?.friendsElement(atIndex: 0)?.name?§, "b")
+        XCTAssertEqual(a?.friendsElement(atIndex: 1)?.name?§, "c")
+        XCTAssertEqual(a?.friendsElement(atIndex: 2)?.name?§, "d")
+        XCTAssertEqual(a?.friendsElement(atIndex: 3)?.name?§, "a")
         
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) == a?.getFriendsElement(atIndex: 0))
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 3) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) == a?.friendsElement(atIndex: 0))
+        XCTAssertTrue(newList?.peopleElement(atIndex: 3) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 2) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 2) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 0) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 0) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 1)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 1)
         )
     }
     
     func testComplexGraphFromFile(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
         let fileHandle = writeToFileAndReturnHandle(data)
-        let fileReader = FBFileReader(fileHandle: fileHandle)
+        let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
         
-        let newList = PeopleList.from(reader:fileReader)
+        let newList = PeopleList.makePeopleList(reader:fileReader)
         
         XCTAssertEqual(newList?.people.count, 5)
         
@@ -207,40 +207,40 @@ class FriendsTest: XCTestCase {
     
     func testComplexGraphDirectReadFromFile(){
         
-        let data = try!complexList().toData()
+        let data = try!complexList().makeData()
         
         let fileHandle = writeToFileAndReturnHandle(data)
-        let reader = FBFileReader(fileHandle: fileHandle)
+        let reader = FlatBuffersFileReader(fileHandle: fileHandle)
         
         let newList = PeopleList_Direct(reader)
         
         XCTAssertEqual(newList?.peopleCount, 5)
         
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 0)?.name?§, "a")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 1)?.name?§, "b")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 2)?.name?§, "c")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 3)?.name?§, "d")
-        XCTAssertEqual(newList?.getPeopleElement(atIndex: 4)?.name?§, "e")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 0)?.name?§, "a")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 1)?.name?§, "b")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 2)?.name?§, "c")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 3)?.name?§, "d")
+        XCTAssertEqual(newList?.peopleElement(atIndex: 4)?.name?§, "e")
         
-        let a = newList?.getPeopleElement(atIndex: 0)
+        let a = newList?.peopleElement(atIndex: 0)
         XCTAssertEqual(a?.friendsCount, 4)
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 0)?.name?§, "b")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 1)?.name?§, "c")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 2)?.name?§, "d")
-        XCTAssertEqual(a?.getFriendsElement(atIndex: 3)?.name?§, "a")
+        XCTAssertEqual(a?.friendsElement(atIndex: 0)?.name?§, "b")
+        XCTAssertEqual(a?.friendsElement(atIndex: 1)?.name?§, "c")
+        XCTAssertEqual(a?.friendsElement(atIndex: 2)?.name?§, "d")
+        XCTAssertEqual(a?.friendsElement(atIndex: 3)?.name?§, "a")
         
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) == a?.getFriendsElement(atIndex: 0))
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 3) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) == a?.friendsElement(atIndex: 0))
+        XCTAssertTrue(newList?.peopleElement(atIndex: 3) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 2) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 2) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 0) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 0) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
         )
-        XCTAssertTrue(newList?.getPeopleElement(atIndex: 1) ==
-            a?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 0)?.getFriendsElement(atIndex: 1)
+        XCTAssertTrue(newList?.peopleElement(atIndex: 1) ==
+            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 1)
         )
     }
     

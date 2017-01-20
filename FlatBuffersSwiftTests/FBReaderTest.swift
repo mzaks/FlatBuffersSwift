@@ -9,21 +9,21 @@
 import XCTest
 @testable import FlatBuffersSwift
 
-class FBReaderTest: XCTestCase {
+class FlatBuffersReaderTest: XCTestCase {
     
     func testReadDirect() {
         
         let data = createSimpleObject()
         
-        let reader = FBMemoryReader(data: data)
+        let reader = FlatBuffersMemoryReader(data: data)
         
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 16)
         
-        let stringOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let stringOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(stringOffset, 28)
         
-        let stringBuffer = reader.getStringBuffer(stringOffset: stringOffset)
+        let stringBuffer = reader.stringBuffer(stringOffset: stringOffset)
         XCTAssertEqual(stringBuffer?§, "max")
         
         let booleanValue1 : Bool? = reader.get(objectOffset: objectOffset!, propertyIndex: 0)
@@ -39,52 +39,52 @@ class FBReaderTest: XCTestCase {
     func testReadDirectWithVector() {
         
         let data = createObjectWithVectors()
-        let reader = FBMemoryReader(data: data)
+        let reader = FlatBuffersMemoryReader(data: data)
         
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 12)
         
-        let sVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 0)
+        let sVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 0)
         XCTAssertEqual(sVectorOffset, 32)
         
-        let sVectorLength = reader.getVectorLength(vectorOffset: sVectorOffset)
+        let sVectorLength = reader.vectorElementCount(vectorOffset: sVectorOffset)
         XCTAssertEqual(sVectorLength, 3)
         
-        let sOffset1 = reader.getVectorOffsetElement(vectorOffset: sVectorOffset!, index: 0)
+        let sOffset1 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 0)
         XCTAssertEqual(sOffset1, 48)
         
-        let sOffset2 = reader.getVectorOffsetElement(vectorOffset: sVectorOffset!, index: 1)
+        let sOffset2 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 1)
         XCTAssertEqual(sOffset2, 56)
         
-        let sOffset3 = reader.getVectorOffsetElement(vectorOffset: sVectorOffset!, index: 2)
+        let sOffset3 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 2)
         XCTAssertEqual(sOffset3, 64)
         
-        let stringBuffer1 = reader.getStringBuffer(stringOffset: sOffset1)
+        let stringBuffer1 = reader.stringBuffer(stringOffset: sOffset1)
         XCTAssertEqual(stringBuffer1?§, "max3")
         
-        let stringBuffer2 = reader.getStringBuffer(stringOffset: sOffset2)
+        let stringBuffer2 = reader.stringBuffer(stringOffset: sOffset2)
         XCTAssertEqual(stringBuffer2?§, "max2")
         
-        let stringBuffer3 = reader.getStringBuffer(stringOffset: sOffset3)
+        let stringBuffer3 = reader.stringBuffer(stringOffset: sOffset3)
         XCTAssertEqual(stringBuffer3?§, "max1")
         
-        let bVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let bVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(bVectorOffset, 24)
         
-        let bVectorLength = reader.getVectorLength(vectorOffset: bVectorOffset)
+        let bVectorLength = reader.vectorElementCount(vectorOffset: bVectorOffset)
         XCTAssertEqual(bVectorLength, 2)
         
-        let b1 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 0)
+        let b1 : Bool? = reader.vectorElementScalar(vectorOffset: bVectorOffset!, index: 0)
         XCTAssertEqual(b1, false)
         
-        let b2 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 1)
+        let b2 : Bool? = reader.vectorElementScalar(vectorOffset: bVectorOffset!, index: 1)
         XCTAssertEqual(b2, true)
     }
     
     func testReadInvalidRootDirect() {
         
         let data : [UInt8] = [12]
-        let reader = FBMemoryReader(buffer: UnsafeRawPointer(data), count: data.count)
+        let reader = FlatBuffersMemoryReader(buffer: UnsafeRawPointer(data), count: data.count)
         
         let objectOffset = reader.rootObjectOffset
         XCTAssertNil(objectOffset)
@@ -93,7 +93,7 @@ class FBReaderTest: XCTestCase {
     
     func testReadPropertyWithHighPropertyIndex() {
         let data = createObjectWithVectors()
-        let reader = FBMemoryReader(data: Data(data))
+        let reader = FlatBuffersMemoryReader(data: Data(data))
         
         let root = reader.rootObjectOffset
         
@@ -104,7 +104,7 @@ class FBReaderTest: XCTestCase {
     
     func testReadPropertyWithLowPropertyIndex() {
         let data = createObjectWithVectors()
-        let reader = FBMemoryReader(data: data)
+        let reader = FlatBuffersMemoryReader(data: data)
         
         let root = reader.rootObjectOffset
         let i : Int? = reader.get(objectOffset: root!, propertyIndex: -1)
@@ -114,10 +114,10 @@ class FBReaderTest: XCTestCase {
     
     func testReadPropertyOffestWithWrongPropertyIndex() {
         let data = createObjectWithVectors()
-        let reader = FBMemoryReader(data: data)
+        let reader = FlatBuffersMemoryReader(data: data)
         
         let root = reader.rootObjectOffset
-        let o = reader.getOffset(objectOffset: root!, propertyIndex: -1)
+        let o = reader.offset(objectOffset: root!, propertyIndex: -1)
         
         XCTAssertNil(o)
     }
@@ -125,7 +125,7 @@ class FBReaderTest: XCTestCase {
     func testReadPropertyWhereVTableReferenceIsBroken() {
         let data : [UInt8] = [4,0,0,0,5]
         
-        let reader = FBMemoryReader(data: Data(data))
+        let reader = FlatBuffersMemoryReader(data: Data(data))
         
         let root = reader.rootObjectOffset
         let i : Int? = reader.get(objectOffset: root!, propertyIndex: 0)
@@ -143,14 +143,14 @@ class FBReaderTest: XCTestCase {
         }
         fh.write(data)
         
-        let reader = FBFileReader(fileHandle : fh)
+        let reader = FlatBuffersFileReader(fileHandle : fh)
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 16)
         
-        let stringOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let stringOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(stringOffset, 28)
         
-        let stringBuffer = reader.getStringBuffer(stringOffset: stringOffset)
+        let stringBuffer = reader.stringBuffer(stringOffset: stringOffset)
         XCTAssertEqual(stringBuffer?§, "max")
         
         let booleanValue1 : Bool? = reader.get(objectOffset: objectOffset!, propertyIndex: 0)
@@ -176,45 +176,45 @@ class FBReaderTest: XCTestCase {
         }
         fh.write(data)
         
-        let reader = FBFileReader(fileHandle : fh)
+        let reader = FlatBuffersFileReader(fileHandle : fh)
         
         let objectOffset = reader.rootObjectOffset
         XCTAssertEqual(objectOffset, 12)
         
-        let sVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 0)
+        let sVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 0)
         XCTAssertEqual(sVectorOffset, 32)
         
-        let sVectorLength = reader.getVectorLength(vectorOffset: sVectorOffset)
+        let sVectorLength = reader.vectorElementCount(vectorOffset: sVectorOffset)
         XCTAssertEqual(sVectorLength, 3)
         
-        let sOffset1 = reader.getVectorOffsetElement(vectorOffset: sVectorOffset!, index: 0)
+        let sOffset1 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 0)
         XCTAssertEqual(sOffset1, 48)
         
-        let sOffset2 = reader.getVectorOffsetElement(vectorOffset: sVectorOffset!, index: 1)
+        let sOffset2 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 1)
         XCTAssertEqual(sOffset2, 56)
         
-        let sOffset3 = reader.getVectorOffsetElement(vectorOffset: sVectorOffset!, index: 2)
+        let sOffset3 = reader.vectorElementOffset(vectorOffset: sVectorOffset!, index: 2)
         XCTAssertEqual(sOffset3, 64)
         
-        let stringBuffer1 = reader.getStringBuffer(stringOffset: sOffset1)
+        let stringBuffer1 = reader.stringBuffer(stringOffset: sOffset1)
         XCTAssertEqual(stringBuffer1?§, "max3")
         
-        let stringBuffer2 = reader.getStringBuffer(stringOffset: sOffset2)
+        let stringBuffer2 = reader.stringBuffer(stringOffset: sOffset2)
         XCTAssertEqual(stringBuffer2?§, "max2")
         
-        let stringBuffer3 = reader.getStringBuffer(stringOffset: sOffset3)
+        let stringBuffer3 = reader.stringBuffer(stringOffset: sOffset3)
         XCTAssertEqual(stringBuffer3?§, "max1")
         
-        let bVectorOffset = reader.getOffset(objectOffset: objectOffset!, propertyIndex: 1)
+        let bVectorOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
         XCTAssertEqual(bVectorOffset, 24)
         
-        let bVectorLength = reader.getVectorLength(vectorOffset: bVectorOffset)
+        let bVectorLength = reader.vectorElementCount(vectorOffset: bVectorOffset)
         XCTAssertEqual(bVectorLength, 2)
         
-        let b1 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 0)
+        let b1 : Bool? = reader.vectorElementScalar(vectorOffset: bVectorOffset!, index: 0)
         XCTAssertEqual(b1, false)
         
-        let b2 : Bool? = reader.getVectorScalarElement(vectorOffset: bVectorOffset!, index: 1)
+        let b2 : Bool? = reader.vectorElementScalar(vectorOffset: bVectorOffset!, index: 1)
         XCTAssertEqual(b2, true)
     }
     
@@ -229,7 +229,7 @@ class FBReaderTest: XCTestCase {
         }
         fh.write(Data(bytes: data))
         
-        let reader = FBFileReader(fileHandle : fh)
+        let reader = FlatBuffersFileReader(fileHandle : fh)
         
         let objectOffset = reader.rootObjectOffset
         XCTAssertNil(objectOffset)
@@ -237,7 +237,7 @@ class FBReaderTest: XCTestCase {
     }
     
     func createSimpleObject() -> Data {
-        let fbb = FBBuilder(config:FBBuildConfig(
+        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -245,19 +245,19 @@ class FBReaderTest: XCTestCase {
             forceDefaults : false,
             nullTerminatedUTF8 : false)
         )
-        let sOffset = try! fbb.createString(value: "max")
-        try! fbb.openObject(numOfProperties: 3)
-        try! fbb.addPropertyToOpenObject(propertyIndex: 0, value: true, defaultValue: false)
-        try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: sOffset)
-        let oOffset = try! fbb.closeObject()
+        let sOffset = try! fbb.insert(value: "max")
+        try! fbb.startObject(numOfProperties: 3)
+        try! fbb.insert(value: true, defaultValue: false, toStartedObjectAt: 0)
+        try! fbb.insert(offset: sOffset, toStartedObjectAt: 1)
+        let oOffset = try! fbb.endObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
-        let data = fbb.data
+        let data = fbb.makeData
         
         return data
     }
     
     func createObjectWithVectors() -> Data{
-        let fbb = FBBuilder(config:FBBuildConfig(
+        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -265,27 +265,27 @@ class FBReaderTest: XCTestCase {
             forceDefaults : false,
             nullTerminatedUTF8 : false)
         )
-        let sOffset1 = try! fbb.createString(value: "max1")
-        let sOffset2 = try! fbb.createString(value: "max2")
-        let sOffset3 = try! fbb.createString(value: "max3")
+        let sOffset1 = try! fbb.insert(value: "max1")
+        let sOffset2 = try! fbb.insert(value: "max2")
+        let sOffset3 = try! fbb.insert(value: "max3")
         
         try! fbb.startVector(count: 3, elementSize: 4)
-        try!fbb.putOffset(offset: sOffset1)
-        try!fbb.putOffset(offset: sOffset2)
-        try!fbb.putOffset(offset: sOffset3)
+        try!fbb.insert(offset: sOffset1)
+        try!fbb.insert(offset: sOffset2)
+        try!fbb.insert(offset: sOffset3)
         let sVectorOffset = fbb.endVector()
         
         try! fbb.startVector(count: 2, elementSize: 1)
-        fbb.put(value: true)
-        fbb.put(value: false)
+        fbb.insert(value: true)
+        fbb.insert(value: false)
         let bVectorOffset = fbb.endVector()
         
-        try! fbb.openObject(numOfProperties: 2)
-        try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 0, offset: sVectorOffset)
-        try! fbb.addPropertyOffsetToOpenObject(propertyIndex: 1, offset: bVectorOffset)
-        let oOffset = try! fbb.closeObject()
+        try! fbb.startObject(numOfProperties: 2)
+        try! fbb.insert(offset: sVectorOffset, toStartedObjectAt: 0)
+        try! fbb.insert(offset: bVectorOffset, toStartedObjectAt: 1)
+        let oOffset = try! fbb.endObject()
         try! fbb.finish(offset: oOffset, fileIdentifier: nil)
-        let data = fbb.data
+        let data = fbb.makeData
         
         return data
     }
