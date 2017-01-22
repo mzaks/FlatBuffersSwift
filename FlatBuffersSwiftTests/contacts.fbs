@@ -18,6 +18,7 @@ table Contact {
     currentLoccation : GeoLocation;
     previousLocations : [GeoLocation];
     moods : [Mood];
+    luckyNumbers : [int];
 }
 
 table Date {

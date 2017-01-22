@@ -6,9 +6,9 @@ import Foundation
 import FlatBuffersSwift
 public final class ContactList {
 	public var lastModified : Int64 = 0
-	public var entries : ContiguousArray<Contact?> = []
+	public var entries : [Contact] = []
 	public init(){}
-	public init(lastModified: Int64, entries: ContiguousArray<Contact?>){
+	public init(lastModified: Int64, entries: [Contact]){
 		self.lastModified = lastModified
 		self.entries = entries
 	}
@@ -33,8 +33,9 @@ public extension ContactList {
 			var index = 0
 			_result.entries.reserveCapacity(length_entries)
 			while index < length_entries {
-				let element = Contact.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_entries, index: index))
-				_result.entries.append(element)
+				if let element = Contact.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_entries, index: index)) {
+					_result.entries.append(element)
+				}
 				index += 1
 			}
 		}
@@ -64,10 +65,13 @@ public extension ContactList {
 	}
 }
 
-public struct ContactList_Direct<T : FlatBuffersReader> : Hashable {
+public struct ContactList_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -81,15 +85,9 @@ public struct ContactList_Direct<T : FlatBuffersReader> : Hashable {
 	public var lastModified : Int64 { 
 		get { return reader.get(objectOffset: myOffset, propertyIndex: 0, defaultValue: 0) }
 	}
-	public var entriesCount : Int {
-		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 1))
-	}
-	public func entriesElement(atIndex index : Int) -> Contact_Direct<T>? {
+	public var entries : FlatBuffersTableVector<Contact_Direct<T>, T> {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
-		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
-			return Contact_Direct<T>(reader: reader, myOffset: ofs)
-		}
-		return nil
+		return FlatBuffersTableVector(reader: self.reader, myOffset: offsetList)
 	}
 	public var hashValue: Int { return Int(myOffset) }
 }
@@ -108,7 +106,7 @@ public extension ContactList {
 			var offsets = [Offset?](repeating: nil, count: entries.count)
 			var index = entries.count - 1
 			while(index >= 0){
-				offsets[index] = try entries[index]?.addToByteArray(builder)
+				offsets[index] = try entries[index].addToByteArray(builder)
 				index -= 1
 			}
 			try builder.startVector(count: entries.count, elementSize: MemoryLayout<Offset>.stride)
@@ -141,13 +139,14 @@ public final class Contact {
 	public var name : String? = nil
 	public var birthday : Date? = nil
 	public var gender : Gender? = Gender.Male
-	public var tags : ContiguousArray<String?> = []
-	public var addressEntries : ContiguousArray<AddressEntry?> = []
+	public var tags : [String] = []
+	public var addressEntries : [AddressEntry] = []
 	public var currentLoccation : GeoLocation? = nil
-	public var previousLocations : ContiguousArray<GeoLocation?> = []
-	public var moods : ContiguousArray<Mood?> = []
+	public var previousLocations : [GeoLocation] = []
+	public var moods : [Mood?] = []
+	public var luckyNumbers : [Int32] = []
 	public init(){}
-	public init(name: String?, birthday: Date?, gender: Gender?, tags: ContiguousArray<String?>, addressEntries: ContiguousArray<AddressEntry?>, currentLoccation: GeoLocation?, previousLocations: ContiguousArray<GeoLocation?>, moods: ContiguousArray<Mood?>){
+	public init(name: String?, birthday: Date?, gender: Gender?, tags: [String], addressEntries: [AddressEntry], currentLoccation: GeoLocation?, previousLocations: [GeoLocation], moods: [Mood?], luckyNumbers: [Int32]){
 		self.name = name
 		self.birthday = birthday
 		self.gender = gender
@@ -156,6 +155,7 @@ public final class Contact {
 		self.currentLoccation = currentLoccation
 		self.previousLocations = previousLocations
 		self.moods = moods
+		self.luckyNumbers = luckyNumbers
 	}
 }
 public extension Contact {
@@ -180,8 +180,9 @@ public extension Contact {
 			var index = 0
 			_result.tags.reserveCapacity(length_tags)
 			while index < length_tags {
-				let element = reader.stringBuffer(stringOffset: reader.vectorElementOffset(vectorOffset: offset_tags, index: index))?§
-				_result.tags.append(element)
+				if let element = reader.stringBuffer(stringOffset: reader.vectorElementOffset(vectorOffset: offset_tags, index: index))?§ {
+					_result.tags.append(element)
+				}
 				index += 1
 			}
 		}
@@ -191,8 +192,9 @@ public extension Contact {
 			var index = 0
 			_result.addressEntries.reserveCapacity(length_addressEntries)
 			while index < length_addressEntries {
-				let element = AddressEntry.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_addressEntries, index: index))
-				_result.addressEntries.append(element)
+				if let element = AddressEntry.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_addressEntries, index: index)) {
+					_result.addressEntries.append(element)
+				}
 				index += 1
 			}
 		}
@@ -203,8 +205,9 @@ public extension Contact {
 			var index = 0
 			_result.previousLocations.reserveCapacity(length_previousLocations)
 			while index < length_previousLocations {
-				let element : GeoLocation? = reader.vectorElementScalar(vectorOffset: offset_previousLocations, index: index)
-				_result.previousLocations.append(element)
+				if let element : GeoLocation = reader.vectorElementScalar(vectorOffset: offset_previousLocations, index: index) {
+					_result.previousLocations.append(element)
+				}
 				index += 1
 			}
 		}
@@ -223,13 +226,28 @@ public extension Contact {
 				index += 1
 			}
 		}
+		let offset_luckyNumbers : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 8)
+		let length_luckyNumbers = reader.vectorElementCount(vectorOffset: offset_luckyNumbers)
+		if(length_luckyNumbers > 0){
+			var index = 0
+			_result.luckyNumbers.reserveCapacity(length_luckyNumbers)
+			while index < length_luckyNumbers {
+				if let element : Int32 = reader.vectorElementScalar(vectorOffset: offset_luckyNumbers, index: index) {
+					_result.luckyNumbers.append(element)
+				}
+				index += 1
+			}
+		}
 		return _result
 	}
 }
-public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
+public struct Contact_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -243,36 +261,20 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 	public var gender : Gender? { 
 		get { return Gender(rawValue: reader.get(objectOffset: myOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue)) }
 	}
-	public var tagsCount : Int {
-		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 3))
-	}
-	public func tagsElement(atIndex index : Int) -> UnsafeBufferPointer<UInt8>? {
+	public var tags : FlatBuffersStringVector<T> {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 3)
-		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
-			return reader.stringBuffer(stringOffset: ofs)
-		}
-		return nil
+		return FlatBuffersStringVector(reader: self.reader, myOffset: offsetList)
 	}
-	public var addressEntriesCount : Int {
-		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 4))
-	}
-	public func addressEntriesElement(atIndex index : Int) -> AddressEntry_Direct<T>? {
+	public var addressEntries : FlatBuffersTableVector<AddressEntry_Direct<T>, T> {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 4)
-		if let ofs = reader.vectorElementOffset(vectorOffset: offsetList, index: index) {
-			return AddressEntry_Direct<T>(reader: reader, myOffset: ofs)
-		}
-		return nil
+		return FlatBuffersTableVector(reader: self.reader, myOffset: offsetList)
 	}
 	public var currentLoccation : GeoLocation? { 
 		get { return reader.get(objectOffset: myOffset, propertyIndex: 5)}
 	}
-	public var previousLocationsCount : Int {
-		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 6))
-	}
-	public func previousLocationsElement(atIndex index : Int) -> GeoLocation? {
+	public var previousLocations : FlatBuffersScalarVector<GeoLocation, T> {
 		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 6)
-		let result : GeoLocation? = reader.vectorElementScalar(vectorOffset: offsetList, index: index)
-		return result
+		return FlatBuffersScalarVector(reader: self.reader, myOffset: offsetList)
 	}
 	public var moodsCount : Int {
 		return reader.vectorElementCount(vectorOffset: reader.offset(objectOffset: myOffset, propertyIndex: 7))
@@ -283,6 +285,10 @@ public struct Contact_Direct<T : FlatBuffersReader> : Hashable {
 			return nil
 		}
 		return Mood(rawValue: rawValue)
+	}
+	public var luckyNumbers : FlatBuffersScalarVector<Int32, T> {
+		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 8)
+		return FlatBuffersScalarVector(reader: self.reader, myOffset: offsetList)
 	}
 	public var hashValue: Int { return Int(myOffset) }
 }
@@ -295,6 +301,16 @@ public extension Contact {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
+		}
+		var offset8 = Offset(0)
+		if luckyNumbers.count > 0 {
+			try builder.startVector(count: luckyNumbers.count, elementSize: MemoryLayout<Int32>.stride)
+			var index = luckyNumbers.count - 1
+			while(index >= 0){
+				builder.insert(value: luckyNumbers[index])
+				index -= 1
+			}
+			offset8 = builder.endVector()
 		}
 		var offset7 = Offset(0)
 		if moods.count > 0 {
@@ -313,9 +329,7 @@ public extension Contact {
 			try builder.startVector(count: previousLocations.count, elementSize: MemoryLayout<GeoLocation>.stride)
 			var index = previousLocations.count - 1
 			while(index >= 0){
-				if let value = previousLocations[index] {
-					builder.insert(value: value)
-				}
+				builder.insert(value: previousLocations[index])
 				index -= 1
 			}
 			offset6 = builder.endVector()
@@ -325,7 +339,7 @@ public extension Contact {
 			var offsets = [Offset?](repeating: nil, count: addressEntries.count)
 			var index = addressEntries.count - 1
 			while(index >= 0){
-				offsets[index] = try addressEntries[index]?.addToByteArray(builder)
+				offsets[index] = try addressEntries[index].addToByteArray(builder)
 				index -= 1
 			}
 			try builder.startVector(count: addressEntries.count, elementSize: MemoryLayout<Offset>.stride)
@@ -354,7 +368,10 @@ public extension Contact {
 		}
 		let offset1 = try birthday?.addToByteArray(builder) ?? 0
 		let offset0 = try builder.insert(value: name)
-		try builder.startObject(numOfProperties: 8)
+		try builder.startObject(numOfProperties: 9)
+		if luckyNumbers.count > 0 {
+			try builder.insert(offset: offset8, toStartedObjectAt: 8)
+		}
 		if moods.count > 0 {
 			try builder.insert(offset: offset7, toStartedObjectAt: 7)
 		}
@@ -413,10 +430,13 @@ public extension Date {
 		return _result
 	}
 }
-public struct Date_Direct<T : FlatBuffersReader> : Hashable {
+public struct Date_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -487,10 +507,13 @@ public extension AddressEntry {
 		return _result
 	}
 }
-public struct AddressEntry_Direct<T : FlatBuffersReader> : Hashable {
+public struct AddressEntry_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -559,10 +582,13 @@ public extension PostalAddress {
 		return _result
 	}
 }
-public struct PostalAddress_Direct<T : FlatBuffersReader> : Hashable {
+public struct PostalAddress_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -623,10 +649,13 @@ public extension EmailAddress {
 		return _result
 	}
 }
-public struct EmailAddress_Direct<T : FlatBuffersReader> : Hashable {
+public struct EmailAddress_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -677,10 +706,13 @@ public extension WebAddress {
 		return _result
 	}
 }
-public struct WebAddress_Direct<T : FlatBuffersReader> : Hashable {
+public struct WebAddress_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -731,10 +763,13 @@ public extension TelephoneNumber {
 		return _result
 	}
 }
-public struct TelephoneNumber_Direct<T : FlatBuffersReader> : Hashable {
+public struct TelephoneNumber_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
 	fileprivate let reader : T
 	fileprivate let myOffset : Offset
-	fileprivate init(reader: T, myOffset: Offset){
+	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+		guard let myOffset = myOffset, let reader = reader as? T else {
+			return nil
+		}
 		self.reader = reader
 		self.myOffset = myOffset
 	}
@@ -797,10 +832,10 @@ fileprivate func create_Address_Direct<T : FlatBuffersReader>(_ reader : T, prop
 		return nil
 	}
 	switch unionCase {
-	case 1 : return PostalAddress_Direct(reader: reader, myOffset: caseObjectOffset)
-	case 2 : return EmailAddress_Direct(reader: reader, myOffset: caseObjectOffset)
-	case 3 : return WebAddress_Direct(reader: reader, myOffset: caseObjectOffset)
-	case 4 : return TelephoneNumber_Direct(reader: reader, myOffset: caseObjectOffset)
+	case 1 : return PostalAddress_Direct<T>(reader: reader, myOffset: caseObjectOffset)
+	case 2 : return EmailAddress_Direct<T>(reader: reader, myOffset: caseObjectOffset)
+	case 3 : return WebAddress_Direct<T>(reader: reader, myOffset: caseObjectOffset)
+	case 4 : return TelephoneNumber_Direct<T>(reader: reader, myOffset: caseObjectOffset)
 	default : return nil
 	}
 }
