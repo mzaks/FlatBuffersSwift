@@ -279,7 +279,7 @@ public extension Friend {
 			if offset4 == 0 {
 				builder.deferedBindings.append((object: object, cursor: cursor4))
 			}
-            try builder.insert(value : unionCase_Human(object), defaultValue : 0, toStartedObjectAt: 4)
+			try builder.insert(value : unionCase_Human(object), defaultValue : 0, toStartedObjectAt: 4)
 		}
 		if mother != nil {
 			let cursor3 = try builder.insert(offset: offset3, toStartedObjectAt: 3)
