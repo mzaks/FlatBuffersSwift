@@ -36,6 +36,31 @@ class FlatBuffersReaderTest: XCTestCase {
         XCTAssertFalse(booleanValueDefault)
     }
     
+    func testReadDirectWithoutCopy() {
+        
+        let data = createSimpleObject()
+        
+        let reader = FlatBuffersMemoryReader(data: data, withoutCopy: true)
+        
+        let objectOffset = reader.rootObjectOffset
+        XCTAssertEqual(objectOffset, 16)
+        
+        let stringOffset = reader.offset(objectOffset: objectOffset!, propertyIndex: 1)
+        XCTAssertEqual(stringOffset, 28)
+        
+        let stringBuffer = reader.stringBuffer(stringOffset: stringOffset)
+        XCTAssertEqual(stringBuffer?§, "max")
+        
+        let booleanValue1 : Bool? = reader.get(objectOffset: objectOffset!, propertyIndex: 0)
+        XCTAssertTrue(booleanValue1!)
+        
+        let booleanValue2 : Bool? = reader.get(objectOffset: objectOffset!, propertyIndex: 2)
+        XCTAssertNil(booleanValue2)
+        
+        let booleanValueDefault : Bool = reader.get(objectOffset: objectOffset!, propertyIndex: 2, defaultValue: false)
+        XCTAssertFalse(booleanValueDefault)
+    }
+    
     func testReadDirectWithVector() {
         
         let data = createObjectWithVectors()

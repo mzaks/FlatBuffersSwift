@@ -39,8 +39,8 @@ let data = try?list.makeData()
 ```
 Decode data very efficiently
 ```swift
-let newList = List.makePeopleList(data: data)
-let name = newList?.people[0]?.firstName
+let newList = List.makeList(data: data)
+let name = newList?.people[0].firstName
 ```
 
 # Please check out [Wiki](https://github.com/mzaks/FlatBuffersSwift/wiki) for more information.

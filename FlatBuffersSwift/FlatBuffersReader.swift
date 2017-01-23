@@ -279,11 +279,12 @@ public extension FlatBuffersReader {
 }
 
 /// A FlatBuffers reader subclass that by default reads directly from a memory buffer, but also supports initialization from Data objects for convenience
-public struct FlatBuffersMemoryReader : FlatBuffersReader {
+public final class FlatBuffersMemoryReader : FlatBuffersReader {
     
     private let count : Int
     public let cache : FlatBuffersReaderCache?
     private let buffer : UnsafeRawPointer
+    private let originalBuffer : UnsafeMutableBufferPointer<UInt8>!
     
     /**
      Initializes the reader directly from a raw memory buffer.
@@ -299,26 +300,42 @@ public struct FlatBuffersMemoryReader : FlatBuffersReader {
         self.buffer = buffer
         self.count = count
         self.cache = cache
+        self.originalBuffer = nil
     }
     
     /**
      Initializes the reader from a Data object.
-     This method will probably keep a copy after https://github.com/mzaks/FlatBuffersSwift/issues/73 is resolved
      - parameters:
          - data: A Data object holding the data to be parsed, the contents may be copied, for performance sensitive implementations, 
                  the UnsafeRawsPointer initializer should be used.
+         - withoutCopy: set it to true if you want to avoid copying the buffer. This implies that you have to keep a reference to data object around.
          - cache: An optional cache of reader objects for reuse
      
      - Returns: A FlatBuffers reader ready for use.
      */
-    public init(data : Data, cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) {
+    public init(data : Data, withoutCopy: Bool = false, cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) {
         self.count = data.count
         self.cache = cache
-        var pointer : UnsafePointer<UInt8>! = nil
-        data.withUnsafeBytes { (u8Ptr: UnsafePointer<UInt8>) in
-            pointer = u8Ptr
+        if withoutCopy {
+            var pointer : UnsafePointer<UInt8>! = nil
+            data.withUnsafeBytes { (u8Ptr: UnsafePointer<UInt8>) in
+                pointer = u8Ptr
+            }
+            self.buffer = UnsafeRawPointer(pointer)
+            self.originalBuffer = nil
+        } else {
+            let pointer : UnsafeMutablePointer<UInt8> = UnsafeMutablePointer.allocate(capacity: data.count)
+            self.originalBuffer = UnsafeMutableBufferPointer(start: pointer, count: data.count)
+            _ = data.copyBytes(to: originalBuffer)
+            self.buffer = UnsafeRawPointer(pointer)
         }
-        self.buffer = UnsafeRawPointer(pointer)
+    }
+    
+    deinit {
+        if let originalBuffer = originalBuffer,
+            let pointer = originalBuffer.baseAddress {
+            pointer.deinitialize(count: count)
+        }
     }
     
     public func scalar<T : Scalar>(at offset: Int) throws -> T {
@@ -346,7 +363,7 @@ public struct FlatBuffersMemoryReader : FlatBuffersReader {
 }
 
 /// A FlatBuffers reader subclass that reads directly from a file handle
-public struct FlatBuffersFileReader : FlatBuffersReader {
+public final class FlatBuffersFileReader : FlatBuffersReader {
     
     private let fileSize : UInt64
     private let fileHandle : FileHandle
@@ -368,34 +385,69 @@ public struct FlatBuffersFileReader : FlatBuffersReader {
         self.cache = cache
     }
     
+    private struct DataCacheKey : Hashable {
+        let offset : Int
+        let lenght : Int
+        
+        static func ==(a : DataCacheKey, b : DataCacheKey) -> Bool {
+            return a.offset == b.offset && a.lenght == b.lenght
+        }
+        
+        var hashValue: Int {
+            return offset
+        }
+    }
+    
+    private var dataCache : [DataCacheKey:Data] = [:]
+    
+    public func clearDataCache(){
+        dataCache.removeAll(keepingCapacity: true)
+    }
+    
     public func scalar<T : Scalar>(at offset: Int) throws -> T {
         let seekPosition = UInt64(offset)
-        if seekPosition + UInt64(MemoryLayout<T>.stride) > fileSize {
+        let length = MemoryLayout<T>.stride
+        if seekPosition + UInt64(length) > fileSize {
             throw FlatBuffersReaderError.outOfBufferBounds
         }
-        fileHandle.seek(toFileOffset: seekPosition)
-        let data = fileHandle.readData(ofLength:MemoryLayout<T>.stride)
-        let pointer = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout<T>.stride)
-        let t : UnsafeMutableBufferPointer<T> = UnsafeMutableBufferPointer(start: pointer, count: 1)
-        _ = data.copyBytes(to: t)
-        if let result = t.baseAddress?.pointee {
-            pointer.deinitialize()
-            return result
+        
+        let cacheKey = DataCacheKey(offset: offset, lenght: length)
+        
+        let data : Data
+        if let _data = dataCache[cacheKey] {
+            data = _data
+        } else {
+            fileHandle.seek(toFileOffset: UInt64(offset))
+            data = fileHandle.readData(ofLength:Int(length))
+            dataCache[cacheKey] = data
         }
-        throw FlatBuffersReaderError.outOfBufferBounds
+        return data.withUnsafeBytes { (pointer) -> T in
+            return pointer.pointee
+        }
     }
     
     public func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
         if UInt64(offset + length) > fileSize {
             throw FlatBuffersReaderError.outOfBufferBounds
         }
-        fileHandle.seek(toFileOffset: UInt64(offset))
-        let data = fileHandle.readData(ofLength:Int(length))
-        let pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
-        let t : UnsafeMutableBufferPointer<UInt8> = UnsafeMutableBufferPointer(start: pointer, count: length)
-        _ = data.copyBytes(to: t)
-        pointer.deinitialize()
-        return UnsafeBufferPointer<UInt8>(start: t.baseAddress, count: length)
+        
+        let cacheKey = DataCacheKey(offset: offset, lenght: length)
+        
+        let data : Data
+        if let _data = dataCache[cacheKey] {
+            data = _data
+        } else {
+            fileHandle.seek(toFileOffset: UInt64(offset))
+            data = fileHandle.readData(ofLength:Int(length))
+            dataCache[cacheKey] = data
+        }
+        
+        var t : UnsafeBufferPointer<UInt8>! = nil
+        data.withUnsafeBytes{
+            t = UnsafeBufferPointer(start: $0, count: length)
+        }
+        
+        return t
     }
     
     public func isEqual(other: FlatBuffersReader) -> Bool{
@@ -409,5 +461,99 @@ public struct FlatBuffersFileReader : FlatBuffersReader {
 postfix operator §
 
 public postfix func §(value: UnsafeBufferPointer<UInt8>) -> String? {
-    return String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(mutating: value.baseAddress!), length: value.count, encoding: String.Encoding.utf8, freeWhenDone: false)
+    guard let p = value.baseAddress else {
+        return nil
+    }
+    return String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(mutating: p), length: value.count, encoding: String.Encoding.utf8, freeWhenDone: false)
+}
+
+public protocol FlatBuffersDirectAccess {
+    init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?)
+}
+public struct FlatBuffersTableVector<T: FlatBuffersDirectAccess, R : FlatBuffersReader> : Collection {
+    public let count : Int
+    
+    fileprivate let reader : R
+    fileprivate let myOffset : Offset?
+    
+    public init(reader: R, myOffset: Offset?){
+        self.reader = reader
+        self.myOffset = myOffset
+        self.count = reader.vectorElementCount(vectorOffset: myOffset)
+    }
+    
+    public var startIndex: Int {
+        return 0
+    }
+    
+    public var endIndex: Int {
+        return count
+    }
+    
+    public func index(after i: Int) -> Int {
+        return i+1
+    }
+    
+    public subscript(i : Int) -> T? {
+        let offset = reader.vectorElementOffset(vectorOffset: myOffset, index: i)
+        return T(reader: reader, myOffset: offset)
+    }
+}
+
+public struct FlatBuffersScalarVector<T: Scalar, R : FlatBuffersReader> : Collection {
+    public let count : Int
+    
+    fileprivate let reader : R
+    fileprivate let myOffset : Offset?
+    public init(reader: R, myOffset: Offset?){
+        self.reader = reader
+        self.myOffset = myOffset
+        self.count = reader.vectorElementCount(vectorOffset: myOffset)
+    }
+    
+    public var startIndex: Int {
+        return 0
+    }
+    
+    public var endIndex: Int {
+        return count
+    }
+    
+    public func index(after i: Int) -> Int {
+        return i+1
+    }
+    
+    public subscript(i : Int) -> T? {
+        return reader.vectorElementScalar(vectorOffset: myOffset, index: i)
+    }
+}
+
+public struct FlatBuffersStringVector<R : FlatBuffersReader> : Collection {
+    public let count : Int
+    
+    fileprivate let reader : R
+    fileprivate let myOffset : Offset?
+    
+    public init(reader: R, myOffset: Offset?){
+        self.reader = reader
+        self.myOffset = myOffset
+        self.count = reader.vectorElementCount(vectorOffset: myOffset)
+    }
+    
+    public var startIndex: Int {
+        return 0
+    }
+    
+    public var endIndex: Int {
+        return count
+    }
+    
+    public func index(after i: Int) -> Int {
+        return i+1
+    }
+    
+    public subscript(i : Int) -> UnsafeBufferPointer<UInt8>? {
+        let offset = reader.vectorElementOffset(vectorOffset: myOffset, index: i)
+        return reader.stringBuffer(stringOffset: offset)
+    }
 }

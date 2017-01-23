@@ -24,7 +24,7 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 1)
         
-        XCTAssertEqual(newList?.people[0]?.name, "Maxim")
+        XCTAssertEqual(newList?.people[0].name, "Maxim")
     }
     
     func testListWithOneEntryWithDirectRecursion() {
@@ -40,9 +40,9 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 1)
         
-        XCTAssertEqual(newList?.people[0]?.name, "Maxim")
-        XCTAssertEqual(newList?.people[0]?.father?.name, "Maxim")
-        XCTAssertTrue(newList?.people[0] === newList?.people[0]?.father)
+        XCTAssertEqual(newList?.people[0].name, "Maxim")
+        XCTAssertEqual(newList?.people[0].father?.name, "Maxim")
+        XCTAssertTrue(newList?.people[0] === newList?.people[0].father)
     }
     
     func testListWithOneEntryWithRecursionThrougVector() {
@@ -58,9 +58,9 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 1)
         
-        XCTAssertEqual(newList?.people[0]?.name, "Maxim")
-        XCTAssertEqual(newList?.people[0]?.friends[0]?.name, "Maxim")
-        XCTAssertTrue(newList?.people[0] === newList?.people[0]?.friends[0])
+        XCTAssertEqual(newList?.people[0].name, "Maxim")
+        XCTAssertEqual(newList?.people[0].friends[0].name, "Maxim")
+        XCTAssertTrue(newList?.people[0] === newList?.people[0].friends[0])
     }
     
     func testListWithOneEntryWithRecursionThrougUnion() {
@@ -76,8 +76,8 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 1)
         
-        XCTAssertEqual(newList?.people[0]?.name, "Maxim")
-        let male = (newList?.people[0]?.lover as? Male)
+        XCTAssertEqual(newList?.people[0].name, "Maxim")
+        let male = (newList?.people[0].lover as? Male)
         XCTAssertEqual(male?.ref?.name, "Maxim")
         XCTAssertTrue(newList?.people[0] === male?.ref)
     }
@@ -98,8 +98,8 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 1)
         
-        XCTAssertEqual(newList?.people[0]?.name, "Maxim")
-        let female = (newList?.people[0]?.lover as? Female)
+        XCTAssertEqual(newList?.people[0].name, "Maxim")
+        let female = (newList?.people[0].lover as? Female)
         XCTAssertEqual(female?.ref?.name, "Daria")
         let male = female?.ref?.lover as? Male
         XCTAssertEqual(male?.ref?.name, "Maxim")
@@ -114,24 +114,24 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 5)
         
-        XCTAssertEqual(newList?.people[0]?.name, "a")
-        XCTAssertEqual(newList?.people[1]?.name, "b")
-        XCTAssertEqual(newList?.people[2]?.name, "c")
-        XCTAssertEqual(newList?.people[3]?.name, "d")
-        XCTAssertEqual(newList?.people[4]?.name, "e")
+        XCTAssertEqual(newList?.people[0].name, "a")
+        XCTAssertEqual(newList?.people[1].name, "b")
+        XCTAssertEqual(newList?.people[2].name, "c")
+        XCTAssertEqual(newList?.people[3].name, "d")
+        XCTAssertEqual(newList?.people[4].name, "e")
         
-        let friendsA = newList?.people[0]?.friends
+        let friendsA = newList?.people[0].friends
         XCTAssertEqual(friendsA?.count, 4)
-        XCTAssertEqual(friendsA?[0]?.name, "b")
-        XCTAssertEqual(friendsA?[1]?.name, "c")
-        XCTAssertEqual(friendsA?[2]?.name, "d")
-        XCTAssertEqual(friendsA?[3]?.name, "a")
+        XCTAssertEqual(friendsA?[0].name, "b")
+        XCTAssertEqual(friendsA?[1].name, "c")
+        XCTAssertEqual(friendsA?[2].name, "d")
+        XCTAssertEqual(friendsA?[3].name, "a")
         
         XCTAssertTrue(newList?.people[1] === friendsA?[0])
-        XCTAssertTrue(newList?.people[3] === friendsA?[0]?.friends[0])
-        XCTAssertTrue(newList?.people[2] === friendsA?[0]?.friends[0]?.friends[0])
-        XCTAssertTrue(newList?.people[0] === friendsA?[0]?.friends[0]?.friends[0]?.friends[0])
-        let friendsC = friendsA?[0]?.friends[0]?.friends[0]
+        XCTAssertTrue(newList?.people[3] === friendsA?[0].friends[0])
+        XCTAssertTrue(newList?.people[2] === friendsA?[0].friends[0].friends[0])
+        XCTAssertTrue(newList?.people[0] === friendsA?[0].friends[0].friends[0].friends[0])
+        let friendsC = friendsA?[0].friends[0].friends[0]
         XCTAssertTrue(newList?.people[1] === friendsC?.friends[1])
     }
     
@@ -143,33 +143,33 @@ class FriendsTest: XCTestCase {
         
         let newList = PeopleList_Direct(reader)
         
-        XCTAssertEqual(newList?.peopleCount, 5)
+        XCTAssertEqual(newList?.people.count, 5)
         
-        XCTAssertEqual(newList?.peopleElement(atIndex: 0)?.name?§, "a")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 1)?.name?§, "b")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 2)?.name?§, "c")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 3)?.name?§, "d")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 4)?.name?§, "e")
+        XCTAssertEqual(newList?.people[0]?.name?§, "a")
+        XCTAssertEqual(newList?.people[1]?.name?§, "b")
+        XCTAssertEqual(newList?.people[2]?.name?§, "c")
+        XCTAssertEqual(newList?.people[3]?.name?§, "d")
+        XCTAssertEqual(newList?.people[4]?.name?§, "e")
         
-        let a = newList?.peopleElement(atIndex: 0)
-        XCTAssertEqual(a?.friendsCount, 4)
-        XCTAssertEqual(a?.friendsElement(atIndex: 0)?.name?§, "b")
-        XCTAssertEqual(a?.friendsElement(atIndex: 1)?.name?§, "c")
-        XCTAssertEqual(a?.friendsElement(atIndex: 2)?.name?§, "d")
-        XCTAssertEqual(a?.friendsElement(atIndex: 3)?.name?§, "a")
+        let a = newList?.people[0]
+        XCTAssertEqual(a?.friends.count, 4)
+        XCTAssertEqual(a?.friends[0]?.name?§, "b")
+        XCTAssertEqual(a?.friends[1]?.name?§, "c")
+        XCTAssertEqual(a?.friends[2]?.name?§, "d")
+        XCTAssertEqual(a?.friends[3]?.name?§, "a")
         
-        XCTAssertTrue(newList?.peopleElement(atIndex: 1) == a?.friendsElement(atIndex: 0))
-        XCTAssertTrue(newList?.peopleElement(atIndex: 3) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.people[1] == a?.friends[0])
+        XCTAssertTrue(newList?.people[3] ==
+            a?.friends[0]?.friends[0]
         )
-        XCTAssertTrue(newList?.peopleElement(atIndex: 2) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.people[2] ==
+            a?.friends[0]?.friends[0]?.friends[0]
         )
-        XCTAssertTrue(newList?.peopleElement(atIndex: 0) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.people[0] ==
+            a?.friends[0]?.friends[0]?.friends[0]?.friends[0]
         )
-        XCTAssertTrue(newList?.peopleElement(atIndex: 1) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 1)
+        XCTAssertTrue(newList?.people[1] ==
+            a?.friends[0]?.friends[0]?.friends[0]?.friends[1]
         )
     }
     
@@ -184,24 +184,24 @@ class FriendsTest: XCTestCase {
         
         XCTAssertEqual(newList?.people.count, 5)
         
-        XCTAssertEqual(newList?.people[0]?.name, "a")
-        XCTAssertEqual(newList?.people[1]?.name, "b")
-        XCTAssertEqual(newList?.people[2]?.name, "c")
-        XCTAssertEqual(newList?.people[3]?.name, "d")
-        XCTAssertEqual(newList?.people[4]?.name, "e")
+        XCTAssertEqual(newList?.people[0].name, "a")
+        XCTAssertEqual(newList?.people[1].name, "b")
+        XCTAssertEqual(newList?.people[2].name, "c")
+        XCTAssertEqual(newList?.people[3].name, "d")
+        XCTAssertEqual(newList?.people[4].name, "e")
         
-        let friendsA = newList?.people[0]?.friends
+        let friendsA = newList?.people[0].friends
         XCTAssertEqual(friendsA?.count, 4)
-        XCTAssertEqual(friendsA?[0]?.name, "b")
-        XCTAssertEqual(friendsA?[1]?.name, "c")
-        XCTAssertEqual(friendsA?[2]?.name, "d")
-        XCTAssertEqual(friendsA?[3]?.name, "a")
+        XCTAssertEqual(friendsA?[0].name, "b")
+        XCTAssertEqual(friendsA?[1].name, "c")
+        XCTAssertEqual(friendsA?[2].name, "d")
+        XCTAssertEqual(friendsA?[3].name, "a")
         
         XCTAssertTrue(newList?.people[1] === friendsA?[0])
-        XCTAssertTrue(newList?.people[3] === friendsA?[0]?.friends[0])
-        XCTAssertTrue(newList?.people[2] === friendsA?[0]?.friends[0]?.friends[0])
-        XCTAssertTrue(newList?.people[0] === friendsA?[0]?.friends[0]?.friends[0]?.friends[0])
-        let friendsC = friendsA?[0]?.friends[0]?.friends[0]
+        XCTAssertTrue(newList?.people[3] === friendsA?[0].friends[0])
+        XCTAssertTrue(newList?.people[2] === friendsA?[0].friends[0].friends[0])
+        XCTAssertTrue(newList?.people[0] === friendsA?[0].friends[0].friends[0].friends[0])
+        let friendsC = friendsA?[0].friends[0].friends[0]
         XCTAssertTrue(newList?.people[1] === friendsC?.friends[1])
     }
     
@@ -214,33 +214,33 @@ class FriendsTest: XCTestCase {
         
         let newList = PeopleList_Direct(reader)
         
-        XCTAssertEqual(newList?.peopleCount, 5)
+        XCTAssertEqual(newList?.people.count, 5)
         
-        XCTAssertEqual(newList?.peopleElement(atIndex: 0)?.name?§, "a")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 1)?.name?§, "b")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 2)?.name?§, "c")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 3)?.name?§, "d")
-        XCTAssertEqual(newList?.peopleElement(atIndex: 4)?.name?§, "e")
+        XCTAssertEqual(newList?.people[0]?.name?§, "a")
+        XCTAssertEqual(newList?.people[1]?.name?§, "b")
+        XCTAssertEqual(newList?.people[2]?.name?§, "c")
+        XCTAssertEqual(newList?.people[3]?.name?§, "d")
+        XCTAssertEqual(newList?.people[4]?.name?§, "e")
         
-        let a = newList?.peopleElement(atIndex: 0)
-        XCTAssertEqual(a?.friendsCount, 4)
-        XCTAssertEqual(a?.friendsElement(atIndex: 0)?.name?§, "b")
-        XCTAssertEqual(a?.friendsElement(atIndex: 1)?.name?§, "c")
-        XCTAssertEqual(a?.friendsElement(atIndex: 2)?.name?§, "d")
-        XCTAssertEqual(a?.friendsElement(atIndex: 3)?.name?§, "a")
+        let a = newList?.people[0]
+        XCTAssertEqual(a?.friends.count, 4)
+        XCTAssertEqual(a?.friends[0]?.name?§, "b")
+        XCTAssertEqual(a?.friends[1]?.name?§, "c")
+        XCTAssertEqual(a?.friends[2]?.name?§, "d")
+        XCTAssertEqual(a?.friends[3]?.name?§, "a")
         
-        XCTAssertTrue(newList?.peopleElement(atIndex: 1) == a?.friendsElement(atIndex: 0))
-        XCTAssertTrue(newList?.peopleElement(atIndex: 3) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.people[1] == a?.friends[0])
+        XCTAssertTrue(newList?.people[3] ==
+            a?.friends[0]?.friends[0]
         )
-        XCTAssertTrue(newList?.peopleElement(atIndex: 2) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.people[2] ==
+            a?.friends[0]?.friends[0]?.friends[0]
         )
-        XCTAssertTrue(newList?.peopleElement(atIndex: 0) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)
+        XCTAssertTrue(newList?.people[0] ==
+            a?.friends[0]?.friends[0]?.friends[0]?.friends[0]
         )
-        XCTAssertTrue(newList?.peopleElement(atIndex: 1) ==
-            a?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 0)?.friendsElement(atIndex: 1)
+        XCTAssertTrue(newList?.people[1] ==
+            a?.friends[0]?.friends[0]?.friends[0]?.friends[1]
         )
     }
     

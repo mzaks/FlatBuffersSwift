@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0B145ECC1E3503690063A471 /* contacts_fb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1321DCE9C490074EE0E /* contacts_fb.swift */; };
 		0B57C1291DCE98F00074EE0E /* FlatBuffersReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBuffersReader.swift */; };
 		0B57C12B1DCE99650074EE0E /* BuilderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C12A1DCE99650074EE0E /* BuilderTest.swift */; };
 		0B57C12D1DCE9A2D0074EE0E /* FBReaderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C12C1DCE9A2D0074EE0E /* FBReaderTest.swift */; };
 		0B57C12F1DCE9AA80074EE0E /* contacts.fbs in Resources */ = {isa = PBXBuildFile; fileRef = 0B57C12E1DCE9AA80074EE0E /* contacts.fbs */; };
 		0B57C1311DCE9B080074EE0E /* friends.fbs in Resources */ = {isa = PBXBuildFile; fileRef = 0B57C1301DCE9B080074EE0E /* friends.fbs */; };
-		0B57C1341DCE9C490074EE0E /* contacts_fb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1321DCE9C490074EE0E /* contacts_fb.swift */; };
 		0B57C1351DCE9C490074EE0E /* friends_fb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1331DCE9C490074EE0E /* friends_fb.swift */; };
 		0B57C1371DCE9C970074EE0E /* ContactsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1361DCE9C970074EE0E /* ContactsTest.swift */; };
 		0B57C1391DCE9CF80074EE0E /* FriendsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1381DCE9CF80074EE0E /* FriendsTest.swift */; };
@@ -251,7 +251,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0B57C1341DCE9C490074EE0E /* contacts_fb.swift in Sources */,
+				0B145ECC1E3503690063A471 /* contacts_fb.swift in Sources */,
 				0B57C1391DCE9CF80074EE0E /* FriendsTest.swift in Sources */,
 				0B57C1351DCE9C490074EE0E /* friends_fb.swift in Sources */,
 				0B57C12D1DCE9A2D0074EE0E /* FBReaderTest.swift in Sources */,
