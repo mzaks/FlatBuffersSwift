@@ -27,8 +27,8 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
-/// Various configuration settings for the builder
-public struct FlatBuffersBuildConfig {
+/// Various options for the builder
+public struct FlatBuffersBuilderOptions {
     public let initialCapacity : Int
     public let uniqueStrings : Bool
     public let uniqueTables : Bool
@@ -58,8 +58,7 @@ public enum FlatBuffersBuildError : Error {
 /// A FlatBuffers builder that supports the generation of flatbuffers 'wire' format from an object graph
 public final class FlatBuffersBuilder {
     
-    private var _config : FlatBuffersBuildConfig
-    public var config : FlatBuffersBuildConfig { return _config }
+    public var options : FlatBuffersBuilderOptions
     private var capacity : Int
     private var _data : UnsafeMutableRawPointer
     private var minalign = 1;
@@ -81,13 +80,13 @@ public final class FlatBuffersBuilder {
      Initializes the builder
      
      - parameters:
-         - config: The configuration settings to use for this builder.
+         - options: The options to use for this builder.
      
      - Returns: A FlatBuffers builder ready for use.
      */
-    public init(config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) {
-        self._config = config
-        self.capacity = config.initialCapacity
+    public init(options _options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) {
+        self.options = _options
+        self.capacity = self.options.initialCapacity
         _data = UnsafeMutableRawPointer.allocate(bytes: capacity, alignedTo: minalign)
     }
     
@@ -223,15 +222,15 @@ public final class FlatBuffersBuilder {
      Start an object construction sequence
      
      - parameters:
-         - numOfProperties: The number of properties we will update
+         - withPropertyCount: The number of properties we will update
      */
-    public func startObject(numOfProperties : Int) throws {
+    public func startObject(withPropertyCount : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
             throw FlatBuffersBuildError.objectIsNotClosed
         }
         currentVTable.removeAll(keepingCapacity: true)
-        currentVTable.reserveCapacity(numOfProperties)
-        for _ in 0..<numOfProperties {
+        currentVTable.reserveCapacity(withPropertyCount)
+        for _ in 0..<withPropertyCount {
             currentVTable.append(0)
         }
         objectStart = Int32(cursor)
@@ -276,7 +275,7 @@ public final class FlatBuffersBuilder {
             throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
         
-        if(config.forceDefaults == false && value == defaultValue) {
+        if(options.forceDefaults == false && value == defaultValue) {
             return
         }
         
@@ -332,7 +331,7 @@ public final class FlatBuffersBuilder {
         
         var foundVTableOffset = vtableDataLength
         
-        if config.uniqueVTables{
+        if options.uniqueVTables{
             for otherVTableOffset in vTableOffsets {
                 let start = cursor - Int(otherVTableOffset)
                 var found = true
@@ -408,13 +407,13 @@ public final class FlatBuffersBuilder {
             return 0
         }
         
-        if config.uniqueStrings{
+        if options.uniqueStrings{
             if let o = stringCache[value]{
                 return o
             }
         }
         // TODO: Performance Test
-        if config.nullTerminatedUTF8 {
+        if options.nullTerminatedUTF8 {
             let utf8View = value.utf8CString
             let length = utf8View.count
             align(size: 4, additionalBytes: length)
@@ -435,7 +434,7 @@ public final class FlatBuffersBuilder {
         }
         
         let o = Offset(cursor)
-        if config.uniqueStrings {
+        if options.uniqueStrings {
             stringCache[value] = o
         }
         return o
