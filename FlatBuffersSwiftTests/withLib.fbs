@@ -1,0 +1,5 @@
+table A {
+ text : string;
+}
+
+root_type A;
