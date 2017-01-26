@@ -262,7 +262,7 @@ class FlatBuffersReaderTest: XCTestCase {
     }
     
     func createSimpleObject() -> Data {
-        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
+        let fbb = FlatBuffersBuilder(options:FlatBuffersBuilderOptions(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -271,7 +271,7 @@ class FlatBuffersReaderTest: XCTestCase {
             nullTerminatedUTF8 : false)
         )
         let sOffset = try! fbb.insert(value: "max")
-        try! fbb.startObject(numOfProperties: 3)
+        try! fbb.startObject(withPropertyCount: 3)
         try! fbb.insert(value: true, defaultValue: false, toStartedObjectAt: 0)
         try! fbb.insert(offset: sOffset, toStartedObjectAt: 1)
         let oOffset = try! fbb.endObject()
@@ -282,7 +282,7 @@ class FlatBuffersReaderTest: XCTestCase {
     }
     
     func createObjectWithVectors() -> Data{
-        let fbb = FlatBuffersBuilder(config:FlatBuffersBuildConfig(
+        let fbb = FlatBuffersBuilder(options:FlatBuffersBuilderOptions(
             initialCapacity : 1,
             uniqueStrings : true,
             uniqueTables : true,
@@ -305,7 +305,7 @@ class FlatBuffersReaderTest: XCTestCase {
         fbb.insert(value: false)
         let bVectorOffset = fbb.endVector()
         
-        try! fbb.startObject(numOfProperties: 2)
+        try! fbb.startObject(withPropertyCount: 2)
         try! fbb.insert(offset: sVectorOffset, toStartedObjectAt: 0)
         try! fbb.insert(offset: bVectorOffset, toStartedObjectAt: 1)
         let oOffset = try! fbb.endObject()

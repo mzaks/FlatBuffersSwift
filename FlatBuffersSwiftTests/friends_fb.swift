@@ -56,8 +56,8 @@ public extension PeopleList {
 		try performLateBindings(builder)
 		try builder.finish(offset: offset, fileIdentifier: "TEST")
 	}
-	public func makeData(withConfig config : FlatBuffersBuildConfig = FlatBuffersBuildConfig()) throws -> Data {
-		let builder = FlatBuffersBuilder(config: config)
+	public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
+		let builder = FlatBuffersBuilder(options: options)
 		try encode(withBuilder: builder)
 		return builder.makeData
 	}
@@ -91,7 +91,7 @@ public func ==<T>(t1 : PeopleList_Direct<T>, t2 : PeopleList_Direct<T>) -> Bool 
 }
 public extension PeopleList {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -130,12 +130,12 @@ public extension PeopleList {
 			}
 			offset0 = builder.endVector()
 		}
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		if people.count > 0 {
 			try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		}
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
@@ -226,7 +226,7 @@ public func ==<T>(t1 : Friend_Direct<T>, t2 : Friend_Direct<T>) -> Bool {
 }
 public extension Friend {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -269,7 +269,7 @@ public extension Friend {
 			offset1 = builder.endVector()
 		}
 		let offset0 = try builder.insert(value: name)
-		try builder.startObject(numOfProperties: 6)
+		try builder.startObject(withPropertyCount: 6)
 		if let object = lover {
 			let cursor4 = try builder.insert(offset: offset4, toStartedObjectAt: 5)
 			if offset4 == 0 {
@@ -298,7 +298,7 @@ public extension Friend {
 		}
 		try builder.insert(offset: offset0, toStartedObjectAt: 0)
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
@@ -352,7 +352,7 @@ public func ==<T>(t1 : Male_Direct<T>, t2 : Male_Direct<T>) -> Bool {
 }
 public extension Male {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -362,7 +362,7 @@ public extension Male {
 		}
 		builder.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		if ref != nil {
 			let cursor0 = try builder.insert(offset: offset0, toStartedObjectAt: 0)
 			if offset0 == 0 {
@@ -372,7 +372,7 @@ public extension Male {
 			}
 		}
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
@@ -426,7 +426,7 @@ public func ==<T>(t1 : Female_Direct<T>, t2 : Female_Direct<T>) -> Bool {
 }
 public extension Female {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			if let myOffset = builder.cache[ObjectIdentifier(self)] {
 				return myOffset
 			}
@@ -436,7 +436,7 @@ public extension Female {
 		}
 		builder.inProgress.insert(ObjectIdentifier(self))
 		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.startObject(numOfProperties: 1)
+		try builder.startObject(withPropertyCount: 1)
 		if ref != nil {
 			let cursor0 = try builder.insert(offset: offset0, toStartedObjectAt: 0)
 			if offset0 == 0 {
@@ -446,7 +446,7 @@ public extension Female {
 			}
 		}
 		let myOffset =  try builder.endObject()
-		if builder.config.uniqueTables {
+		if builder.options.uniqueTables {
 			builder.cache[ObjectIdentifier(self)] = myOffset
 		}
 		builder.inProgress.remove(ObjectIdentifier(self))
