@@ -658,7 +658,7 @@ extension UInt : Scalar {}
 extension Float32 : Scalar {}
 extension Float64 : Scalar {}
 
-/// Various configuration settings for the builder
+/// Various options for the builder
 public struct FlatBuffersBuilderOptions {
     public let initialCapacity : Int
     public let uniqueStrings : Bool
@@ -711,7 +711,7 @@ public final class FlatBuffersBuilder {
      Initializes the builder
      
      - parameters:
-         - config: The configuration settings to use for this builder.
+         - options: The options to use for this builder.
      
      - Returns: A FlatBuffers builder ready for use.
      */
@@ -853,7 +853,7 @@ public final class FlatBuffersBuilder {
      Start an object construction sequence
      
      - parameters:
-         - numOfProperties: The number of properties we will update
+         - withPropertyCount: The number of properties we will update
      */
     public func startObject(withPropertyCount : Int) throws {
         guard objectStart == -1 && vectorNumElems == -1 else {
