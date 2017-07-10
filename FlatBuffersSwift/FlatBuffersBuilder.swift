@@ -61,7 +61,7 @@ public final class FlatBuffersBuilder {
     public var options : FlatBuffersBuilderOptions
     private var capacity : Int
     private var _data : UnsafeMutableRawPointer
-    private var minalign = 1;
+    private var minalign = 1
     private var cursor = 0
     private var leftCursor : Int {
         return capacity - cursor
@@ -69,7 +69,7 @@ public final class FlatBuffersBuilder {
     
     private var currentVTable : ContiguousArray<Int32> = []
     private var objectStart : Int32 = -1
-    private var vectorNumElems : Int32 = -1;
+    private var vectorNumElems : Int32 = -1
     private var vTableOffsets : ContiguousArray<Int32> = []
     
     public var cache : [ObjectIdentifier : Offset] = [:]
@@ -183,7 +183,7 @@ public final class FlatBuffersBuilder {
             return cursor
         }
         align(size: 4, additionalBytes: 0)
-        let _offset = Int32(cursor) - offset + MemoryLayout<Int32>.stride;
+        let _offset = Int32(cursor) - offset + Offset(MemoryLayout<Int32>.stride)
         insert(value: _offset)
         return cursor
     }
@@ -202,7 +202,7 @@ public final class FlatBuffersBuilder {
         guard jumpCursor <= cursor else {
             throw FlatBuffersBuildError.cursorIsInvalid
         }
-        let _offset = Int32(jumpCursor) - offset;
+        let _offset = Int32(jumpCursor) - offset
         
         _data.storeBytes(of: _offset, toByteOffset: capacity - jumpCursor, as: Int32.self)
     }
@@ -316,15 +316,15 @@ public final class FlatBuffersBuilder {
         var index = currentVTable.count - 1
         while(index>=0) {
             // Offset relative to the start of the table.
-            let off = Int16(currentVTable[index] != 0 ? Int32(vtableloc) - currentVTable[index] : 0);
-            insert(value: off);
+            let off = Int16(currentVTable[index] != 0 ? Int32(vtableloc) - currentVTable[index] : Int32(0))
+            insert(value: off)
             index -= 1
         }
         
         let numberOfstandardFields = 2
         
-        insert(value: Int16(Int32(vtableloc) - objectStart)); // standard field 1: lenght of the object data
-        insert(value: Int16((currentVTable.count + numberOfstandardFields) * MemoryLayout<Int16>.stride)); // standard field 2: length of vtable and standard fields them selves
+        insert(value: Int16(Int32(vtableloc) - objectStart)) // standard field 1: lenght of the object data
+        insert(value: Int16((currentVTable.count + numberOfstandardFields) * MemoryLayout<Int16>.stride)) // standard field 2: length of vtable and standard fields them selves
         
         // search if we already have same vtable
         let vtableDataLength = cursor - vtableloc
@@ -340,7 +340,7 @@ public final class FlatBuffersBuilder {
                     let b = _data.advanced(by:leftCursor + i + start).assumingMemoryBound(to: UInt8.self).pointee
                     if a != b {
                         found = false
-                        break;
+                        break
                     }
                 }
                 if found == true {

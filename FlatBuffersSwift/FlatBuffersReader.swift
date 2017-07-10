@@ -100,10 +100,10 @@ public extension FlatBuffersReader {
             return nil
         }
         
-        let position = objectOffset + propOffset
+        let position = Int(objectOffset) + propOffset
         do {
-            let localObjectOffset : Int32 = try scalar(at: Int(position))
-            let offset = position + localObjectOffset
+            let localObjectOffset : Int32 = try scalar(at: position)
+            let offset = Offset(position) + localObjectOffset
             
             if localObjectOffset == 0 {
                 return nil
@@ -155,13 +155,13 @@ public extension FlatBuffersReader {
         guard index < vectorElementCount(vectorOffset: vectorOffset) else {
             return nil
         }
-        let valueStartPosition = Int(vectorOffset + MemoryLayout<Int32>.stride + (index * MemoryLayout<Int32>.stride))
+        let valueStartPosition = Int(vectorOffset) + MemoryLayout<Int32>.stride + (index * MemoryLayout<Int32>.stride)
         do {
             let localOffset : Int32 = try scalar(at: valueStartPosition)
             if(localOffset == 0){
                 return nil
             }
-            return localOffset + valueStartPosition
+            return localOffset + Offset(valueStartPosition)
         } catch {
             return nil
         }
@@ -187,7 +187,7 @@ public extension FlatBuffersReader {
             return nil
         }
         
-        let valueStartPosition = Int(vectorOffset + MemoryLayout<Int32>.stride + (index * MemoryLayout<T>.stride))
+        let valueStartPosition = Int(vectorOffset) + MemoryLayout<Int32>.stride + (index * MemoryLayout<T>.stride)
         
         do {
             return try scalar(at: valueStartPosition) as T
@@ -211,7 +211,7 @@ public extension FlatBuffersReader {
         if propOffset == 0 {
             return defaultValue
         }
-        let position = Int(objectOffset + propOffset)
+        let position = Int(objectOffset) + propOffset
         do {
             return try scalar(at: position)
         } catch {
@@ -233,7 +233,7 @@ public extension FlatBuffersReader {
         if propOffset == 0 {
             return nil
         }
-        let position = Int(objectOffset + propOffset)
+        let position = Int(objectOffset) + propOffset
         do {
             return try scalar(at: position) as T
         } catch {
