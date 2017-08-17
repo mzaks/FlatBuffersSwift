@@ -460,8 +460,8 @@ public final class FlatBuffersFileReader : FlatBuffersReader {
 
 postfix operator §
 
-public postfix func §(value: UnsafeBufferPointer<UInt8>) -> String? {
-    guard let p = value.baseAddress else {
+public postfix func §(value: UnsafeBufferPointer<UInt8>?) -> String? {
+    guard let p = value.baseAddress, let value = value else {
         return nil
     }
     return String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(mutating: p), length: value.count, encoding: String.Encoding.utf8, freeWhenDone: false)
@@ -528,6 +528,40 @@ public struct FlatBuffersScalarVector<T: Scalar, R : FlatBuffersReader> : Collec
     }
 }
 
+public protocol FlatBuffersEnum {
+    static func fromScalar<T: Scalar>(_ scalar: T) -> Self?
+}
+
+public struct FlatBuffersEnumVector<T: Scalar, R : FlatBuffersReader, E: FlatBuffersEnum> : Collection {
+    public let count : Int
+    
+    fileprivate let reader : R
+    fileprivate let myOffset : Offset?
+    public init(reader: R, myOffset: Offset?){
+        self.reader = reader
+        self.myOffset = myOffset
+        self.count = reader.vectorElementCount(vectorOffset: myOffset)
+    }
+    
+    public var startIndex: Int {
+        return 0
+    }
+    
+    public var endIndex: Int {
+        return count
+    }
+    
+    public func index(after i: Int) -> Int {
+        return i+1
+    }
+    
+    public subscript(i : Int) -> E? {
+        guard let scalar : T = reader.vectorElementScalar(vectorOffset: myOffset, index: i) else {
+            return nil
+        }
+        return E.fromScalar(scalar)
+    }
+}
 public struct FlatBuffersStringVector<R : FlatBuffersReader> : Collection {
     public let count : Int
     

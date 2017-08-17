@@ -12,6 +12,35 @@ public final class ContactList {
 		self.lastModified = lastModified
 		self.entries = entries
 	}
+    public struct Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
+        fileprivate let reader : T
+        fileprivate let myOffset : Offset
+        public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
+            guard let myOffset = myOffset, let reader = reader as? T else {
+                return nil
+            }
+            self.reader = reader
+            self.myOffset = myOffset
+        }
+        public init?(_ reader: T) {
+            self.reader = reader
+            guard let offest = reader.rootObjectOffset else {
+                return nil
+            }
+            self.myOffset = offest
+        }
+        public var lastModified : Int64 {
+            get { return reader.get(objectOffset: myOffset, propertyIndex: 0, defaultValue: 0) }
+        }
+        public var entries : FlatBuffersTableVector<Contact_Direct<T>, T> {
+            let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
+            return FlatBuffersTableVector(reader: self.reader, myOffset: offsetList)
+        }
+        public var hashValue: Int { return Int(myOffset) }
+        public static func ==<T>(t1 : ContactList.Direct<T>, t2 : ContactList.Direct<T>) -> Bool {
+            return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
+        }
+    }
 }
 public extension ContactList {
 	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> ContactList? {
@@ -90,10 +119,11 @@ public struct ContactList_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersD
 		return FlatBuffersTableVector(reader: self.reader, myOffset: offsetList)
 	}
 	public var hashValue: Int { return Int(myOffset) }
+    public static func ==<T>(t1 : ContactList_Direct<T>, t2 : ContactList_Direct<T>) -> Bool {
+        return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
+    }
 }
-public func ==<T>(t1 : ContactList_Direct<T>, t2 : ContactList_Direct<T>) -> Bool {
-	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
-}
+
 public extension ContactList {
 	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
 		if builder.options.uniqueTables {
@@ -102,7 +132,7 @@ public extension ContactList {
 			}
 		}
 		var offset1 = Offset(0)
-		if entries.count > 0{
+		if entries.count > 0 {
 			var offsets = [Offset?](repeating: nil, count: entries.count)
 			var index = entries.count - 1
 			while(index >= 0){
