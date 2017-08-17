@@ -239,7 +239,7 @@ extension T1 {
         XCTAssertEqual(expected, result)
     }
     
-    func testInsert() {
+    func testInsertExtension() {
         let expected = """
 extension FlatBuffersBuilder {
     public func insertT1(i: Int32 = 0, b: Bool = false, bs: Offset? = nil, name: Offset? = nil, names: Offset? = nil, _self: Offset? = nil, selfs: Offset? = nil, s: S1? = nil, s_s: Offset? = nil, e: E = E.A, es: Offset? = nil, u_type: Int8 = 0, u: Offset? = nil) throws -> Offset {
@@ -284,6 +284,87 @@ extension FlatBuffersBuilder {
         let lookup = schema?.identLookup
         let table = lookup?.tables["T1"]
         let result = table?.insertExtenstion(lookup: lookup!)
+        print(result!)
+        XCTAssertEqual(expected, result)
+    }
+    
+    func testInsertMethod() {
+        let expected = """
+extension T1 {
+    func insert(_ builder : FlatBuffersBuilder) throws -> Offset {
+        if builder.options.uniqueTables {
+            if let myOffset = builder.cache[ObjectIdentifier(self)] {
+                return myOffset
+            }
+        }
+        let bs: Offset?
+        if self.bs.isEmpty {
+            bs = nil
+        } else {
+            try builder.startVector(count: self.bs.count, elementSize: MemoryLayout<Bool>.stride)
+            for o in self.bs.reversed() {
+                builder.insert(value: o)
+            }
+            bs = builder.endVector()
+        }
+        let name = self.name == nil ? nil : try builder.insert(value: self.name)
+        let names = self.names == nil ? nil : try builder.insert(value: self.names)
+        let _self = try self._self?.insert(builder)
+        let selfs: Offset?
+        if self.selfs.isEmpty {
+            selfs = nil
+        } else {
+            let offsets = try self.selfs.map{ try $0.insert(builder) }
+            try builder.startVector(count: self.selfs.count, elementSize: MemoryLayout<Offset>.stride)
+            for o in offsets.reversed() {
+                builder.insert(value: o)
+            }
+            selfs = builder.endVector()
+        }
+        let s_s: Offset?
+        if self.s_s.isEmpty {
+            s_s = nil
+        } else {
+            try builder.startVector(count: self.s_s.count, elementSize: MemoryLayout<S1>.stride)
+            for o in self.s_s.reversed() {
+                builder.insert(value: o)
+            }
+            s_s = builder.endVector()
+        }
+        let es: Offset?
+        if self.es.isEmpty {
+            es = nil
+        } else {
+            try builder.startVector(count: self.es.count, elementSize: MemoryLayout<E>.stride)
+            for o in self.es.reversed() {
+                builder.insert(value: o.rawValue)
+            }
+            es = builder.endVector()
+        }
+        let u = try self.u?.insert(builder)
+        let u_type = try self.u?.unionCase ?? 0
+        return try builder.insertT1(
+            i: i,
+            b: b,
+            bs: bs,
+            name: name,
+            names: names,
+            _self: _self,
+            selfs: selfs,
+            s: s,
+            s_s: s_s,
+            e: e ?? E.A,
+            es: es,
+            u_type: u_type,
+            u: u
+        )
+    }
+}
+"""
+        let schema = Schema.with(pointer:s.utf8Start, length: s.utf8CodeUnitCount)?.0
+        let lookup = schema?.identLookup
+        let table = lookup?.tables["T1"]
+        let result = table?.insertMethod(lookup: lookup!)
         print(result!)
         XCTAssertEqual(expected, result)
     }

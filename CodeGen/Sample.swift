@@ -354,7 +354,7 @@ extension T1 {
         }
         
         let u = try self.u?.insert(builder)
-        
+        let u_type = self.u?.unionCase ?? 0
         return try builder.insertT1(
             i: i,
             b: b,
@@ -367,7 +367,7 @@ extension T1 {
             s_s: s_s,
             e: e ?? E.A,
             es: es,
-            u_type: self.u?.unionCase ?? 0,
+            u_type: u_type,
             u: u
         )
     }

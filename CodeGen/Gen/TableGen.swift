@@ -266,12 +266,33 @@ extension Table {
                         """
                     }
                 }
-                if f.type.isTable(lookup) || f.type.isUnion(lookup) {
+                if f.type.isTable(lookup) {
                     return "        let \(f.fieldName) = try self.\(f.fieldName)?.insert(builder)"
+                }
+                if f.type.isUnion(lookup) {
+                    return """
+                            let \(f.fieldName) = try self.\(f.fieldName)?.insert(builder)
+                            let \(f.fieldName)_type = try self.\(f.fieldName)?.unionCase ?? 0
+                    """
                 }
                 fatalError("Unexpected Case")
             }
             return statements.joined(separator: "\n")
+        }
+        func parameters(values: [(name: String, index: Int, root: Field)]) -> String {
+            let results = values.filter({ (v) -> Bool in
+                return v.root.isDeprecated == false
+            }).map { (v) -> String in
+                var rightHand = v.name
+                if !v.root.type.vector {
+                    if v.root.type.isEnum(lookup) {
+                        rightHand = "\(v.name) ?? \(v.root.type.defaultValueFB(lookup: lookup))"
+                    }
+                }
+                
+                return "            \(v.name): \(rightHand)"
+            }
+            return results.joined(separator: ",\n")
         }
         let offsetBasedFields = fields.filter { (f) -> Bool in
             if f.type.string || f.type.vector {
@@ -284,9 +305,10 @@ extension Table {
             
             return false
         }
+        let sorted = self.computeFieldNamesWithVTableIndex(lookup: lookup)
         
         return """
-        extension T1 {
+        extension \(name.value) {
             func insert(_ builder : FlatBuffersBuilder) throws -> Offset {
                 if builder.options.uniqueTables {
                     if let myOffset = builder.cache[ObjectIdentifier(self)] {
@@ -294,6 +316,9 @@ extension Table {
                     }
                 }
         \(genOffsetAssignements(offsetBasedFields))
+                return try builder.insert\(name.value)(
+        \(parameters(values: sorted))
+                )
             }
         }
         """
