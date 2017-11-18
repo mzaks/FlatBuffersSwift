@@ -265,4 +265,122 @@ extension Schema {
         
         return IdentLookup(structs: structs, tables: tables, enums: enums, unions: unions)
     }
+    
+    var hasRecursions: Bool {
+        let lookup = identLookup
+        guard let rootType = rootType?.ident.value,
+            let rootTable = lookup.tables[rootType] else {
+            return false
+        }
+        func findCycle(table: Table, visited: Set<String>) -> Bool {
+            if visited.contains(table.name.value) {
+                return true
+            }
+            var newVisited = visited
+            newVisited.insert(table.name.value)
+            
+            for f in table.fields {
+                if let ref = f.type.ref?.value {
+                    if let t = lookup.tables[ref] {
+                        if findCycle(table: t, visited: newVisited) {
+                            return true
+                        }
+                    } else if let u = lookup.unions[ref] {
+                        for u_case in u.cases {
+                            guard let t = lookup.tables[u_case.value] else {
+                                fatalError("Union case \(u_case.value) is not a table")
+                            }
+                            if findCycle(table: t, visited: newVisited) {
+                                return true
+                            }
+                        }
+                    }
+                }
+            }
+            return false
+        }
+        return findCycle(table: rootTable, visited: [])
+    }
+    
+    class StringBuilder {
+        var value: String = ""
+        func append(_ s : String) {
+            value += s
+            value += "\n"
+        }
+    }
+    
+    class Visited {
+        var set: Set<String> = []
+        func insert(_ s: String) {
+            set.insert(s)
+        }
+    }
+    
+    var swift: String {
+        let lookup = identLookup
+        var result = StringBuilder()
+        result.append("import Foundation")
+        result.append("import FlatBuffersSwift")
+        result.append("")
+        
+        var visited = Visited()
+        guard let rootType = rootType?.ident.value,
+            let rootTable = lookup.tables[rootType] else {
+                fatalError("Root type \(self.rootType?.ident.value ?? "nil") is not a table")
+        }
+        func trace(result: StringBuilder, node: ASTNode, visited: Visited) {
+            if let table = node as? Table {
+                guard visited.set.contains(table.name.value) == false else {
+                    return
+                }
+                visited.insert(table.name.value)
+                result.append(table.swift(lookup: lookup, isRoot: table.name.value == rootType))
+                for f in table.fields {
+                    if let ref = f.type.ref?.value {
+                        if let t = lookup.tables[ref] {
+                            trace(result: result, node: t, visited: visited)
+                        } else if let s = lookup.structs[ref] {
+                            trace(result: result, node: s, visited: visited)
+                        } else if let e = lookup.enums[ref] {
+                            trace(result: result, node: e, visited: visited)
+                        } else if let u = lookup.unions[ref] {
+                            trace(result: result, node: u, visited: visited)
+                        }
+                    }
+                }
+            } else if let e = node as? Enum {
+                guard visited.set.contains(e.name.value) == false else {
+                    return
+                }
+                visited.insert(e.name.value)
+                result.append(e.swift)
+            } else if let s = node as? Struct {
+                guard visited.set.contains(s.name.value) == false else {
+                    return
+                }
+                visited.insert(s.name.value)
+                result.append(s.swift)
+                for f in s.fields {
+                    if let ref = f.type.ref?.value,
+                        let _s = lookup.structs[ref] {
+                        trace(result: result, node: _s, visited: visited)
+                    }
+                }
+            } else if let u = node as? Union {
+                guard visited.set.contains(u.name.value) == false else {
+                    return
+                }
+                visited.insert(u.name.value)
+                result.append(u.swift)
+                for u_case in u.cases {
+                    if let t = lookup.tables[u_case.value] {
+                        trace(result: result, node: t, visited: visited)
+                    }
+                }
+            }
+        }
+        trace(result: result, node: rootTable, visited: visited)
+        return result.value
+    }
 }

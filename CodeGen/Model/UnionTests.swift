@@ -32,26 +32,26 @@ class UnionTests: XCTestCase {
 """
         let expected = """
 public enum Foo2 {
-    case tableA(A), tableB(B)
+    case withA(A), withB(B)
     fileprivate static func from(selfReader: Foo2.Direct<FlatBuffersMemoryReader>?) -> Foo2? {
         guard let selfReader = selfReader else {
             return nil
         }
         switch selfReader {
-        case .tableA(let o):
+        case .withA(let o):
             guard let o1 = A.from(selfReader: o) else {
                 return nil
             }
-            return .tableA(o1)
-        case .tableB(let o):
+            return .withA(o1)
+        case .withB(let o):
             guard let o1 = B.from(selfReader: o) else {
                 return nil
             }
-            return .tableB(o1)
+            return .withB(o1)
         }
     }
     public enum Direct<R : FlatBuffersReader> {
-        case tableA(A.Direct<R>), tableB(B.Direct<R>)
+        case withA(A.Direct<R>), withB(B.Direct<R>)
         fileprivate static func from(reader: R, propertyIndex : Int, objectOffset : Offset?) -> Foo2.Direct<R>? {
             guard let objectOffset = objectOffset else {
                 return nil
@@ -65,28 +65,60 @@ public enum Foo2 {
                 guard let o = A.Direct<R>(reader: reader, myOffset: caseObjectOffset) else {
                     return nil
             }
-            return Foo2.Direct.tableA(o)
+            return Foo2.Direct.withA(o)
             case 2:
                 guard let o = B.Direct<R>(reader: reader, myOffset: caseObjectOffset) else {
                     return nil
             }
-            return Foo2.Direct.tableB(o)
+            return Foo2.Direct.withB(o)
             default:
                 break
             }
             return nil
         }
+        var asA: A.Direct<R>? {
+            switch self {
+            case .withA(let v):
+                return v
+            default:
+                return nil
+            }
+        }
+        var asB: B.Direct<R>? {
+            switch self {
+            case .withB(let v):
+                return v
+            default:
+                return nil
+            }
+        }
     }
     var unionCase: Int8 {
         switch self {
-          case .tableA(_): return 1
-          case .tableB(_): return 2
+          case .withA(_): return 1
+          case .withB(_): return 2
         }
     }
     func insert(_ builder: FlatBuffersBuilder) throws -> Offset {
         switch self {
-          case .tableA(let o): return try o.insert(builder)
-          case .tableB(let o): return try o.insert(builder)
+          case .withA(let o): return try o.insert(builder)
+          case .withB(let o): return try o.insert(builder)
+        }
+    }
+    var asA: A? {
+        switch self {
+        case .withA(let v):
+            return v
+        default:
+            return nil
+        }
+    }
+    var asB: B? {
+        switch self {
+        case .withB(let v):
+            return v
+        default:
+            return nil
         }
     }
 }

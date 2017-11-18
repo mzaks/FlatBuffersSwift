@@ -10,6 +10,16 @@ import Foundation
 
 extension Table {
     
+    public func swift(lookup: IdentLookup, isRoot: Bool = false) -> String {
+        return """
+        \(swiftClass(lookup:lookup))
+        \(readerProtocolExtension(lookup:lookup))
+        \(fromDataExtenstion(lookup:lookup, isRoot: isRoot))
+        \(insertExtenstion(lookup:lookup))
+        \(insertMethod(lookup:lookup, isRoot: isRoot))
+        """
+    }
+    
     public func readerProtocolExtension(lookup: IdentLookup) -> String {
         func gen(_ fieldEnum: (String, Int, Field)) -> String {
             let fieldName = fieldEnum.0
@@ -17,6 +27,7 @@ extension Table {
             let field = fieldEnum.2
             return """
                 public var \(fieldName): \(protocolType(field.type, lookup)) {
+            \(guardForOffset(field, index, lookup))
                     return \(accessorReturnExpression(field, index, lookup))
                 }
             """
@@ -205,6 +216,7 @@ extension Table {
         }
         let sorted = self.computeFieldNamesWithVTableIndex(lookup: lookup)
         let sortedBySize = self.computeFieldNamesWithVTableIndexSortedBySize(lookup: lookup)
+        
         return """
         extension FlatBuffersBuilder {
             public func insert\(name.value)(\(parameters(values: sorted))) throws -> Offset {
@@ -216,13 +228,10 @@ extension Table {
         """
     }
     
-    public func insertMethod(lookup: IdentLookup) -> String {
+    public func insertMethod(lookup: IdentLookup, isRoot: Bool = false) -> String {
         func genOffsetAssignements(_ fields: [Field]) -> String {
             
             let statements = fields.map { (f) -> String in
-                if f.type.string {
-                    return "        let \(f.fieldName) = self.\(f.fieldName) == nil ? nil : try builder.insert(value: self.\(f.fieldName))"
-                }
                 if f.type.vector {
                     if f.type.scalar != nil || f.type.isStruct(lookup) || f.type.isEnum(lookup) {
                         let typeName: String
@@ -259,12 +268,15 @@ extension Table {
                                     let offsets = try self.\(f.fieldName).map{ try \(insertStm) }
                                     try builder.startVector(count: self.\(f.fieldName).count, elementSize: MemoryLayout<Offset>.stride)
                                     for o in offsets.reversed() {
-                                        builder.insert(value: o)
+                                        try builder.insert(offset: o)
                                     }
                                     \(f.fieldName) = builder.endVector()
                                 }
                         """
                     }
+                }
+                if f.type.string {
+                    return "        let \(f.fieldName) = self.\(f.fieldName) == nil ? nil : try builder.insert(value: self.\(f.fieldName))"
                 }
                 if f.type.isTable(lookup) {
                     return "        let \(f.fieldName) = try self.\(f.fieldName)?.insert(builder)"
@@ -272,7 +284,7 @@ extension Table {
                 if f.type.isUnion(lookup) {
                     return """
                             let \(f.fieldName) = try self.\(f.fieldName)?.insert(builder)
-                            let \(f.fieldName)_type = try self.\(f.fieldName)?.unionCase ?? 0
+                            let \(f.fieldName)_type = self.\(f.fieldName)?.unionCase ?? 0
                     """
                 }
                 fatalError("Unexpected Case")
@@ -294,6 +306,22 @@ extension Table {
             }
             return results.joined(separator: ",\n")
         }
+        
+        func inserRootMethods() -> String {
+            if isRoot {
+                return """
+                    public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
+                        let builder = FlatBuffersBuilder(options: options)
+                        let offset = try insert(builder)
+                        try builder.finish(offset: offset, fileIdentifier: nil)
+                        return builder.makeData
+                    }
+                """
+            } else {
+                return ""
+            }
+        }
+        
         let offsetBasedFields = fields.filter { (f) -> Bool in
             if f.type.string || f.type.vector {
                 return true
@@ -305,6 +333,7 @@ extension Table {
             
             return false
         }
+        
         let sorted = self.computeFieldNamesWithVTableIndex(lookup: lookup)
         
         return """
@@ -320,6 +349,7 @@ extension Table {
         \(parameters(values: sorted))
                 )
             }
+        \(inserRootMethods())
         }
         """
     }
@@ -366,6 +396,19 @@ extension Table {
         
     }
     
+    private func guardForOffset(_ field: Field, _ index: Int, _ lookup: IdentLookup) -> String {
+        if field.type.vector {
+            return ""
+        }
+        guard field.type.string || field.type.ref != nil else {
+            return ""
+        }
+        if let ref = field.type.ref, lookup.tables[ref.value] == nil {
+            return ""
+        }
+        return "        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:\(index)) else {return nil}"
+    }
+    
     private func accessorReturnExpression(_ field: Field, _ index: Int, _ lookup: IdentLookup) -> String {
         let index = field.id ?? index.description
         if let scalar = field.type.scalar {
@@ -379,7 +422,7 @@ extension Table {
             if field.type.vector {
                 return "FlatBuffersStringVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:\(index)))"
             }
-            return "_reader.stringBuffer(stringOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:\(index)))"
+            return "_reader.stringBuffer(stringOffset: offset)"
         }
         if let ref = field.type.ref {
             let t = Type(scalar: nil, vector: false, ref: ref, string: false)
@@ -387,7 +430,7 @@ extension Table {
                 if field.type.vector {
                     return "FlatBuffersTableVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:\(index)))"
                 }
-                return t.swift + ".Direct(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:\(index)))"
+                return t.swift + ".Direct(reader: _reader, myOffset: offset)"
             } else if lookup.structs[ref.value] != nil {
                 if field.type.vector {
                     return "FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:\(index)))"

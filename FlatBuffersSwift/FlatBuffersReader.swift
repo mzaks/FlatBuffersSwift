@@ -461,7 +461,7 @@ public final class FlatBuffersFileReader : FlatBuffersReader {
 postfix operator §
 
 public postfix func §(value: UnsafeBufferPointer<UInt8>?) -> String? {
-    guard let p = value.baseAddress, let value = value else {
+    guard let p = value?.baseAddress, let value = value else {
         return nil
     }
     return String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(mutating: p), length: value.count, encoding: String.Encoding.utf8, freeWhenDone: false)

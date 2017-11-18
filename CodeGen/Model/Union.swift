@@ -57,24 +57,24 @@ extension Union {
     var swift: String {
         func genCases(_ cases: [Ident]) -> String {
             let theCases = cases.map { (ident) -> String in
-                return "table\(ident.value)(\(ident.value))"
+                return "with\(ident.value)(\(ident.value))"
             }
             return theCases.joined(separator: ", ")
         }
         func genDirectCases(_ cases: [Ident]) -> String {
             let theCases = cases.map { (ident) -> String in
-                return "table\(ident.value)(\(ident.value).Direct<R>)"
+                return "with\(ident.value)(\(ident.value).Direct<R>)"
             }
             return theCases.joined(separator: ", ")
         }
         func genSwitchCases(_ caases: [Ident]) -> String {
             let theCases = cases.map { (ident) -> String in
                 return """
-                        case .table\(ident.value)(let o):
+                        case .with\(ident.value)(let o):
                             guard let o1 = \(ident.value).from(selfReader: o) else {
                                 return nil
                             }
-                            return .table\(ident.value)(o1)
+                            return .with\(ident.value)(o1)
                 """
             }
             return theCases.joined(separator: "\n")
@@ -88,10 +88,42 @@ extension Union {
                                 guard let o = \(ident.value).Direct<R>(reader: reader, myOffset: caseObjectOffset) else {
                                     return nil
                             }
-                            return \(unionName).Direct.table\(ident.value)(o)
+                            return \(unionName).Direct.with\(ident.value)(o)
                 """
             }
             return theCases.joined(separator: "\n")
+        }
+        func genAsProperties(_ cases: [Ident]) -> String {
+            let properties = cases.map { (ident) -> String in
+                let name = ident.value
+                return """
+                    var as\(name): \(name)? {
+                        switch self {
+                        case .with\(name)(let v):
+                            return v
+                        default:
+                            return nil
+                        }
+                    }
+                """
+            }
+            return properties.joined(separator: "\n")
+        }
+        func genDirectAsProperties(_ cases: [Ident]) -> String {
+            let properties = cases.map { (ident) -> String in
+                let name = ident.value
+                return """
+                        var as\(name): \(name).Direct<R>? {
+                            switch self {
+                            case .with\(name)(let v):
+                                return v
+                            default:
+                                return nil
+                            }
+                        }
+                """
+            }
+            return properties.joined(separator: "\n")
         }
         return """
         public enum \(name.value) {
@@ -121,17 +153,19 @@ extension Union {
                     }
                     return nil
                 }
+        \(genDirectAsProperties(cases))
             }
             var unionCase: Int8 {
                 switch self {
-        \(cases.enumerated().map{"          case .table\($0.element.value)(_): return \($0.offset + 1)"}.joined(separator: "\n"))
+        \(cases.enumerated().map{"          case .with\($0.element.value)(_): return \($0.offset + 1)"}.joined(separator: "\n"))
                 }
             }
             func insert(_ builder: FlatBuffersBuilder) throws -> Offset {
                 switch self {
-        \(cases.enumerated().map{"          case .table\($0.element.value)(let o): return try o.insert(builder)"}.joined(separator: "\n"))
+        \(cases.enumerated().map{"          case .with\($0.element.value)(let o): return try o.insert(builder)"}.joined(separator: "\n"))
                 }
             }
+        \(genAsProperties(cases))
         }
         """
     }

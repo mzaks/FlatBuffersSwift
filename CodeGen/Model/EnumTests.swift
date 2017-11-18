@@ -44,7 +44,7 @@ class EnumTests: XCTestCase {
         let expected = """
 public enum Foo: Int8, FlatBuffersEnum {
     case bar1, bar2 = 3, bar3
-    public static func fromScalar<T>(_ scalar: T) -> E? where T : Scalar {
+    public static func fromScalar<T>(_ scalar: T) -> Foo? where T : Scalar {
         guard let value = scalar as? RawValue else {
             return nil
         }

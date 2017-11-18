@@ -3,7 +3,7 @@ table ContactList {
     entries : [Contact];
 }
 
-enum Gender : byte {Male, Female}
+enum Gender : byte {Male, Female, Other}
 
 enum Mood : byte {Funny, Serious, Angry, Humble}
 
@@ -19,6 +19,8 @@ table Contact {
     previousLocations : [GeoLocation];
     moods : [Mood];
     luckyNumbers : [int];
+    alive: bool;
+    successfulLogins: [bool];
 }
 
 table Date {

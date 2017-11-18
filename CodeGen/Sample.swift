@@ -3,6 +3,7 @@
 
 import Foundation
 
+/*
 public enum E: Int8, FlatBuffersEnum {
     case A, B
     public static func fromScalar<T>(_ scalar: T) -> E? where T : Scalar {
@@ -372,6 +373,7 @@ extension T1 {
         )
     }
 }
+*/
 
 // MARK: Reader
 //

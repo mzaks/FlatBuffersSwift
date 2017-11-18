@@ -102,7 +102,7 @@ extension Enum {
         return """
 public enum \(self.name.value): \(type.swift), FlatBuffersEnum {
     case \(gen(cases))
-    public static func fromScalar<T>(_ scalar: T) -> E? where T : Scalar {
+    public static func fromScalar<T>(_ scalar: T) -> \(self.name.value)? where T : Scalar {
         guard let value = scalar as? RawValue else {
             return nil
         }

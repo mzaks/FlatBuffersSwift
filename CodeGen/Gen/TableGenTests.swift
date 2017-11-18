@@ -58,42 +58,55 @@ extension T1.Direct {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var i: Int32 {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 0, defaultValue: 0)
     }
     public var b: Bool {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 1, defaultValue: false)
     }
     public var __d: Float64 {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 2, defaultValue: 0)
     }
     public var bs: FlatBuffersScalarVector<Bool, T> {
+
         return FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:3))
     }
     public var name: UnsafeBufferPointer<UInt8>? {
-        return _reader.stringBuffer(stringOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:4))
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:4) else {return nil}
+        return _reader.stringBuffer(stringOffset: offset)
     }
     public var names: FlatBuffersStringVector<T> {
+
         return FlatBuffersStringVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:5))
     }
     public var _self: T0.Direct<T>? {
-        return T0.Direct(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:6))
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:6) else {return nil}
+        return T0.Direct(reader: _reader, myOffset: offset)
     }
     public var selfs: FlatBuffersTableVector<T0.Direct<T>, T> {
+
         return FlatBuffersTableVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:7))
     }
     public var s: S1? {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 8)
     }
     public var s_s: FlatBuffersScalarVector<S1, T> {
+
         return FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:9))
     }
     public var e: E? {
+
         return E(rawValue:_reader.get(objectOffset: _myOffset, propertyIndex: 10, defaultValue: E.A.rawValue))
     }
     public var es: FlatBuffersEnumVector<Int8, T, E> {
+
         return FlatBuffersEnumVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:11))
     }
     public var u: U1.Direct<T>? {
+
         return U1.Direct.from(reader: _reader, propertyIndex : 12, objectOffset : _myOffset)
     }
 }
@@ -102,8 +115,7 @@ extension T1.Direct {
         let lookup = schema?.identLookup
         let table = lookup?.tables["T1"]
         let result = table?.readerProtocolExtension(lookup: lookup!)
-        print(result!)
-        XCTAssertEqual(expected, result)
+        XCTAssertEqual(expected, result!)
     }
     
     func testProtocolReaderExtensionWithExplicitIndex() {
@@ -136,12 +148,15 @@ extension T1.Direct {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var b: Bool {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 0, defaultValue: false)
     }
     public var i: Int32 {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 1, defaultValue: 0)
     }
     public var __d: Float64 {
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 2, defaultValue: 0)
     }
 }
@@ -308,7 +323,17 @@ extension T1 {
             bs = builder.endVector()
         }
         let name = self.name == nil ? nil : try builder.insert(value: self.name)
-        let names = self.names == nil ? nil : try builder.insert(value: self.names)
+        let names: Offset?
+        if self.names.isEmpty {
+            names = nil
+        } else {
+            let offsets = try self.names.map{ try builder.insert(value: $0) }
+            try builder.startVector(count: self.names.count, elementSize: MemoryLayout<Offset>.stride)
+            for o in offsets.reversed() {
+                try builder.insert(offset: o)
+            }
+            names = builder.endVector()
+        }
         let _self = try self._self?.insert(builder)
         let selfs: Offset?
         if self.selfs.isEmpty {
@@ -317,7 +342,7 @@ extension T1 {
             let offsets = try self.selfs.map{ try $0.insert(builder) }
             try builder.startVector(count: self.selfs.count, elementSize: MemoryLayout<Offset>.stride)
             for o in offsets.reversed() {
-                builder.insert(value: o)
+                try builder.insert(offset: o)
             }
             selfs = builder.endVector()
         }
@@ -342,7 +367,7 @@ extension T1 {
             es = builder.endVector()
         }
         let u = try self.u?.insert(builder)
-        let u_type = try self.u?.unionCase ?? 0
+        let u_type = self.u?.unionCase ?? 0
         return try builder.insertT1(
             i: i,
             b: b,
@@ -359,14 +384,14 @@ extension T1 {
             u: u
         )
     }
+
 }
 """
         let schema = Schema.with(pointer:s.utf8Start, length: s.utf8CodeUnitCount)?.0
         let lookup = schema?.identLookup
         let table = lookup?.tables["T1"]
         let result = table?.insertMethod(lookup: lookup!)
-        print(result!)
-        XCTAssertEqual(expected, result)
+        XCTAssertEqual(expected, result!)
     }
     
     func testGenAll() {

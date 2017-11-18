@@ -59,12 +59,12 @@
 		0B57C1391DCE9CF80074EE0E /* FriendsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1381DCE9CF80074EE0E /* FriendsTest.swift */; };
 		0B62C1F31C43F6A2002500FE /* FlatBuffersBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C1F01C43F1CD002500FE /* FlatBuffersBuilder.swift */; };
 		0BA0E8491C32B62200B896B7 /* FlatBuffersSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0BBC37311F27244900C3B0C3 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4235171F2155CA00F99E88 /* Sample.swift */; };
 		0BBC37331F28A49900C3B0C3 /* Sample2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BBC37321F28A49900C3B0C3 /* Sample2.swift */; };
 		0BE02E3F1F2E49F700A7DFBF /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE02E3E1F2E49F700A7DFBF /* Comment.swift */; };
 		0BE02E401F2E49F700A7DFBF /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE02E3E1F2E49F700A7DFBF /* Comment.swift */; };
 		0BE02E421F2E4E3B00A7DFBF /* CommentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE02E411F2E4E3B00A7DFBF /* CommentTests.swift */; };
 		0BE327781CD69BA00067DAC8 /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
+		0BED08D81F48CDAA00104978 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4235171F2155CA00F99E88 /* Sample.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -397,7 +397,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0900;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = maxim.zaks;
 				TargetAttributes = {
 					0B31A4EB1F1366970029D016 = {
@@ -408,11 +408,11 @@
 					};
 					0BA0E8441C32B62200B896B7 = {
 						CreatedOnToolsVersion = 7.2;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0910;
 					};
 					0BA0E84E1C32B62200B896B7 = {
 						CreatedOnToolsVersion = 7.2;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0910;
 					};
 				};
 			};
@@ -477,9 +477,9 @@
 				0B31A5161F136BCC0029D016 /* StringLiteral.swift in Sources */,
 				0B31A4EF1F1366970029D016 /* main.swift in Sources */,
 				0B31A5691F1D44E70029D016 /* MetaData.swift in Sources */,
+				0BED08D81F48CDAA00104978 /* Sample.swift in Sources */,
 				0B31A5271F1380300029D016 /* Field.swift in Sources */,
 				0B31A5221F1377F20029D016 /* Type.swift in Sources */,
-				0BBC37311F27244900C3B0C3 /* Sample.swift in Sources */,
 				0B42351F1F23E96D00F99E88 /* TableGen.swift in Sources */,
 				0BBC37331F28A49900C3B0C3 /* Sample2.swift in Sources */,
 				0B31A5711F1EA23C0029D016 /* Enum.swift in Sources */,
@@ -637,14 +637,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -686,14 +692,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -740,7 +752,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -765,7 +778,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -779,7 +793,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -792,7 +807,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
