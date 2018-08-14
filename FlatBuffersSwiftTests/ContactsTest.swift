@@ -18,8 +18,6 @@ class ContactsTest: XCTestCase {
         
         let data = try!list.makeData()
         
-        print(data.map{$0})
-        
         XCTAssertNotNil(data)
         
         let readContactList = ContactList.from(data: data)!
@@ -98,6 +96,9 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(numbers[1], 23)
         XCTAssertEqual(numbers[2], 45)
         
+        XCTAssertEqual(i1.alive, true)
+        XCTAssertEqual(i1.successfulLogins.flatMap{$0}, [true, false, true])
+        
         
         XCTAssertEqual(i2.name, "Anonymous")
         XCTAssertNil(i2.birthday)
@@ -109,6 +110,8 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i2.moods.count, 1)
         XCTAssertEqual(i2.moods[0], Mood.Angry)
         XCTAssertEqual(i2.luckyNumbers.count, 0)
+        XCTAssertEqual(i2.alive, false)
+        XCTAssertEqual(i2.successfulLogins.isEmpty, true)
     }
     
     
@@ -182,6 +185,9 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(numbers[1], 23)
         XCTAssertEqual(numbers[2], 45)
         
+        XCTAssertEqual(i1.alive, true)
+        XCTAssertEqual(i1.successfulLogins.flatMap{$0}, [true, false, true])
+        
         
         XCTAssertEqual(i2.name?§, "Anonymous")
         XCTAssertNil(i2.birthday)
@@ -193,6 +199,8 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i2.moods.count, 1)
         XCTAssertEqual(i2.moods[0], Mood.Angry)
         XCTAssertEqual(i2.luckyNumbers.count, 0)
+        XCTAssertEqual(i2.alive, false)
+        XCTAssertEqual(i2.successfulLogins.isEmpty, true)
     }
     
     func testToFileDirectRead() {
@@ -263,6 +271,9 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(numbers[1], 23)
         XCTAssertEqual(numbers[2], 45)
         
+        XCTAssertEqual(i1.alive, true)
+        XCTAssertEqual(i1.successfulLogins.flatMap{$0}, [true, false, true])
+        
         
         XCTAssertEqual(i2.name?§, "Anonymous")
         XCTAssertNil(i2.birthday)
@@ -274,6 +285,8 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(i2.moods.count, 1)
         XCTAssertEqual(i2.moods[0], Mood.Angry)
         XCTAssertEqual(i2.luckyNumbers.count, 0)
+        XCTAssertEqual(i2.alive, false)
+        XCTAssertEqual(i2.successfulLogins.isEmpty, true)
     }
     
     func createContactList() -> ContactList {
@@ -295,7 +308,9 @@ class ContactsTest: XCTestCase {
                                 GeoLocation(latitude: 22.1, longitude: 23.2, elevation: 24.3),
                                 ],
                             moods: [Mood.Funny, Mood.Humble, Mood.Serious],
-                            luckyNumbers: [1, 23, 45])
+                            luckyNumbers: [1, 23, 45],
+                            alive: true,
+                            successfulLogins: [true, false, true])
         
         let item2 = Contact(name: "Anonymous",
                             birthday: nil,
