@@ -109,7 +109,7 @@ extension Table {
     }
     
     private var sortedFields: [Field] {
-        let ids = fields.flatMap { (f) -> (Int, Field)? in
+        let ids = fields.compactMap { (f) -> (Int, Field)? in
             if let id = f.id, let index = Int(id) {
                 return (index, f)
             }

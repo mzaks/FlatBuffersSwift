@@ -232,15 +232,15 @@ extension T1 {
             i: selfReader.i,
             b: selfReader.b,
             __d: selfReader.__d,
-            bs: selfReader.bs.flatMap{$0},
+            bs: selfReader.bs.compactMap{$0},
             name: selfReader.name§,
-            names: selfReader.names.flatMap{ $0§ },
+            names: selfReader.names.compactMap{ $0§ },
             _self: T0.from(selfReader:selfReader._self),
-            selfs: selfReader.selfs.flatMap{ T0.from(selfReader:$0) },
+            selfs: selfReader.selfs.compactMap{ T0.from(selfReader:$0) },
             s: selfReader.s,
-            s_s: selfReader.s_s.flatMap{$0},
+            s_s: selfReader.s_s.compactMap{$0},
             e: selfReader.e,
-            es: selfReader.es.flatMap{$0},
+            es: selfReader.es.compactMap{$0},
             u: U1.from(selfReader: selfReader.u)
         )
     }
@@ -312,6 +312,7 @@ extension T1 {
                 return myOffset
             }
         }
+
         let bs: Offset?
         if self.bs.isEmpty {
             bs = nil
@@ -368,7 +369,7 @@ extension T1 {
         }
         let u = try self.u?.insert(builder)
         let u_type = self.u?.unionCase ?? 0
-        return try builder.insertT1(
+        let myOffset = try builder.insertT1(
             i: i,
             b: b,
             bs: bs,
@@ -383,6 +384,11 @@ extension T1 {
             u_type: u_type,
             u: u
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }

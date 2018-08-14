@@ -256,13 +256,19 @@ extension T1 {
                 return myOffset
             }
         }
+
         let u = try self.u?.insert(builder)
         let u_type = self.u?.unionCase ?? 0
-        return try builder.insertT1(
+        let myOffset = try builder.insertT1(
             u_type: u_type,
             u: u,
             s: s
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
     public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
         let builder = FlatBuffersBuilder(options: options)
@@ -445,11 +451,17 @@ extension T11 {
             }
         }
 
-        return try builder.insertT11(
+
+        let myOffset = try builder.insertT11(
             i: i,
             s: s,
             e: e ?? E2.A
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -549,11 +561,17 @@ extension T2 {
                 return myOffset
             }
         }
+
         let t = try self.t?.insert(builder)
-        return try builder.insertT2(
+        let myOffset = try builder.insertT2(
             b: b,
             t: t
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -563,6 +581,6 @@ extension T2 {
         let schema = Schema.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
         let result = schema?.0.swift
         print(result!)
-        XCTAssertEqual(result!, expected)
+        XCTAssertEqual(expected, result!)
     }
 }

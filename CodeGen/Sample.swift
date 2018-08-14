@@ -1061,7 +1061,7 @@ public final class FlatBuffersBuilder {
     public init(options _options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) {
         self.options = _options
         self.capacity = self.options.initialCapacity
-        _data = UnsafeMutableRawPointer.allocate(bytes: capacity, alignedTo: minalign)
+        _data = UnsafeMutableRawPointer.allocate(byteCount: capacity, alignment: minalign)
     }
     
     /**
@@ -1088,14 +1088,13 @@ public final class FlatBuffersBuilder {
             return
         }
         let _leftCursor = leftCursor
-        let _capacity = capacity
         while leftCursor <= size {
             capacity = capacity << 1
         }
         
-        let newData = UnsafeMutableRawPointer.allocate(bytes: capacity, alignedTo: minalign)
-        newData.advanced(by:leftCursor).copyBytes(from: _data.advanced(by: _leftCursor), count: cursor)
-        _data.deallocate(bytes: _capacity, alignedTo: minalign)
+        let newData = UnsafeMutableRawPointer.allocate(byteCount: capacity, alignment: minalign)
+        newData.advanced(by:leftCursor).copyMemory(from: _data.advanced(by: _leftCursor), byteCount: cursor)
+        _data.deallocate()
         _data = newData
     }
     

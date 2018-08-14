@@ -97,7 +97,7 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(numbers[2], 45)
         
         XCTAssertEqual(i1.alive, true)
-        XCTAssertEqual(i1.successfulLogins.flatMap{$0}, [true, false, true])
+        XCTAssertEqual(i1.successfulLogins.compactMap{$0}, [true, false, true])
         
         
         XCTAssertEqual(i2.name, "Anonymous")
@@ -186,7 +186,7 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(numbers[2], 45)
         
         XCTAssertEqual(i1.alive, true)
-        XCTAssertEqual(i1.successfulLogins.flatMap{$0}, [true, false, true])
+        XCTAssertEqual(i1.successfulLogins.compactMap{$0}, [true, false, true])
         
         
         XCTAssertEqual(i2.name?§, "Anonymous")
@@ -272,7 +272,7 @@ class ContactsTest: XCTestCase {
         XCTAssertEqual(numbers[2], 45)
         
         XCTAssertEqual(i1.alive, true)
-        XCTAssertEqual(i1.successfulLogins.flatMap{$0}, [true, false, true])
+        XCTAssertEqual(i1.successfulLogins.compactMap{$0}, [true, false, true])
         
         
         XCTAssertEqual(i2.name?§, "Anonymous")

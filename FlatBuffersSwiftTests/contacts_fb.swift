@@ -34,11 +34,11 @@ extension ContactList.Direct {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var lastModified: Int64 {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 0, defaultValue: 0)
     }
     public var entries: FlatBuffersTableVector<Contact.Direct<T>, T> {
-        
+
         return FlatBuffersTableVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:1))
     }
 }
@@ -56,7 +56,7 @@ extension ContactList {
         }
         return ContactList(
             lastModified: selfReader.lastModified,
-            entries: selfReader.entries.flatMap{ Contact.from(selfReader:$0) }
+            entries: selfReader.entries.compactMap{ Contact.from(selfReader:$0) }
         )
     }
 }
@@ -77,6 +77,7 @@ extension ContactList {
                 return myOffset
             }
         }
+
         let entries: Offset?
         if self.entries.isEmpty {
             entries = nil
@@ -84,14 +85,19 @@ extension ContactList {
             let offsets = try self.entries.map{ try $0.insert(builder) }
             try builder.startVector(count: self.entries.count, elementSize: MemoryLayout<Offset>.stride)
             for o in offsets.reversed() {
-               try builder.insert(offset: o)
+                try builder.insert(offset: o)
             }
             entries = builder.endVector()
         }
-        return try builder.insertContactList(
+        let myOffset = try builder.insertContactList(
             lastModified: lastModified,
             entries: entries
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
     public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
         let builder = FlatBuffersBuilder(options: options)
@@ -159,39 +165,39 @@ extension Contact.Direct {
         return Date.Direct(reader: _reader, myOffset: offset)
     }
     public var gender: Gender? {
-        
+
         return Gender(rawValue:_reader.get(objectOffset: _myOffset, propertyIndex: 2, defaultValue: Gender.Male.rawValue))
     }
     public var tags: FlatBuffersStringVector<T> {
-        
+
         return FlatBuffersStringVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:3))
     }
     public var addressEntries: FlatBuffersTableVector<AddressEntry.Direct<T>, T> {
-        
+
         return FlatBuffersTableVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:4))
     }
     public var currentLoccation: GeoLocation? {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 5)
     }
     public var previousLocations: FlatBuffersScalarVector<GeoLocation, T> {
-        
+
         return FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:6))
     }
     public var moods: FlatBuffersEnumVector<Int8, T, Mood> {
-        
+
         return FlatBuffersEnumVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:7))
     }
     public var luckyNumbers: FlatBuffersScalarVector<Int32, T> {
-        
+
         return FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:8))
     }
     public var alive: Bool {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 9, defaultValue: false)
     }
     public var successfulLogins: FlatBuffersScalarVector<Bool, T> {
-        
+
         return FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:10))
     }
 }
@@ -208,14 +214,14 @@ extension Contact {
             name: selfReader.name§,
             birthday: Date.from(selfReader:selfReader.birthday),
             gender: selfReader.gender,
-            tags: selfReader.tags.flatMap{ $0§ },
-            addressEntries: selfReader.addressEntries.flatMap{ AddressEntry.from(selfReader:$0) },
+            tags: selfReader.tags.compactMap{ $0§ },
+            addressEntries: selfReader.addressEntries.compactMap{ AddressEntry.from(selfReader:$0) },
             currentLoccation: selfReader.currentLoccation,
-            previousLocations: selfReader.previousLocations.flatMap{$0},
-            moods: selfReader.moods.flatMap{$0},
-            luckyNumbers: selfReader.luckyNumbers.flatMap{$0},
+            previousLocations: selfReader.previousLocations.compactMap{$0},
+            moods: selfReader.moods.compactMap{$0},
+            luckyNumbers: selfReader.luckyNumbers.compactMap{$0},
             alive: selfReader.alive,
-            successfulLogins: selfReader.successfulLogins.flatMap{$0}
+            successfulLogins: selfReader.successfulLogins.compactMap{$0}
         )
     }
 }
@@ -262,6 +268,7 @@ extension Contact {
                 return myOffset
             }
         }
+
         let name = self.name == nil ? nil : try builder.insert(value: self.name)
         let birthday = try self.birthday?.insert(builder)
         let tags: Offset?
@@ -271,7 +278,7 @@ extension Contact {
             let offsets = try self.tags.map{ try builder.insert(value: $0) }
             try builder.startVector(count: self.tags.count, elementSize: MemoryLayout<Offset>.stride)
             for o in offsets.reversed() {
-               try builder.insert(offset: o)
+                try builder.insert(offset: o)
             }
             tags = builder.endVector()
         }
@@ -282,7 +289,7 @@ extension Contact {
             let offsets = try self.addressEntries.map{ try $0.insert(builder) }
             try builder.startVector(count: self.addressEntries.count, elementSize: MemoryLayout<Offset>.stride)
             for o in offsets.reversed() {
-               try builder.insert(offset: o)
+                try builder.insert(offset: o)
             }
             addressEntries = builder.endVector()
         }
@@ -326,7 +333,7 @@ extension Contact {
             }
             successfulLogins = builder.endVector()
         }
-        return try builder.insertContact(
+        let myOffset = try builder.insertContact(
             name: name,
             birthday: birthday,
             gender: gender ?? Gender.Male,
@@ -339,6 +346,11 @@ extension Contact {
             alive: alive,
             successfulLogins: successfulLogins
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -377,15 +389,15 @@ extension Date.Direct {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var day: Int8 {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 0, defaultValue: 0)
     }
     public var month: Int8 {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 1, defaultValue: 0)
     }
     public var year: Int16 {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 2, defaultValue: 0)
     }
 }
@@ -422,11 +434,17 @@ extension Date {
             }
         }
 
-        return try builder.insertDate(
+
+        let myOffset = try builder.insertDate(
             day: day,
             month: month,
             year: year
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -472,11 +490,11 @@ extension AddressEntry.Direct {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var order: Int32 {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 0, defaultValue: 0)
     }
     public var address: Address.Direct<T>? {
-        
+
         return Address.Direct.from(reader: _reader, propertyIndex : 1, objectOffset : _myOffset)
     }
 }
@@ -513,13 +531,19 @@ extension AddressEntry {
                 return myOffset
             }
         }
+
         let address = try self.address?.insert(builder)
         let address_type = self.address?.unionCase ?? 0
-        return try builder.insertAddressEntry(
+        let myOffset = try builder.insertAddressEntry(
             order: order,
             address_type: address_type,
             address: address
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -715,7 +739,7 @@ extension PostalAddress.Direct {
         return _reader.stringBuffer(stringOffset: offset)
     }
     public var postalCode: Int32 {
-        
+
         return _reader.get(objectOffset: _myOffset, propertyIndex: 2, defaultValue: 0)
     }
     public var streetAndNumber: UnsafeBufferPointer<UInt8>? {
@@ -763,15 +787,21 @@ extension PostalAddress {
                 return myOffset
             }
         }
+
         let country = self.country == nil ? nil : try builder.insert(value: self.country)
         let city = self.city == nil ? nil : try builder.insert(value: self.city)
         let streetAndNumber = self.streetAndNumber == nil ? nil : try builder.insert(value: self.streetAndNumber)
-        return try builder.insertPostalAddress(
+        let myOffset = try builder.insertPostalAddress(
             country: country,
             city: city,
             postalCode: postalCode,
             streetAndNumber: streetAndNumber
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -840,10 +870,16 @@ extension EmailAddress {
                 return myOffset
             }
         }
+
         let mailto = self.mailto == nil ? nil : try builder.insert(value: self.mailto)
-        return try builder.insertEmailAddress(
+        let myOffset = try builder.insertEmailAddress(
             mailto: mailto
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -912,10 +948,16 @@ extension WebAddress {
                 return myOffset
             }
         }
+
         let url = self.url == nil ? nil : try builder.insert(value: self.url)
-        return try builder.insertWebAddress(
+        let myOffset = try builder.insertWebAddress(
             url: url
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }
@@ -984,10 +1026,16 @@ extension TelephoneNumber {
                 return myOffset
             }
         }
+
         let number = self.number == nil ? nil : try builder.insert(value: self.number)
-        return try builder.insertTelephoneNumber(
+        let myOffset = try builder.insertTelephoneNumber(
             number: number
         )
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+
+        return myOffset
     }
 
 }

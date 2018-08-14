@@ -116,18 +116,18 @@ extension Table {
                 let name = field.fieldName
                 if field.type.scalar != nil {
                     if field.type.vector {
-                        return "            \(name): selfReader.\(name).flatMap{$0}"
+                        return "            \(name): selfReader.\(name).compactMap{$0}"
                     }
                     return "            \(name): selfReader.\(name)"
                 } else if field.type.string {
                     if field.type.vector {
-                        return "            \(name): selfReader.\(name).flatMap{ $0§ }"
+                        return "            \(name): selfReader.\(name).compactMap{ $0§ }"
                     }
                     return "            \(name): selfReader.\(name)§"
                 } else if let ref = field.type.ref {
                     if let t = lookup.tables[ref.value] {
                         if field.type.vector {
-                            return "            \(name): selfReader.\(name).flatMap{ \(t.name.value).from(selfReader:$0) }"
+                            return "            \(name): selfReader.\(name).compactMap{ \(t.name.value).from(selfReader:$0) }"
                         }
                         return "            \(name): \(t.name.value).from(selfReader:selfReader.\(name))"
                     } else if let u = lookup.unions[ref.value] {
@@ -137,7 +137,7 @@ extension Table {
                         return "            \(name): \(u.name.value).from(selfReader: selfReader.\(field.fieldName))"
                     } else {
                         if field.type.vector {
-                            return "            \(name): selfReader.\(name).flatMap{$0}"
+                            return "            \(name): selfReader.\(name).compactMap{$0}"
                         }
                         return "            \(name): selfReader.\(name)"
                     }
@@ -228,7 +228,7 @@ extension Table {
         """
     }
     
-    public func insertMethod(lookup: IdentLookup, isRoot: Bool = false) -> String {
+    public func insertMethod(lookup: IdentLookup, isRoot: Bool = false, isRecursive: Bool = false) -> String {
         func genOffsetAssignements(_ fields: [Field]) -> String {
             
             let statements = fields.map { (f) -> String in
@@ -322,6 +322,17 @@ extension Table {
             }
         }
         
+        let monitorProgressStart = isRecursive ? """
+                if builder.inProgress.contains(ObjectIdentifier(self)){
+                    return 0
+                }
+                builder.inProgress.insert(ObjectIdentifier(self))
+        """ : ""
+        
+        let monitorProgressEnd = isRecursive ? """
+                builder.inProgress.remove(ObjectIdentifier(self))
+        """ : ""
+        
         let offsetBasedFields = fields.filter { (f) -> Bool in
             if f.type.string || f.type.vector {
                 return true
@@ -344,10 +355,16 @@ extension Table {
                         return myOffset
                     }
                 }
+        \(monitorProgressStart)
         \(genOffsetAssignements(offsetBasedFields))
-                return try builder.insert\(name.value)(
+                let myOffset = try builder.insert\(name.value)(
         \(parameters(values: sorted))
                 )
+                if builder.options.uniqueTables {
+                    builder.cache[ObjectIdentifier(self)] = myOffset
+                }
+        \(monitorProgressEnd)
+                return myOffset
             }
         \(inserRootMethods())
         }
