@@ -162,3 +162,33 @@ extension Struct {
         return result
     }
 }
+
+extension Table {
+    func findCycle(lookup: IdentLookup, visited: Set<String>) -> Bool {
+        if visited.contains(name.value) {
+            return true
+        }
+        var newVisited = visited
+        newVisited.insert(name.value)
+
+        for f in fields {
+            if let ref = f.type.ref?.value {
+                if let t = lookup.tables[ref] {
+                    if t.findCycle(lookup: lookup, visited: newVisited) {
+                        return true
+                    }
+                } else if let u = lookup.unions[ref] {
+                    for u_case in u.cases {
+                        guard let t = lookup.tables[u_case.value] else {
+                            fatalError("Union case \(u_case.value) is not a table")
+                        }
+                        if t.findCycle(lookup: lookup, visited: newVisited) {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
+    }
+}

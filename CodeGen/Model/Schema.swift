@@ -272,34 +272,8 @@ extension Schema {
             let rootTable = lookup.tables[rootType] else {
             return false
         }
-        func findCycle(table: Table, visited: Set<String>) -> Bool {
-            if visited.contains(table.name.value) {
-                return true
-            }
-            var newVisited = visited
-            newVisited.insert(table.name.value)
-            
-            for f in table.fields {
-                if let ref = f.type.ref?.value {
-                    if let t = lookup.tables[ref] {
-                        if findCycle(table: t, visited: newVisited) {
-                            return true
-                        }
-                    } else if let u = lookup.unions[ref] {
-                        for u_case in u.cases {
-                            guard let t = lookup.tables[u_case.value] else {
-                                fatalError("Union case \(u_case.value) is not a table")
-                            }
-                            if findCycle(table: t, visited: newVisited) {
-                                return true
-                            }
-                        }
-                    }
-                }
-            }
-            return false
-        }
-        return findCycle(table: rootTable, visited: [])
+
+        return rootTable.findCycle(lookup: lookup, visited: [])
     }
     
     class StringBuilder {
@@ -335,7 +309,13 @@ extension Schema {
                     return
                 }
                 visited.insert(table.name.value)
-                result.append(table.swift(lookup: lookup, isRoot: table.name.value == rootType))
+                if table.name.value == rootType,
+                    let fileIdentifier = fileIdent?.value.value {
+                    result.append(table.swift(lookup: lookup, isRoot: table.name.value == rootType, fileIdentifier: fileIdentifier))
+                } else {
+                    result.append(table.swift(lookup: lookup, isRoot: table.name.value == rootType))
+                }
+
                 for f in table.fields {
                     if let ref = f.type.ref?.value {
                         if let t = lookup.tables[ref] {
@@ -381,6 +361,21 @@ extension Schema {
             }
         }
         trace(result: result, node: rootTable, visited: visited)
+        if self.hasRecursions {
+            result.append("""
+            fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
+                for binding in builder.deferedBindings {
+                    if let offset = builder.cache[ObjectIdentifier(binding.object)] {
+                        try builder.update(offset: offset, atCursor: binding.cursor)
+                    } else {
+                        throw FlatBuffersBuildError.couldNotPerformLateBinding
+                    }
+                }
+                builder.deferedBindings.removeAll()
+            }
+            """)
+        }
+
         return result.value
     }
 }

@@ -59,12 +59,10 @@
 		0B57C1391DCE9CF80074EE0E /* FriendsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1381DCE9CF80074EE0E /* FriendsTest.swift */; };
 		0B62C1F31C43F6A2002500FE /* FlatBuffersBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B62C1F01C43F1CD002500FE /* FlatBuffersBuilder.swift */; };
 		0BA0E8491C32B62200B896B7 /* FlatBuffersSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BA0E8481C32B62200B896B7 /* FlatBuffersSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0BBC37331F28A49900C3B0C3 /* Sample2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BBC37321F28A49900C3B0C3 /* Sample2.swift */; };
 		0BE02E3F1F2E49F700A7DFBF /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE02E3E1F2E49F700A7DFBF /* Comment.swift */; };
 		0BE02E401F2E49F700A7DFBF /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE02E3E1F2E49F700A7DFBF /* Comment.swift */; };
 		0BE02E421F2E4E3B00A7DFBF /* CommentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE02E411F2E4E3B00A7DFBF /* CommentTests.swift */; };
 		0BE327781CD69BA00067DAC8 /* FlatBuffersSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */; };
-		0BED08D81F48CDAA00104978 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4235171F2155CA00F99E88 /* Sample.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,7 +124,6 @@
 		0B31A5781F1FE6E90029D016 /* UnionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnionTests.swift; sourceTree = "<group>"; };
 		0B31A57A1F1FE9A20029D016 /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
 		0B31A57D1F1FF4F20029D016 /* SchemaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaTests.swift; sourceTree = "<group>"; };
-		0B4235171F2155CA00F99E88 /* Sample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sample.swift; sourceTree = "<group>"; };
 		0B42351A1F23E6D900F99E88 /* StructGen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StructGen.swift; sourceTree = "<group>"; };
 		0B42351E1F23E96D00F99E88 /* TableGen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableGen.swift; sourceTree = "<group>"; };
 		0B4235211F23EC0500F99E88 /* TableGenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableGenTests.swift; sourceTree = "<group>"; };
@@ -145,7 +142,6 @@
 		0BA0E84F1C32B62200B896B7 /* FlatBuffersSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlatBuffersSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BA0E8561C32B62200B896B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0BA0E86A1C32B6AD00B896B7 /* FlatBuffersReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlatBuffersReader.swift; sourceTree = "<group>"; };
-		0BBC37321F28A49900C3B0C3 /* Sample2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sample2.swift; sourceTree = "<group>"; };
 		0BE02E3E1F2E49F700A7DFBF /* Comment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		0BE02E411F2E4E3B00A7DFBF /* CommentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentTests.swift; sourceTree = "<group>"; };
 		85EE88611CDE83E00030231F /* generate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = generate.sh; sourceTree = SOURCE_ROOT; };
@@ -195,8 +191,6 @@
 				0B31A5081F1366CE0029D016 /* CodeGenTests-Info.plist */,
 				0B31A5121F1369390029D016 /* CodeGenTests-Bridging-Header.h */,
 				0B31A4EE1F1366970029D016 /* main.swift */,
-				0B4235171F2155CA00F99E88 /* Sample.swift */,
-				0BBC37321F28A49900C3B0C3 /* Sample2.swift */,
 			);
 			path = CodeGen;
 			sourceTree = "<group>";
@@ -477,11 +471,9 @@
 				0B31A5161F136BCC0029D016 /* StringLiteral.swift in Sources */,
 				0B31A4EF1F1366970029D016 /* main.swift in Sources */,
 				0B31A5691F1D44E70029D016 /* MetaData.swift in Sources */,
-				0BED08D81F48CDAA00104978 /* Sample.swift in Sources */,
 				0B31A5271F1380300029D016 /* Field.swift in Sources */,
 				0B31A5221F1377F20029D016 /* Type.swift in Sources */,
 				0B42351F1F23E96D00F99E88 /* TableGen.swift in Sources */,
-				0BBC37331F28A49900C3B0C3 /* Sample2.swift in Sources */,
 				0B31A5711F1EA23C0029D016 /* Enum.swift in Sources */,
 				0B42351B1F23E6D900F99E88 /* StructGen.swift in Sources */,
 				0B31A5301F140D920029D016 /* ValueLiteral.swift in Sources */,

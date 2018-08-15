@@ -229,24 +229,27 @@ extension T1 {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? T1 {
             return o
         }
-        return T1(
-            u: U.from(selfReader: selfReader.u),
-            s: selfReader.s
-        )
+        let o = T1()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.u = U.from(selfReader: selfReader.u)
+        o.s = selfReader.s
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertT1(u_type: Int8 = 0, u: Offset? = nil, s: S1? = nil) throws -> Offset {
+    public func insertT1(u_type: Int8 = 0, u: Offset? = nil, s: S1? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 3)
         try self.startObject(withPropertyCount: 3)
-        try self.insert(value: u_type, defaultValue: 0, toStartedObjectAt: 0)
+        valueCursors[0] = try self.insert(value: u_type, defaultValue: 0, toStartedObjectAt: 0)
         if let u = u {
-            try self.insert(offset: u, toStartedObjectAt: 1)
+            valueCursors[1] = try self.insert(offset: u, toStartedObjectAt: 1)
         }
         if let s = s {
             self.insert(value: s)
-            try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 2)
+            valueCursors[2] = try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 2)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension T1 {
@@ -256,24 +259,33 @@ extension T1 {
                 return myOffset
             }
         }
-
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
         let u = try self.u?.insert(builder)
         let u_type = self.u?.unionCase ?? 0
-        let myOffset = try builder.insertT1(
+        let (myOffset, valueCursors) = try builder.insertT1(
             u_type: u_type,
             u: u,
             s: s
         )
+        if u == 0,
+           let o = self.u,
+           let cursor = valueCursors[1] {
+            builder.deferedBindings.append((o.value, cursor))
+        }
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
-
+        builder.inProgress.remove(ObjectIdentifier(self))
         return myOffset
     }
     public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
         let builder = FlatBuffersBuilder(options: options)
         let offset = try insert(builder)
         try builder.finish(offset: offset, fileIdentifier: nil)
+        try performLateBindings(builder)
         return builder.makeData
     }
 }
@@ -367,6 +379,12 @@ public enum U {
             return nil
         }
     }
+    var value: AnyObject {
+        switch self {
+        case .withT11(let v): return v
+        case .withT2(let v): return v
+        }
+    }
 }
 public final class T11 {
     public var i: Int32
@@ -424,23 +442,26 @@ extension T11 {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? T11 {
             return o
         }
-        return T11(
-            i: selfReader.i,
-            s: selfReader.s,
-            e: selfReader.e
-        )
+        let o = T11()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.i = selfReader.i
+        o.s = selfReader.s
+        o.e = selfReader.e
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertT11(i: Int32 = 0, s: S1? = nil, e: E2 = E2.A) throws -> Offset {
+    public func insertT11(i: Int32 = 0, s: S1? = nil, e: E2 = E2.A) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 3)
         try self.startObject(withPropertyCount: 3)
-        try self.insert(value: e.rawValue, defaultValue: E2.A.rawValue, toStartedObjectAt: 2)
-        try self.insert(value: i, defaultValue: 0, toStartedObjectAt: 0)
+        valueCursors[2] = try self.insert(value: e.rawValue, defaultValue: E2.A.rawValue, toStartedObjectAt: 2)
+        valueCursors[0] = try self.insert(value: i, defaultValue: 0, toStartedObjectAt: 0)
         if let s = s {
             self.insert(value: s)
-            try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 1)
+            valueCursors[1] = try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 1)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension T11 {
@@ -452,11 +473,12 @@ extension T11 {
         }
 
 
-        let myOffset = try builder.insertT11(
+        let (myOffset, _) = try builder.insertT11(
             i: i,
             s: s,
             e: e ?? E2.A
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -538,20 +560,23 @@ extension T2 {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? T2 {
             return o
         }
-        return T2(
-            b: selfReader.b,
-            t: T1.from(selfReader:selfReader.t)
-        )
+        let o = T2()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.b = selfReader.b
+        o.t = T1.from(selfReader:selfReader.t)
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertT2(b: Bool = false, t: Offset? = nil) throws -> Offset {
+    public func insertT2(b: Bool = false, t: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 2)
         try self.startObject(withPropertyCount: 2)
-        try self.insert(value: b, defaultValue: false, toStartedObjectAt: 0)
+        valueCursors[0] = try self.insert(value: b, defaultValue: false, toStartedObjectAt: 0)
         if let t = t {
-            try self.insert(offset: t, toStartedObjectAt: 1)
+            valueCursors[1] = try self.insert(offset: t, toStartedObjectAt: 1)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension T2 {
@@ -561,19 +586,37 @@ extension T2 {
                 return myOffset
             }
         }
-
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
         let t = try self.t?.insert(builder)
-        let myOffset = try builder.insertT2(
+        let (myOffset, valueCursors) = try builder.insertT2(
             b: b,
             t: t
         )
+        if t == 0,
+           let o = self.t,
+           let cursor = valueCursors[1] {
+            builder.deferedBindings.append((o, cursor))
+        }
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
-
+        builder.inProgress.remove(ObjectIdentifier(self))
         return myOffset
     }
 
+}
+fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
+    for binding in builder.deferedBindings {
+        if let offset = builder.cache[ObjectIdentifier(binding.object)] {
+            try builder.update(offset: offset, atCursor: binding.cursor)
+        } else {
+            throw FlatBuffersBuildError.couldNotPerformLateBinding
+        }
+    }
+    builder.deferedBindings.removeAll()
 }
 
 """

@@ -53,6 +53,7 @@ public enum FlatBuffersBuildError : Error {
     case cursorIsInvalid
     case badFileIdentifier
     case unsupportedType
+    case couldNotPerformLateBinding
 }
 
 /// A FlatBuffers builder that supports the generation of flatbuffers 'wire' format from an object graph
@@ -74,7 +75,7 @@ public final class FlatBuffersBuilder {
     
     public var cache : [ObjectIdentifier : Offset] = [:]
     public var inProgress : Set<ObjectIdentifier> = []
-    public var deferedBindings : ContiguousArray<(object:Any, cursor:Int)> = []
+    public var deferedBindings : ContiguousArray<(object:AnyObject, cursor:Int)> = []
 
     /**
      Initializes the builder
@@ -242,10 +243,10 @@ public final class FlatBuffersBuilder {
          - propertyIndex: The index of the property to update
          - offset: The offsetnumber of properties we will update
 
-     - Returns: The current cursor position (Note: What is the use case of the return value?)
+     - Returns: The current cursor position, cursor is used to replace the value later (e.g. during late binding phase).
      */
     @discardableResult
-    public func insert(offset : Offset, toStartedObjectAt propertyIndex : Int) throws -> Int{
+    public func insert(offset : Offset, toStartedObjectAt propertyIndex : Int) throws -> Int {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -265,8 +266,11 @@ public final class FlatBuffersBuilder {
          - value: The value to append
          - defaultValue: If configured to skip default values, a value 
         matching this default value will not be written to the buffer.
+
+     - Returns: The current cursor position, cursor is used to replace the value later.
      */
-    public func insert<T : Scalar>(value : T, defaultValue : T, toStartedObjectAt propertyIndex : Int) throws {
+    @discardableResult
+    public func insert<T : Scalar>(value : T, defaultValue : T, toStartedObjectAt propertyIndex : Int) throws -> Int? {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -275,11 +279,14 @@ public final class FlatBuffersBuilder {
         }
         
         if(options.forceDefaults == false && value == defaultValue) {
-            return
+            // The value was not added, so there is no cursor for late replacements.
+            return nil
         }
         
         insert(value: value)
         currentVTable[propertyIndex] = Int32(cursor)
+
+        return cursor
     }
     
     /**
@@ -287,8 +294,10 @@ public final class FlatBuffersBuilder {
      
      - parameters:
          - propertyIndex: The index of the property to update
+     - Returns: The current cursor position, cursor is used to replace the value later.
      */
-    public func insertCurrentOffsetAsProperty(toStartedObjectAt propertyIndex : Int) throws {
+    @discardableResult
+    public func insertCurrentOffsetAsProperty(toStartedObjectAt propertyIndex : Int) throws -> Int {
         guard objectStart > -1 else {
             throw FlatBuffersBuildError.noOpenObject
         }
@@ -296,6 +305,8 @@ public final class FlatBuffersBuilder {
             throw FlatBuffersBuildError.propertyIndexIsInvalid
         }
         currentVTable[propertyIndex] = Int32(cursor)
+
+        return cursor
     }
   
     /**

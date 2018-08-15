@@ -121,6 +121,12 @@ public enum Foo2 {
             return nil
         }
     }
+    var value: AnyObject {
+        switch self {
+        case .withA(let v): return v
+        case .withB(let v): return v
+        }
+    }
 }
 """
         let result = Union.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)?.0.swift

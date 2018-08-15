@@ -228,21 +228,23 @@ extension T1 {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? T1 {
             return o
         }
-        return T1(
-            i: selfReader.i,
-            b: selfReader.b,
-            __d: selfReader.__d,
-            bs: selfReader.bs.compactMap{$0},
-            name: selfReader.name§,
-            names: selfReader.names.compactMap{ $0§ },
-            _self: T0.from(selfReader:selfReader._self),
-            selfs: selfReader.selfs.compactMap{ T0.from(selfReader:$0) },
-            s: selfReader.s,
-            s_s: selfReader.s_s.compactMap{$0},
-            e: selfReader.e,
-            es: selfReader.es.compactMap{$0},
-            u: U1.from(selfReader: selfReader.u)
-        )
+        let o = T1()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.i = selfReader.i
+        o.b = selfReader.b
+        o.__d = selfReader.__d
+        o.bs = selfReader.bs.compactMap{$0}
+        o.name = selfReader.name§
+        o.names = selfReader.names.compactMap{ $0§ }
+        o._self = T0.from(selfReader:selfReader._self)
+        o.selfs = selfReader.selfs.compactMap{ T0.from(selfReader:$0) }
+        o.s = selfReader.s
+        o.s_s = selfReader.s_s.compactMap{$0}
+        o.e = selfReader.e
+        o.es = selfReader.es.compactMap{$0}
+        o.u = U1.from(selfReader: selfReader.u)
+
+        return o
     }
 }
 """
@@ -257,41 +259,42 @@ extension T1 {
     func testInsertExtension() {
         let expected = """
 extension FlatBuffersBuilder {
-    public func insertT1(i: Int32 = 0, b: Bool = false, bs: Offset? = nil, name: Offset? = nil, names: Offset? = nil, _self: Offset? = nil, selfs: Offset? = nil, s: S1? = nil, s_s: Offset? = nil, e: E = E.A, es: Offset? = nil, u_type: Int8 = 0, u: Offset? = nil) throws -> Offset {
+    public func insertT1(i: Int32 = 0, b: Bool = false, bs: Offset? = nil, name: Offset? = nil, names: Offset? = nil, _self: Offset? = nil, selfs: Offset? = nil, s: S1? = nil, s_s: Offset? = nil, e: E = E.A, es: Offset? = nil, u_type: Int8 = 0, u: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 14)
         try self.startObject(withPropertyCount: 14)
-        try self.insert(value: b, defaultValue: false, toStartedObjectAt: 1)
+        valueCursors[1] = try self.insert(value: b, defaultValue: false, toStartedObjectAt: 1)
         if let s = s {
             self.insert(value: s)
-            try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 8)
+            valueCursors[8] = try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 8)
         }
-        try self.insert(value: e.rawValue, defaultValue: E.A.rawValue, toStartedObjectAt: 10)
-        try self.insert(value: u_type, defaultValue: 0, toStartedObjectAt: 12)
-        try self.insert(value: i, defaultValue: 0, toStartedObjectAt: 0)
+        valueCursors[10] = try self.insert(value: e.rawValue, defaultValue: E.A.rawValue, toStartedObjectAt: 10)
+        valueCursors[12] = try self.insert(value: u_type, defaultValue: 0, toStartedObjectAt: 12)
+        valueCursors[0] = try self.insert(value: i, defaultValue: 0, toStartedObjectAt: 0)
         if let bs = bs {
-            try self.insert(offset: bs, toStartedObjectAt: 3)
+            valueCursors[3] = try self.insert(offset: bs, toStartedObjectAt: 3)
         }
         if let name = name {
-            try self.insert(offset: name, toStartedObjectAt: 4)
+            valueCursors[4] = try self.insert(offset: name, toStartedObjectAt: 4)
         }
         if let names = names {
-            try self.insert(offset: names, toStartedObjectAt: 5)
+            valueCursors[5] = try self.insert(offset: names, toStartedObjectAt: 5)
         }
         if let _self = _self {
-            try self.insert(offset: _self, toStartedObjectAt: 6)
+            valueCursors[6] = try self.insert(offset: _self, toStartedObjectAt: 6)
         }
         if let selfs = selfs {
-            try self.insert(offset: selfs, toStartedObjectAt: 7)
+            valueCursors[7] = try self.insert(offset: selfs, toStartedObjectAt: 7)
         }
         if let s_s = s_s {
-            try self.insert(offset: s_s, toStartedObjectAt: 9)
+            valueCursors[9] = try self.insert(offset: s_s, toStartedObjectAt: 9)
         }
         if let es = es {
-            try self.insert(offset: es, toStartedObjectAt: 11)
+            valueCursors[11] = try self.insert(offset: es, toStartedObjectAt: 11)
         }
         if let u = u {
-            try self.insert(offset: u, toStartedObjectAt: 13)
+            valueCursors[13] = try self.insert(offset: u, toStartedObjectAt: 13)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 """
@@ -312,7 +315,10 @@ extension T1 {
                 return myOffset
             }
         }
-
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
         let bs: Offset?
         if self.bs.isEmpty {
             bs = nil
@@ -328,9 +334,9 @@ extension T1 {
         if self.names.isEmpty {
             names = nil
         } else {
-            let offsets = try self.names.map{ try builder.insert(value: $0) }
+            let offsets = try self.names.reversed().map{ try builder.insert(value: $0) }
             try builder.startVector(count: self.names.count, elementSize: MemoryLayout<Offset>.stride)
-            for o in offsets.reversed() {
+            for (_, o) in offsets.enumerated() {
                 try builder.insert(offset: o)
             }
             names = builder.endVector()
@@ -340,9 +346,9 @@ extension T1 {
         if self.selfs.isEmpty {
             selfs = nil
         } else {
-            let offsets = try self.selfs.map{ try $0.insert(builder) }
+            let offsets = try self.selfs.reversed().map{ try $0.insert(builder) }
             try builder.startVector(count: self.selfs.count, elementSize: MemoryLayout<Offset>.stride)
-            for o in offsets.reversed() {
+            for (_, o) in offsets.enumerated() {
                 try builder.insert(offset: o)
             }
             selfs = builder.endVector()
@@ -369,7 +375,7 @@ extension T1 {
         }
         let u = try self.u?.insert(builder)
         let u_type = self.u?.unionCase ?? 0
-        let myOffset = try builder.insertT1(
+        let (myOffset, valueCursors) = try builder.insertT1(
             i: i,
             b: b,
             bs: bs,
@@ -384,10 +390,15 @@ extension T1 {
             u_type: u_type,
             u: u
         )
+        if u == 0,
+           let o = self.u,
+           let cursor = valueCursors[13] {
+            builder.deferedBindings.append((o.value, cursor))
+        }
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
-
+        builder.inProgress.remove(ObjectIdentifier(self))
         return myOffset
     }
 
@@ -396,7 +407,7 @@ extension T1 {
         let schema = Schema.with(pointer:s.utf8Start, length: s.utf8CodeUnitCount)?.0
         let lookup = schema?.identLookup
         let table = lookup?.tables["T1"]
-        let result = table?.insertMethod(lookup: lookup!)
+        let result = table?.insertMethod(lookup: lookup!, fileIdentifier: "nil")
         XCTAssertEqual(expected, result!)
     }
     

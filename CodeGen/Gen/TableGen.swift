@@ -10,13 +10,13 @@ import Foundation
 
 extension Table {
     
-    public func swift(lookup: IdentLookup, isRoot: Bool = false) -> String {
+    public func swift(lookup: IdentLookup, isRoot: Bool = false, fileIdentifier: String = "nil") -> String {
         return """
         \(swiftClass(lookup:lookup))
         \(readerProtocolExtension(lookup:lookup))
         \(fromDataExtenstion(lookup:lookup, isRoot: isRoot))
         \(insertExtenstion(lookup:lookup))
-        \(insertMethod(lookup:lookup, isRoot: isRoot))
+        \(insertMethod(lookup:lookup, isRoot: isRoot, fileIdentifier: fileIdentifier))
         """
     }
     
@@ -116,35 +116,35 @@ extension Table {
                 let name = field.fieldName
                 if field.type.scalar != nil {
                     if field.type.vector {
-                        return "            \(name): selfReader.\(name).compactMap{$0}"
+                        return "        o.\(name) = selfReader.\(name).compactMap{$0}"
                     }
-                    return "            \(name): selfReader.\(name)"
+                    return "        o.\(name) = selfReader.\(name)"
                 } else if field.type.string {
                     if field.type.vector {
-                        return "            \(name): selfReader.\(name).compactMap{ $0§ }"
+                        return "        o.\(name) = selfReader.\(name).compactMap{ $0§ }"
                     }
-                    return "            \(name): selfReader.\(name)§"
+                    return "        o.\(name) = selfReader.\(name)§"
                 } else if let ref = field.type.ref {
                     if let t = lookup.tables[ref.value] {
                         if field.type.vector {
-                            return "            \(name): selfReader.\(name).compactMap{ \(t.name.value).from(selfReader:$0) }"
+                            return "        o.\(name) = selfReader.\(name).compactMap{ \(t.name.value).from(selfReader:$0) }"
                         }
-                        return "            \(name): \(t.name.value).from(selfReader:selfReader.\(name))"
+                        return "        o.\(name) = \(t.name.value).from(selfReader:selfReader.\(name))"
                     } else if let u = lookup.unions[ref.value] {
                         if field.type.vector {
                             fatalError("Union vector nos supported yet")
                         }
-                        return "            \(name): \(u.name.value).from(selfReader: selfReader.\(field.fieldName))"
+                        return "        o.\(name) = \(u.name.value).from(selfReader: selfReader.\(field.fieldName))"
                     } else {
                         if field.type.vector {
-                            return "            \(name): selfReader.\(name).compactMap{$0}"
+                            return "        o.\(name) = selfReader.\(name).compactMap{$0}"
                         }
-                        return "            \(name): selfReader.\(name)"
+                        return "        o.\(name) = selfReader.\(name)"
                     }
                 }
                 fatalError("Unexpected case")
             }
-            return statements.joined(separator: ",\n")
+            return statements.joined(separator: "\n")
         }
         return """
     extension \(name.value) {
@@ -156,9 +156,11 @@ extension Table {
             if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? \(name.value) {
                 return o
             }
-            return \(name.value)(
+            let o = \(name.value)()
+            selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
     \(genAssignmentStatements(fields: fields))
-            )
+
+            return o
         }
     }
     """
@@ -181,7 +183,7 @@ extension Table {
                     v.root.type.vector {
                     return """
                             if let \(v.name) = \(v.name) {
-                                try self.insert(offset: \(v.name), toStartedObjectAt: \(v.index))
+                                valueCursors[\(v.index)] = try self.insert(offset: \(v.name), toStartedObjectAt: \(v.index))
                             }
                     """
                 }
@@ -190,7 +192,7 @@ extension Table {
                         lookup.unions[ref.value] != nil {
                         return """
                                 if let \(v.name) = \(v.name) {
-                                    try self.insert(offset: \(v.name), toStartedObjectAt: \(v.index))
+                                    valueCursors[\(v.index)] = try self.insert(offset: \(v.name), toStartedObjectAt: \(v.index))
                                 }
                         """
                     }
@@ -198,17 +200,17 @@ extension Table {
                         return """
                                 if let \(v.name) = \(v.name) {
                                     self.insert(value: \(v.name))
-                                    try self.insertCurrentOffsetAsProperty(toStartedObjectAt: \(v.index))
+                                    valueCursors[\(v.index)] = try self.insertCurrentOffsetAsProperty(toStartedObjectAt: \(v.index))
                                 }
                         """
                     }
                     if lookup.enums[ref.value] != nil {
-                        return "        try self.insert(value: \(v.name).rawValue, defaultValue: \(v.root.type.defaultValueFB(lookup: lookup)).rawValue, toStartedObjectAt: \(v.index))"
+                        return "        valueCursors[\(v.index)] = try self.insert(value: \(v.name).rawValue, defaultValue: \(v.root.type.defaultValueFB(lookup: lookup)).rawValue, toStartedObjectAt: \(v.index))"
                     }
                 }
                 
                 if v.root.type.scalar != nil {
-                    return "        try self.insert(value: \(v.name), defaultValue: \(v.root.type.defaultValueFB(lookup: lookup)), toStartedObjectAt: \(v.index))"
+                    return "        valueCursors[\(v.index)] = try self.insert(value: \(v.name), defaultValue: \(v.root.type.defaultValueFB(lookup: lookup)), toStartedObjectAt: \(v.index))"
                 }
                 fatalError("Unexpected case")
             }
@@ -219,16 +221,17 @@ extension Table {
         
         return """
         extension FlatBuffersBuilder {
-            public func insert\(name.value)(\(parameters(values: sorted))) throws -> Offset {
+            public func insert\(name.value)(\(parameters(values: sorted))) throws -> (Offset, [Int?]) {
+                var valueCursors = [Int?](repeating: nil, count: \(sorted.count))
                 try self.startObject(withPropertyCount: \(sorted.count))
         \(insertStatements(values: sortedBySize))
-                return try self.endObject()
+                return try (self.endObject(), valueCursors)
             }
         }
         """
     }
     
-    public func insertMethod(lookup: IdentLookup, isRoot: Bool = false, isRecursive: Bool = false) -> String {
+    public func insertMethod(lookup: IdentLookup, isRoot: Bool = false, fileIdentifier: String) -> String {
         func genOffsetAssignements(_ fields: [Field]) -> String {
             
             let statements = fields.map { (f) -> String in
@@ -260,15 +263,25 @@ extension Table {
                     }
                     if f.type.string || f.type.isTable(lookup) {
                         let insertStm = f.type.string ? "builder.insert(value: $0)" : "$0.insert(builder)"
+                        let isRecursive = f.type.isRecursive(lookup)
+                        let insertElementStm = isRecursive ? """
+                                        let cursor = try builder.insert(offset: o)
+                                        if o == 0 {
+                                            builder.deferedBindings.append((object: self.\(f.fieldName).reversed()[index], cursor: cursor))
+                                        }
+                        """
+                        : """
+                                        try builder.insert(offset: o)
+                        """
                         return """
                                 let \(f.fieldName): Offset?
                                 if self.\(f.fieldName).isEmpty {
                                     \(f.fieldName) = nil
                                 } else {
-                                    let offsets = try self.\(f.fieldName).map{ try \(insertStm) }
+                                    let offsets = try self.\(f.fieldName).reversed().map{ try \(insertStm) }
                                     try builder.startVector(count: self.\(f.fieldName).count, elementSize: MemoryLayout<Offset>.stride)
-                                    for o in offsets.reversed() {
-                                        try builder.insert(offset: o)
+                                    for (\(isRecursive ? "index" : "_" ), o) in offsets.enumerated() {
+                        \(insertElementStm)
                                     }
                                     \(f.fieldName) = builder.endVector()
                                 }
@@ -291,6 +304,25 @@ extension Table {
             }
             return statements.joined(separator: "\n")
         }
+
+        func genCheckForLateBindings(lookup: IdentLookup, sorted: [(name: String, index: Int, root: Field)]) -> String {
+            let statements = sorted.compactMap { f -> String? in
+                if f.root.type.vector {
+                    return nil
+                }
+                guard f.root.type.isRecursive(lookup) else { return nil }
+                let isUnion = f.root.type.isUnion(lookup)
+                return """
+                        if \(f.root.fieldName) == 0,
+                           let o = self.\(f.root.fieldName),
+                           let cursor = valueCursors[\(f.index)] {
+                            builder.deferedBindings.append((\(isUnion ? "o.value" : "o"), cursor))
+                        }
+                """
+            }
+            return statements.joined(separator: "\n")
+        }
+
         func parameters(values: [(name: String, index: Int, root: Field)]) -> String {
             let results = values.filter({ (v) -> Bool in
                 return v.root.isDeprecated == false
@@ -306,14 +338,18 @@ extension Table {
             }
             return results.joined(separator: ",\n")
         }
-        
-        func inserRootMethods() -> String {
+
+        let isRecursive = findCycle(lookup: lookup, visited: [])
+
+        func inserRootMethods(_ fileIdentifier: String) -> String {
             if isRoot {
+                let escapedFileIdentifier = fileIdentifier == "nil" ? fileIdentifier : "\"\(fileIdentifier)\""
                 return """
                     public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
                         let builder = FlatBuffersBuilder(options: options)
                         let offset = try insert(builder)
-                        try builder.finish(offset: offset, fileIdentifier: nil)
+                        try builder.finish(offset: offset, fileIdentifier: \(escapedFileIdentifier))
+                        \(isRecursive ? "try performLateBindings(builder)" : "")
                         return builder.makeData
                     }
                 """
@@ -321,7 +357,7 @@ extension Table {
                 return ""
             }
         }
-        
+
         let monitorProgressStart = isRecursive ? """
                 if builder.inProgress.contains(ObjectIdentifier(self)){
                     return 0
@@ -346,6 +382,8 @@ extension Table {
         }
         
         let sorted = self.computeFieldNamesWithVTableIndex(lookup: lookup)
+
+        let hasRecursiveProperties = isRecursive && sorted.filter{ $0.root.type.vector == false && $0.root.type.isRecursive(lookup)}.isEmpty == false
         
         return """
         extension \(name.value) {
@@ -357,16 +395,17 @@ extension Table {
                 }
         \(monitorProgressStart)
         \(genOffsetAssignements(offsetBasedFields))
-                let myOffset = try builder.insert\(name.value)(
+                let (myOffset, \(hasRecursiveProperties ? "valueCursors" : "_")) = try builder.insert\(name.value)(
         \(parameters(values: sorted))
                 )
+        \(isRecursive ? genCheckForLateBindings(lookup: lookup, sorted: sorted) : "")
                 if builder.options.uniqueTables {
                     builder.cache[ObjectIdentifier(self)] = myOffset
                 }
         \(monitorProgressEnd)
                 return myOffset
             }
-        \(inserRootMethods())
+        \(inserRootMethods(fileIdentifier))
         }
         """
     }

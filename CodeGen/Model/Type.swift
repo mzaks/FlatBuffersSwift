@@ -192,6 +192,22 @@ struct Type {
         }
         return false
     }
+    func isRecursive(_ lookup: IdentLookup) -> Bool {
+        guard let ref = ref?.value else { return false }
+        if let table = lookup.tables[ref] {
+            return table.findCycle(lookup: lookup, visited: [])
+        }
+        if let union = lookup.unions[ref]{
+            for indent in union.cases {
+                if let table = lookup.tables[indent.value] {
+                    if table.findCycle(lookup: lookup, visited: []) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
 }
 
 extension Type: ASTNode {

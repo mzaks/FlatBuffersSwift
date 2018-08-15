@@ -109,6 +109,16 @@ extension Union {
             }
             return properties.joined(separator: "\n")
         }
+        func genValueProperty(_ cases: [Ident]) -> String {
+            let caseStatements = cases.map { "        case .with\($0.value)(let v): return v" }.joined(separator: "\n")
+            return """
+                var value: AnyObject {
+                    switch self {
+            \(caseStatements)
+                    }
+                }
+            """
+        }
         func genDirectAsProperties(_ cases: [Ident]) -> String {
             let properties = cases.map { (ident) -> String in
                 let name = ident.value
@@ -166,6 +176,7 @@ extension Union {
                 }
             }
         \(genAsProperties(cases))
+        \(genValueProperty(cases))
         }
         """
     }

@@ -54,20 +54,23 @@ extension ContactList {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? ContactList {
             return o
         }
-        return ContactList(
-            lastModified: selfReader.lastModified,
-            entries: selfReader.entries.compactMap{ Contact.from(selfReader:$0) }
-        )
+        let o = ContactList()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.lastModified = selfReader.lastModified
+        o.entries = selfReader.entries.compactMap{ Contact.from(selfReader:$0) }
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertContactList(lastModified: Int64 = 0, entries: Offset? = nil) throws -> Offset {
+    public func insertContactList(lastModified: Int64 = 0, entries: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 2)
         try self.startObject(withPropertyCount: 2)
         if let entries = entries {
-            try self.insert(offset: entries, toStartedObjectAt: 1)
+            valueCursors[1] = try self.insert(offset: entries, toStartedObjectAt: 1)
         }
-        try self.insert(value: lastModified, defaultValue: 0, toStartedObjectAt: 0)
-        return try self.endObject()
+        valueCursors[0] = try self.insert(value: lastModified, defaultValue: 0, toStartedObjectAt: 0)
+        return try (self.endObject(), valueCursors)
     }
 }
 extension ContactList {
@@ -82,17 +85,18 @@ extension ContactList {
         if self.entries.isEmpty {
             entries = nil
         } else {
-            let offsets = try self.entries.map{ try $0.insert(builder) }
+            let offsets = try self.entries.reversed().map{ try $0.insert(builder) }
             try builder.startVector(count: self.entries.count, elementSize: MemoryLayout<Offset>.stride)
-            for o in offsets.reversed() {
+            for (_, o) in offsets.enumerated() {
                 try builder.insert(offset: o)
             }
             entries = builder.endVector()
         }
-        let myOffset = try builder.insertContactList(
+        let (myOffset, _) = try builder.insertContactList(
             lastModified: lastModified,
             entries: entries
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -103,6 +107,7 @@ extension ContactList {
         let builder = FlatBuffersBuilder(options: options)
         let offset = try insert(builder)
         try builder.finish(offset: offset, fileIdentifier: nil)
+        
         return builder.makeData
     }
 }
@@ -210,55 +215,58 @@ extension Contact {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? Contact {
             return o
         }
-        return Contact(
-            name: selfReader.name§,
-            birthday: Date.from(selfReader:selfReader.birthday),
-            gender: selfReader.gender,
-            tags: selfReader.tags.compactMap{ $0§ },
-            addressEntries: selfReader.addressEntries.compactMap{ AddressEntry.from(selfReader:$0) },
-            currentLoccation: selfReader.currentLoccation,
-            previousLocations: selfReader.previousLocations.compactMap{$0},
-            moods: selfReader.moods.compactMap{$0},
-            luckyNumbers: selfReader.luckyNumbers.compactMap{$0},
-            alive: selfReader.alive,
-            successfulLogins: selfReader.successfulLogins.compactMap{$0}
-        )
+        let o = Contact()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.name = selfReader.name§
+        o.birthday = Date.from(selfReader:selfReader.birthday)
+        o.gender = selfReader.gender
+        o.tags = selfReader.tags.compactMap{ $0§ }
+        o.addressEntries = selfReader.addressEntries.compactMap{ AddressEntry.from(selfReader:$0) }
+        o.currentLoccation = selfReader.currentLoccation
+        o.previousLocations = selfReader.previousLocations.compactMap{$0}
+        o.moods = selfReader.moods.compactMap{$0}
+        o.luckyNumbers = selfReader.luckyNumbers.compactMap{$0}
+        o.alive = selfReader.alive
+        o.successfulLogins = selfReader.successfulLogins.compactMap{$0}
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertContact(name: Offset? = nil, birthday: Offset? = nil, gender: Gender = Gender.Male, tags: Offset? = nil, addressEntries: Offset? = nil, currentLoccation: GeoLocation? = nil, previousLocations: Offset? = nil, moods: Offset? = nil, luckyNumbers: Offset? = nil, alive: Bool = false, successfulLogins: Offset? = nil) throws -> Offset {
+    public func insertContact(name: Offset? = nil, birthday: Offset? = nil, gender: Gender = Gender.Male, tags: Offset? = nil, addressEntries: Offset? = nil, currentLoccation: GeoLocation? = nil, previousLocations: Offset? = nil, moods: Offset? = nil, luckyNumbers: Offset? = nil, alive: Bool = false, successfulLogins: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 11)
         try self.startObject(withPropertyCount: 11)
-        try self.insert(value: gender.rawValue, defaultValue: Gender.Male.rawValue, toStartedObjectAt: 2)
-        try self.insert(value: alive, defaultValue: false, toStartedObjectAt: 9)
+        valueCursors[2] = try self.insert(value: gender.rawValue, defaultValue: Gender.Male.rawValue, toStartedObjectAt: 2)
+        valueCursors[9] = try self.insert(value: alive, defaultValue: false, toStartedObjectAt: 9)
         if let name = name {
-            try self.insert(offset: name, toStartedObjectAt: 0)
+            valueCursors[0] = try self.insert(offset: name, toStartedObjectAt: 0)
         }
         if let birthday = birthday {
-            try self.insert(offset: birthday, toStartedObjectAt: 1)
+            valueCursors[1] = try self.insert(offset: birthday, toStartedObjectAt: 1)
         }
         if let tags = tags {
-            try self.insert(offset: tags, toStartedObjectAt: 3)
+            valueCursors[3] = try self.insert(offset: tags, toStartedObjectAt: 3)
         }
         if let addressEntries = addressEntries {
-            try self.insert(offset: addressEntries, toStartedObjectAt: 4)
+            valueCursors[4] = try self.insert(offset: addressEntries, toStartedObjectAt: 4)
         }
         if let previousLocations = previousLocations {
-            try self.insert(offset: previousLocations, toStartedObjectAt: 6)
+            valueCursors[6] = try self.insert(offset: previousLocations, toStartedObjectAt: 6)
         }
         if let moods = moods {
-            try self.insert(offset: moods, toStartedObjectAt: 7)
+            valueCursors[7] = try self.insert(offset: moods, toStartedObjectAt: 7)
         }
         if let luckyNumbers = luckyNumbers {
-            try self.insert(offset: luckyNumbers, toStartedObjectAt: 8)
+            valueCursors[8] = try self.insert(offset: luckyNumbers, toStartedObjectAt: 8)
         }
         if let successfulLogins = successfulLogins {
-            try self.insert(offset: successfulLogins, toStartedObjectAt: 10)
+            valueCursors[10] = try self.insert(offset: successfulLogins, toStartedObjectAt: 10)
         }
         if let currentLoccation = currentLoccation {
             self.insert(value: currentLoccation)
-            try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 5)
+            valueCursors[5] = try self.insertCurrentOffsetAsProperty(toStartedObjectAt: 5)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension Contact {
@@ -275,9 +283,9 @@ extension Contact {
         if self.tags.isEmpty {
             tags = nil
         } else {
-            let offsets = try self.tags.map{ try builder.insert(value: $0) }
+            let offsets = try self.tags.reversed().map{ try builder.insert(value: $0) }
             try builder.startVector(count: self.tags.count, elementSize: MemoryLayout<Offset>.stride)
-            for o in offsets.reversed() {
+            for (_, o) in offsets.enumerated() {
                 try builder.insert(offset: o)
             }
             tags = builder.endVector()
@@ -286,9 +294,9 @@ extension Contact {
         if self.addressEntries.isEmpty {
             addressEntries = nil
         } else {
-            let offsets = try self.addressEntries.map{ try $0.insert(builder) }
+            let offsets = try self.addressEntries.reversed().map{ try $0.insert(builder) }
             try builder.startVector(count: self.addressEntries.count, elementSize: MemoryLayout<Offset>.stride)
-            for o in offsets.reversed() {
+            for (_, o) in offsets.enumerated() {
                 try builder.insert(offset: o)
             }
             addressEntries = builder.endVector()
@@ -333,7 +341,7 @@ extension Contact {
             }
             successfulLogins = builder.endVector()
         }
-        let myOffset = try builder.insertContact(
+        let (myOffset, _) = try builder.insertContact(
             name: name,
             birthday: birthday,
             gender: gender ?? Gender.Male,
@@ -346,6 +354,7 @@ extension Contact {
             alive: alive,
             successfulLogins: successfulLogins
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -410,20 +419,23 @@ extension Date {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? Date {
             return o
         }
-        return Date(
-            day: selfReader.day,
-            month: selfReader.month,
-            year: selfReader.year
-        )
+        let o = Date()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.day = selfReader.day
+        o.month = selfReader.month
+        o.year = selfReader.year
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertDate(day: Int8 = 0, month: Int8 = 0, year: Int16 = 0) throws -> Offset {
+    public func insertDate(day: Int8 = 0, month: Int8 = 0, year: Int16 = 0) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 3)
         try self.startObject(withPropertyCount: 3)
-        try self.insert(value: day, defaultValue: 0, toStartedObjectAt: 0)
-        try self.insert(value: month, defaultValue: 0, toStartedObjectAt: 1)
-        try self.insert(value: year, defaultValue: 0, toStartedObjectAt: 2)
-        return try self.endObject()
+        valueCursors[0] = try self.insert(value: day, defaultValue: 0, toStartedObjectAt: 0)
+        valueCursors[1] = try self.insert(value: month, defaultValue: 0, toStartedObjectAt: 1)
+        valueCursors[2] = try self.insert(value: year, defaultValue: 0, toStartedObjectAt: 2)
+        return try (self.endObject(), valueCursors)
     }
 }
 extension Date {
@@ -435,11 +447,12 @@ extension Date {
         }
 
 
-        let myOffset = try builder.insertDate(
+        let (myOffset, _) = try builder.insertDate(
             day: day,
             month: month,
             year: year
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -507,21 +520,24 @@ extension AddressEntry {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? AddressEntry {
             return o
         }
-        return AddressEntry(
-            order: selfReader.order,
-            address: Address.from(selfReader: selfReader.address)
-        )
+        let o = AddressEntry()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.order = selfReader.order
+        o.address = Address.from(selfReader: selfReader.address)
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertAddressEntry(order: Int32 = 0, address_type: Int8 = 0, address: Offset? = nil) throws -> Offset {
+    public func insertAddressEntry(order: Int32 = 0, address_type: Int8 = 0, address: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 3)
         try self.startObject(withPropertyCount: 3)
-        try self.insert(value: address_type, defaultValue: 0, toStartedObjectAt: 1)
-        try self.insert(value: order, defaultValue: 0, toStartedObjectAt: 0)
+        valueCursors[1] = try self.insert(value: address_type, defaultValue: 0, toStartedObjectAt: 1)
+        valueCursors[0] = try self.insert(value: order, defaultValue: 0, toStartedObjectAt: 0)
         if let address = address {
-            try self.insert(offset: address, toStartedObjectAt: 2)
+            valueCursors[2] = try self.insert(offset: address, toStartedObjectAt: 2)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension AddressEntry {
@@ -534,11 +550,12 @@ extension AddressEntry {
 
         let address = try self.address?.insert(builder)
         let address_type = self.address?.unionCase ?? 0
-        let myOffset = try builder.insertAddressEntry(
+        let (myOffset, _) = try builder.insertAddressEntry(
             order: order,
             address_type: address_type,
             address: address
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -693,6 +710,14 @@ public enum Address {
             return nil
         }
     }
+    var value: AnyObject {
+        switch self {
+        case .withPostalAddress(let v): return v
+        case .withEmailAddress(let v): return v
+        case .withWebAddress(let v): return v
+        case .withTelephoneNumber(let v): return v
+        }
+    }
 }
 public final class PostalAddress {
     public var country: String?
@@ -756,28 +781,31 @@ extension PostalAddress {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? PostalAddress {
             return o
         }
-        return PostalAddress(
-            country: selfReader.country§,
-            city: selfReader.city§,
-            postalCode: selfReader.postalCode,
-            streetAndNumber: selfReader.streetAndNumber§
-        )
+        let o = PostalAddress()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.country = selfReader.country§
+        o.city = selfReader.city§
+        o.postalCode = selfReader.postalCode
+        o.streetAndNumber = selfReader.streetAndNumber§
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertPostalAddress(country: Offset? = nil, city: Offset? = nil, postalCode: Int32 = 0, streetAndNumber: Offset? = nil) throws -> Offset {
+    public func insertPostalAddress(country: Offset? = nil, city: Offset? = nil, postalCode: Int32 = 0, streetAndNumber: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 4)
         try self.startObject(withPropertyCount: 4)
         if let country = country {
-            try self.insert(offset: country, toStartedObjectAt: 0)
+            valueCursors[0] = try self.insert(offset: country, toStartedObjectAt: 0)
         }
         if let city = city {
-            try self.insert(offset: city, toStartedObjectAt: 1)
+            valueCursors[1] = try self.insert(offset: city, toStartedObjectAt: 1)
         }
-        try self.insert(value: postalCode, defaultValue: 0, toStartedObjectAt: 2)
+        valueCursors[2] = try self.insert(value: postalCode, defaultValue: 0, toStartedObjectAt: 2)
         if let streetAndNumber = streetAndNumber {
-            try self.insert(offset: streetAndNumber, toStartedObjectAt: 3)
+            valueCursors[3] = try self.insert(offset: streetAndNumber, toStartedObjectAt: 3)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension PostalAddress {
@@ -791,12 +819,13 @@ extension PostalAddress {
         let country = self.country == nil ? nil : try builder.insert(value: self.country)
         let city = self.city == nil ? nil : try builder.insert(value: self.city)
         let streetAndNumber = self.streetAndNumber == nil ? nil : try builder.insert(value: self.streetAndNumber)
-        let myOffset = try builder.insertPostalAddress(
+        let (myOffset, _) = try builder.insertPostalAddress(
             country: country,
             city: city,
             postalCode: postalCode,
             streetAndNumber: streetAndNumber
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -849,18 +878,21 @@ extension EmailAddress {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? EmailAddress {
             return o
         }
-        return EmailAddress(
-            mailto: selfReader.mailto§
-        )
+        let o = EmailAddress()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.mailto = selfReader.mailto§
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertEmailAddress(mailto: Offset? = nil) throws -> Offset {
+    public func insertEmailAddress(mailto: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 1)
         try self.startObject(withPropertyCount: 1)
         if let mailto = mailto {
-            try self.insert(offset: mailto, toStartedObjectAt: 0)
+            valueCursors[0] = try self.insert(offset: mailto, toStartedObjectAt: 0)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension EmailAddress {
@@ -872,9 +904,10 @@ extension EmailAddress {
         }
 
         let mailto = self.mailto == nil ? nil : try builder.insert(value: self.mailto)
-        let myOffset = try builder.insertEmailAddress(
+        let (myOffset, _) = try builder.insertEmailAddress(
             mailto: mailto
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -927,18 +960,21 @@ extension WebAddress {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? WebAddress {
             return o
         }
-        return WebAddress(
-            url: selfReader.url§
-        )
+        let o = WebAddress()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.url = selfReader.url§
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertWebAddress(url: Offset? = nil) throws -> Offset {
+    public func insertWebAddress(url: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 1)
         try self.startObject(withPropertyCount: 1)
         if let url = url {
-            try self.insert(offset: url, toStartedObjectAt: 0)
+            valueCursors[0] = try self.insert(offset: url, toStartedObjectAt: 0)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension WebAddress {
@@ -950,9 +986,10 @@ extension WebAddress {
         }
 
         let url = self.url == nil ? nil : try builder.insert(value: self.url)
-        let myOffset = try builder.insertWebAddress(
+        let (myOffset, _) = try builder.insertWebAddress(
             url: url
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
@@ -1005,18 +1042,21 @@ extension TelephoneNumber {
         if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? TelephoneNumber {
             return o
         }
-        return TelephoneNumber(
-            number: selfReader.number§
-        )
+        let o = TelephoneNumber()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.number = selfReader.number§
+
+        return o
     }
 }
 extension FlatBuffersBuilder {
-    public func insertTelephoneNumber(number: Offset? = nil) throws -> Offset {
+    public func insertTelephoneNumber(number: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 1)
         try self.startObject(withPropertyCount: 1)
         if let number = number {
-            try self.insert(offset: number, toStartedObjectAt: 0)
+            valueCursors[0] = try self.insert(offset: number, toStartedObjectAt: 0)
         }
-        return try self.endObject()
+        return try (self.endObject(), valueCursors)
     }
 }
 extension TelephoneNumber {
@@ -1028,9 +1068,10 @@ extension TelephoneNumber {
         }
 
         let number = self.number == nil ? nil : try builder.insert(value: self.number)
-        let myOffset = try builder.insertTelephoneNumber(
+        let (myOffset, _) = try builder.insertTelephoneNumber(
             number: number
         )
+
         if builder.options.uniqueTables {
             builder.cache[ObjectIdentifier(self)] = myOffset
         }
