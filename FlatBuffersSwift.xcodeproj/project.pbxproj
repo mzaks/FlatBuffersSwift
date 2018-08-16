@@ -97,7 +97,7 @@
 /* Begin PBXFileReference section */
 		0B145ECD1E3620480063A471 /* withLib.fbs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = withLib.fbs; sourceTree = "<group>"; };
 		0B145ECF1E3620DF0063A471 /* withLib_fb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = withLib_fb.swift; sourceTree = "<group>"; };
-		0B31A4EC1F1366970029D016 /* CodeGen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CodeGen; sourceTree = BUILT_PRODUCTS_DIR; };
+		0B31A4EC1F1366970029D016 /* FBSwiftCodeGen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FBSwiftCodeGen; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B31A4EE1F1366970029D016 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		0B31A5071F1366CE0029D016 /* CodeGenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CodeGenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B31A5081F1366CE0029D016 /* CodeGenTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CodeGenTests-Info.plist"; path = "/Users/mzaks/dev/FlatBuffersSwift/CodeGen/CodeGenTests-Info.plist"; sourceTree = "<absolute>"; };
@@ -252,7 +252,7 @@
 			children = (
 				0BA0E8451C32B62200B896B7 /* FlatBuffersSwift.framework */,
 				0BA0E84F1C32B62200B896B7 /* FlatBuffersSwiftTests.xctest */,
-				0B31A4EC1F1366970029D016 /* CodeGen */,
+				0B31A4EC1F1366970029D016 /* FBSwiftCodeGen */,
 				0B31A5071F1366CE0029D016 /* CodeGenTests.xctest */,
 			);
 			name = Products;
@@ -313,9 +313,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		0B31A4EB1F1366970029D016 /* CodeGen */ = {
+		0B31A4EB1F1366970029D016 /* FBSwiftCodeGen */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0B31A4F21F1366970029D016 /* Build configuration list for PBXNativeTarget "CodeGen" */;
+			buildConfigurationList = 0B31A4F21F1366970029D016 /* Build configuration list for PBXNativeTarget "FBSwiftCodeGen" */;
 			buildPhases = (
 				0B31A4E81F1366970029D016 /* Sources */,
 				0B31A4E91F1366970029D016 /* Frameworks */,
@@ -325,9 +325,9 @@
 			);
 			dependencies = (
 			);
-			name = CodeGen;
+			name = FBSwiftCodeGen;
 			productName = CodeGen;
-			productReference = 0B31A4EC1F1366970029D016 /* CodeGen */;
+			productReference = 0B31A4EC1F1366970029D016 /* FBSwiftCodeGen */;
 			productType = "com.apple.product-type.tool";
 		};
 		0B31A4F31F1366CE0029D016 /* CodeGenTests */ = {
@@ -424,7 +424,7 @@
 			targets = (
 				0BA0E8441C32B62200B896B7 /* FlatBuffersSwift */,
 				0BA0E84E1C32B62200B896B7 /* FlatBuffersSwiftTests */,
-				0B31A4EB1F1366970029D016 /* CodeGen */,
+				0B31A4EB1F1366970029D016 /* FBSwiftCodeGen */,
 				0B31A4F31F1366CE0029D016 /* CodeGenTests */,
 			);
 		};
@@ -542,7 +542,7 @@
 /* Begin PBXTargetDependency section */
 		0B31A50A1F1367930029D016 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0B31A4EB1F1366970029D016 /* CodeGen */;
+			target = 0B31A4EB1F1366970029D016 /* FBSwiftCodeGen */;
 			targetProxy = 0B31A5091F1367930029D016 /* PBXContainerItemProxy */;
 		};
 		0BA0E8521C32B62200B896B7 /* PBXTargetDependency */ = {
@@ -565,6 +565,7 @@
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -585,6 +586,7 @@
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -811,7 +813,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0B31A4F21F1366970029D016 /* Build configuration list for PBXNativeTarget "CodeGen" */ = {
+		0B31A4F21F1366970029D016 /* Build configuration list for PBXNativeTarget "FBSwiftCodeGen" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0B31A4F01F1366970029D016 /* Debug */,
