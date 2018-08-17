@@ -25,8 +25,9 @@ root_type List;
 ```
 
 ## 2. Generate Swift code
-
-`java -jar fbsCG.jar -fbs contacts.fbs -out contacts.swift -lang swift`
+`fbsCG` console application can be found here: https://github.com/mzaks/FlatBuffersSwiftCodeGen
+To generate, please execute it as following:
+`fbsCG contacts.fbs contacts.swift`
 
 ## 3. Use the generated API
 
@@ -39,7 +40,7 @@ let data = try?list.makeData()
 ```
 Decode data very efficiently
 ```swift
-let newList = List.makeList(data: data)
+let newList = List.from(data: data)
 let name = newList?.people[0].firstName
 ```
 
