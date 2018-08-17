@@ -1,5 +1,5 @@
 language: objective-c
-osx_image: xcode8
+osx_image: xcode9.4
 script:
 #  - echo -en "travis_fold:start:generate\r"
 #  - sh generate.sh
