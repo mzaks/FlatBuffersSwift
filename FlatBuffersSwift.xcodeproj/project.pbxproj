@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0B145ECC1E3503690063A471 /* contacts_fb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C1321DCE9C490074EE0E /* contacts_fb.swift */; };
-		0B145ECE1E3620480063A471 /* withLib.fbs in Resources */ = {isa = PBXBuildFile; fileRef = 0B145ECD1E3620480063A471 /* withLib.fbs */; };
-		0B145ED01E3620DF0063A471 /* withLib_fb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B145ECF1E3620DF0063A471 /* withLib_fb.swift */; };
 		0B57C1291DCE98F00074EE0E /* FlatBuffersReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA0E86A1C32B6AD00B896B7 /* FlatBuffersReader.swift */; };
 		0B57C12B1DCE99650074EE0E /* BuilderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C12A1DCE99650074EE0E /* BuilderTest.swift */; };
 		0B57C12D1DCE9A2D0074EE0E /* FBReaderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B57C12C1DCE9A2D0074EE0E /* FBReaderTest.swift */; };
@@ -34,8 +32,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0B145ECD1E3620480063A471 /* withLib.fbs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = withLib.fbs; sourceTree = "<group>"; };
-		0B145ECF1E3620DF0063A471 /* withLib_fb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = withLib_fb.swift; sourceTree = "<group>"; };
 		0B57C12A1DCE99650074EE0E /* BuilderTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuilderTest.swift; sourceTree = "<group>"; };
 		0B57C12C1DCE9A2D0074EE0E /* FBReaderTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FBReaderTest.swift; sourceTree = "<group>"; };
 		0B57C12E1DCE9AA80074EE0E /* contacts.fbs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = contacts.fbs; sourceTree = "<group>"; };
@@ -118,8 +114,6 @@
 				0B57C12C1DCE9A2D0074EE0E /* FBReaderTest.swift */,
 				0B57C1361DCE9C970074EE0E /* ContactsTest.swift */,
 				0B57C1381DCE9CF80074EE0E /* FriendsTest.swift */,
-				0B145ECD1E3620480063A471 /* withLib.fbs */,
-				0B145ECF1E3620DF0063A471 /* withLib_fb.swift */,
 			);
 			path = FlatBuffersSwiftTests;
 			sourceTree = "<group>";
@@ -193,16 +187,16 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = maxim.zaks;
 				TargetAttributes = {
 					0BA0E8441C32B62200B896B7 = {
 						CreatedOnToolsVersion = 7.2;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0940;
 					};
 					0BA0E84E1C32B62200B896B7 = {
 						CreatedOnToolsVersion = 7.2;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0940;
 					};
 				};
 			};
@@ -238,7 +232,6 @@
 			files = (
 				0B57C12F1DCE9AA80074EE0E /* contacts.fbs in Resources */,
 				0B57C1311DCE9B080074EE0E /* friends.fbs in Resources */,
-				0B145ECE1E3620480063A471 /* withLib.fbs in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,7 +256,6 @@
 				0B57C1351DCE9C490074EE0E /* friends_fb.swift in Sources */,
 				0B57C12D1DCE9A2D0074EE0E /* FBReaderTest.swift in Sources */,
 				0B57C1371DCE9C970074EE0E /* ContactsTest.swift in Sources */,
-				0B145ED01E3620DF0063A471 /* withLib_fb.swift in Sources */,
 				0B57C12B1DCE99650074EE0E /* BuilderTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -287,14 +279,22 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -336,14 +336,22 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -390,7 +398,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -415,7 +424,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -429,7 +439,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -442,7 +453,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = maxim.zaks.FlatBuffersSwiftTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

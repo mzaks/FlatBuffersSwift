@@ -1,515 +1,558 @@
-
-// generated with FlatBuffersSchemaEditor https://github.com/mzaks/FlatBuffersSchemaEditor
-
 import Foundation
-
 import FlatBuffersSwift
+
 public final class PeopleList {
-	public var people : [Friend] = []
-	public init(){}
-	public init(people: [Friend]){
-		self.people = people
-	}
+    public var people: [Friend]
+    public init(people: [Friend] = []) {
+        self.people = people
+    }
+    public struct Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
+        fileprivate let _reader : T
+        fileprivate let _myOffset : Offset
+    }
 }
-public extension PeopleList {
-	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> PeopleList? {
-		guard let objectOffset = objectOffset else {
-			return nil
-		}
-		if  let cache = reader.cache,
-			let o = cache.objectPool[objectOffset] {
-			return o as? PeopleList
-		}
-		let _result = PeopleList()
-		if let cache = reader.cache {
-			cache.objectPool[objectOffset] = _result
-		}
-		let offset_people : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 0)
-		let length_people = reader.vectorElementCount(vectorOffset: offset_people)
-		if(length_people > 0){
-			var index = 0
-			_result.people.reserveCapacity(length_people)
-			while index < length_people {
-				if let element = Friend.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_people, index: index)) {
-					_result.people.append(element)
-				}
-				index += 1
-			}
-		}
-		return _result
-	}
-}
-public extension PeopleList {
-	public static func makePeopleList(data : Data,  cache : FlatBuffersReaderCache? = FlatBuffersReaderCache()) -> PeopleList? {
-		let reader = FlatBuffersMemoryReader(data: data, cache: cache)
-		return makePeopleList(reader: reader)
-	}
-	public static func makePeopleList(reader : FlatBuffersReader) -> PeopleList? {
-		let objectOffset = reader.rootObjectOffset
-		return create(reader, objectOffset : objectOffset)
-	}
-}
+extension PeopleList.Direct {
+    public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset? = nil) {
+        guard let reader = reader as? T else {
+            return nil
+        }
+        self._reader = reader
+        if let myOffset = myOffset {
+            self._myOffset = myOffset
+        } else {
+            if let rootOffset = reader.rootObjectOffset {
+                self._myOffset = rootOffset
+            } else {
+                return nil
+            }
+        }
+    }
+    public var hashValue: Int { return Int(_myOffset) }
+    public static func ==<T>(t1 : PeopleList.Direct<T>, t2 : PeopleList.Direct<T>) -> Bool {
+        return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
+    }
+    public var people: FlatBuffersTableVector<Friend.Direct<T>, T> {
 
-public extension PeopleList {
-	public func encode(withBuilder builder : FlatBuffersBuilder) throws -> Void {
-		let offset = try addToByteArray(builder)
-		try performLateBindings(builder)
-		try builder.finish(offset: offset, fileIdentifier: "TEST")
-	}
-	public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
-		let builder = FlatBuffersBuilder(options: options)
-		try encode(withBuilder: builder)
-		return builder.makeData
-	}
+        return FlatBuffersTableVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:0))
+    }
 }
+extension PeopleList {
+    public static func from(data: Data) -> PeopleList? {
+        let reader = FlatBuffersMemoryReader(data: data, withoutCopy: false)
+        return PeopleList.from(selfReader: Direct<FlatBuffersMemoryReader>(reader: reader))
+    }
+    fileprivate static func from(selfReader: Direct<FlatBuffersMemoryReader>?) -> PeopleList? {
+        guard let selfReader = selfReader else {
+            return nil
+        }
+        if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? PeopleList {
+            return o
+        }
+        let o = PeopleList()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.people = selfReader.people.compactMap{ Friend.from(selfReader:$0) }
 
-public struct PeopleList_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
-	fileprivate let reader : T
-	fileprivate let myOffset : Offset
-	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
-		guard let myOffset = myOffset, let reader = reader as? T else {
-			return nil
-		}
-		self.reader = reader
-		self.myOffset = myOffset
-	}
-	public init?(_ reader: T) {
-		self.reader = reader
-		guard let offest = reader.rootObjectOffset else {
-			return nil
-		}
-		self.myOffset = offest
-	}
-	public var people : FlatBuffersTableVector<Friend_Direct<T>, T> {
-		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 0)
-		return FlatBuffersTableVector(reader: self.reader, myOffset: offsetList)
-	}
-	public var hashValue: Int { return Int(myOffset) }
+        return o
+    }
 }
-public func ==<T>(t1 : PeopleList_Direct<T>, t2 : PeopleList_Direct<T>) -> Bool {
-	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
+extension FlatBuffersBuilder {
+    public func insertPeopleList(people: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 1)
+        try self.startObject(withPropertyCount: 1)
+        if let people = people {
+            valueCursors[0] = try self.insert(offset: people, toStartedObjectAt: 0)
+        }
+        return try (self.endObject(), valueCursors)
+    }
 }
-public extension PeopleList {
-	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.options.uniqueTables {
-			if let myOffset = builder.cache[ObjectIdentifier(self)] {
-				return myOffset
-			}
-		}
-		if builder.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		builder.inProgress.insert(ObjectIdentifier(self))
-		var offset0 = Offset(0)
-		if people.count > 0{
-			var offsets = [Offset?](repeating: nil, count: people.count)
-			var index = people.count - 1
-			var deferedBindingObjects : [Int : Friend] = [:]
-			while(index >= 0){
-				offsets[index] = try people[index].addToByteArray(builder)
-				if offsets[index] == 0 {
-					deferedBindingObjects[index] = people[index]
-				}
-				index -= 1
-			}
-			try builder.startVector(count: people.count, elementSize: MemoryLayout<Offset>.stride)
-			index = people.count - 1
-			var deferedBindingCursors : [Int : Int] = [:]
-			while(index >= 0){
-				let cursor = try builder.insert(offset: offsets[index])
-				if offsets[index] == 0 {
-					deferedBindingCursors[index] = cursor
-				}
-				index -= 1
-			}
-			for key in deferedBindingObjects.keys {
-				if let object = deferedBindingObjects[key],
-				   let cursor = deferedBindingCursors[key] {
-					builder.deferedBindings.append((object: object, cursor: cursor))
-				}
-			}
-			offset0 = builder.endVector()
-		}
-		try builder.startObject(withPropertyCount: 1)
-		if people.count > 0 {
-			try builder.insert(offset: offset0, toStartedObjectAt: 0)
-		}
-		let myOffset =  try builder.endObject()
-		if builder.options.uniqueTables {
-			builder.cache[ObjectIdentifier(self)] = myOffset
-		}
-		builder.inProgress.remove(ObjectIdentifier(self))
-		return myOffset
-	}
+extension PeopleList {
+    func insert(_ builder : FlatBuffersBuilder) throws -> Offset {
+        if builder.options.uniqueTables {
+            if let myOffset = builder.cache[ObjectIdentifier(self)] {
+                return myOffset
+            }
+        }
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
+        let people: Offset?
+        if self.people.isEmpty {
+            people = nil
+        } else {
+            let offsets = try self.people.reversed().map{ try $0.insert(builder) }
+            try builder.startVector(count: self.people.count, elementSize: MemoryLayout<Offset>.stride)
+            for (index, o) in offsets.enumerated() {
+                let cursor = try builder.insert(offset: o)
+                if o == 0 {
+                    builder.deferedBindings.append((object: self.people.reversed()[index], cursor: cursor))
+                }
+            }
+            people = builder.endVector()
+        }
+        let (myOffset, _) = try builder.insertPeopleList(
+            people: people
+        )
+
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+        builder.inProgress.remove(ObjectIdentifier(self))
+        return myOffset
+    }
+    public func makeData(withOptions options : FlatBuffersBuilderOptions = FlatBuffersBuilderOptions()) throws -> Data {
+        let builder = FlatBuffersBuilder(options: options)
+        let offset = try insert(builder)
+        try builder.finish(offset: offset, fileIdentifier: "TEST")
+        try performLateBindings(builder)
+        return builder.makeData
+    }
 }
 public final class Friend {
-	public var name : String? = nil
-	public var friends : [Friend] = []
-	public var father : Friend? = nil
-	public var mother : Friend? = nil
-	public var lover : Human? = nil
-	public init(){}
-	public init(name: String?, friends: [Friend], father: Friend?, mother: Friend?, lover: Human?){
-		self.name = name
-		self.friends = friends
-		self.father = father
-		self.mother = mother
-		self.lover = lover
-	}
+    public var name: String?
+    public var friends: [Friend]
+    public var father: Friend?
+    public var mother: Friend?
+    public var lover: Human?
+    public init(name: String? = nil, friends: [Friend] = [], father: Friend? = nil, mother: Friend? = nil, lover: Human? = nil) {
+        self.name = name
+        self.friends = friends
+        self.father = father
+        self.mother = mother
+        self.lover = lover
+    }
+    public struct Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
+        fileprivate let _reader : T
+        fileprivate let _myOffset : Offset
+    }
 }
-public extension Friend {
-	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> Friend? {
-		guard let objectOffset = objectOffset else {
-			return nil
-		}
-		if  let cache = reader.cache,
-			let o = cache.objectPool[objectOffset] {
-			return o as? Friend
-		}
-		let _result = Friend()
-		if let cache = reader.cache {
-			cache.objectPool[objectOffset] = _result
-		}
-		_result.name = reader.stringBuffer(stringOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))?§
-		let offset_friends : Offset? = reader.offset(objectOffset: objectOffset, propertyIndex: 1)
-		let length_friends = reader.vectorElementCount(vectorOffset: offset_friends)
-		if(length_friends > 0){
-			var index = 0
-			_result.friends.reserveCapacity(length_friends)
-			while index < length_friends {
-				if let element = Friend.create(reader, objectOffset: reader.vectorElementOffset(vectorOffset: offset_friends, index: index)) {
-					_result.friends.append(element)
-				}
-				index += 1
-			}
-		}
-		_result.father = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 2))
-		_result.mother = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 3))
-		_result.lover = create_Human(reader, propertyIndex: 4, objectOffset: objectOffset)
-		return _result
-	}
+extension Friend.Direct {
+    public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset? = nil) {
+        guard let reader = reader as? T else {
+            return nil
+        }
+        self._reader = reader
+        if let myOffset = myOffset {
+            self._myOffset = myOffset
+        } else {
+            if let rootOffset = reader.rootObjectOffset {
+                self._myOffset = rootOffset
+            } else {
+                return nil
+            }
+        }
+    }
+    public var hashValue: Int { return Int(_myOffset) }
+    public static func ==<T>(t1 : Friend.Direct<T>, t2 : Friend.Direct<T>) -> Bool {
+        return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
+    }
+    public var name: UnsafeBufferPointer<UInt8>? {
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
+        return _reader.stringBuffer(stringOffset: offset)
+    }
+    public var friends: FlatBuffersTableVector<Friend.Direct<T>, T> {
+
+        return FlatBuffersTableVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:1))
+    }
+    public var father: Friend.Direct<T>? {
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:2) else {return nil}
+        return Friend.Direct(reader: _reader, myOffset: offset)
+    }
+    public var mother: Friend.Direct<T>? {
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:3) else {return nil}
+        return Friend.Direct(reader: _reader, myOffset: offset)
+    }
+    public var lover: Human.Direct<T>? {
+
+        return Human.Direct.from(reader: _reader, propertyIndex : 4, objectOffset : _myOffset)
+    }
 }
-public struct Friend_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
-	fileprivate let reader : T
-	fileprivate let myOffset : Offset
-	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
-		guard let myOffset = myOffset, let reader = reader as? T else {
-			return nil
-		}
-		self.reader = reader
-		self.myOffset = myOffset
-	}
-	public var name : UnsafeBufferPointer<UInt8>? { get { return reader.stringBuffer(stringOffset: reader.offset(objectOffset: myOffset, propertyIndex:0)) } }
-	public var friends : FlatBuffersTableVector<Friend_Direct<T>, T> {
-		let offsetList = reader.offset(objectOffset: myOffset, propertyIndex: 1)
-		return FlatBuffersTableVector(reader: self.reader, myOffset: offsetList)
-	}
-	public var father : Friend_Direct<T>? { get { 
-		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 2) {
-			return Friend_Direct(reader: reader, myOffset: offset)
-		}
-		return nil
-	} }
-	public var mother : Friend_Direct<T>? { get { 
-		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 3) {
-			return Friend_Direct(reader: reader, myOffset: offset)
-		}
-		return nil
-	} }
-	public var lover : Human_Direct? { get { 
-		return create_Human_Direct(reader, propertyIndex: 4, objectOffset: self.myOffset)
-	} }
-	public var hashValue: Int { return Int(myOffset) }
+extension Friend {
+
+    fileprivate static func from(selfReader: Direct<FlatBuffersMemoryReader>?) -> Friend? {
+        guard let selfReader = selfReader else {
+            return nil
+        }
+        if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? Friend {
+            return o
+        }
+        let o = Friend()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.name = selfReader.name§
+        o.friends = selfReader.friends.compactMap{ Friend.from(selfReader:$0) }
+        o.father = Friend.from(selfReader:selfReader.father)
+        o.mother = Friend.from(selfReader:selfReader.mother)
+        o.lover = Human.from(selfReader: selfReader.lover)
+
+        return o
+    }
 }
-public func ==<T>(t1 : Friend_Direct<T>, t2 : Friend_Direct<T>) -> Bool {
-	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
+extension FlatBuffersBuilder {
+    public func insertFriend(name: Offset? = nil, friends: Offset? = nil, father: Offset? = nil, mother: Offset? = nil, lover_type: Int8 = 0, lover: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 6)
+        try self.startObject(withPropertyCount: 6)
+        valueCursors[4] = try self.insert(value: lover_type, defaultValue: 0, toStartedObjectAt: 4)
+        if let name = name {
+            valueCursors[0] = try self.insert(offset: name, toStartedObjectAt: 0)
+        }
+        if let friends = friends {
+            valueCursors[1] = try self.insert(offset: friends, toStartedObjectAt: 1)
+        }
+        if let father = father {
+            valueCursors[2] = try self.insert(offset: father, toStartedObjectAt: 2)
+        }
+        if let mother = mother {
+            valueCursors[3] = try self.insert(offset: mother, toStartedObjectAt: 3)
+        }
+        if let lover = lover {
+            valueCursors[5] = try self.insert(offset: lover, toStartedObjectAt: 5)
+        }
+        return try (self.endObject(), valueCursors)
+    }
 }
-public extension Friend {
-	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.options.uniqueTables {
-			if let myOffset = builder.cache[ObjectIdentifier(self)] {
-				return myOffset
-			}
-		}
-		if builder.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		builder.inProgress.insert(ObjectIdentifier(self))
-		let offset4 = try addToByteArray_Human(builder, union: lover)
-		let offset3 = try mother?.addToByteArray(builder) ?? 0
-		let offset2 = try father?.addToByteArray(builder) ?? 0
-		var offset1 = Offset(0)
-		if friends.count > 0{
-			var offsets = [Offset?](repeating: nil, count: friends.count)
-			var index = friends.count - 1
-			var deferedBindingObjects : [Int : Friend] = [:]
-			while(index >= 0){
-				offsets[index] = try friends[index].addToByteArray(builder)
-				if offsets[index] == 0 {
-					deferedBindingObjects[index] = friends[index]
-				}
-				index -= 1
-			}
-			try builder.startVector(count: friends.count, elementSize: MemoryLayout<Offset>.stride)
-			index = friends.count - 1
-			var deferedBindingCursors : [Int : Int] = [:]
-			while(index >= 0){
-				let cursor = try builder.insert(offset: offsets[index])
-				if offsets[index] == 0 {
-					deferedBindingCursors[index] = cursor
-				}
-				index -= 1
-			}
-			for key in deferedBindingObjects.keys {
-				if let object = deferedBindingObjects[key],
-				   let cursor = deferedBindingCursors[key] {
-					builder.deferedBindings.append((object: object, cursor: cursor))
-				}
-			}
-			offset1 = builder.endVector()
-		}
-		let offset0 = try builder.insert(value: name)
-		try builder.startObject(withPropertyCount: 6)
-		if let object = lover {
-			let cursor4 = try builder.insert(offset: offset4, toStartedObjectAt: 5)
-			if offset4 == 0 {
-				builder.deferedBindings.append((object: object, cursor: cursor4))
-			}
-			try builder.insert(value : unionCase_Human(object), defaultValue : 0, toStartedObjectAt: 4)
-		}
-		if mother != nil {
-			let cursor3 = try builder.insert(offset: offset3, toStartedObjectAt: 3)
-			if offset3 == 0 {
-				if let object = mother {
-					builder.deferedBindings.append((object: object, cursor: cursor3))
-				}
-			}
-		}
-		if father != nil {
-			let cursor2 = try builder.insert(offset: offset2, toStartedObjectAt: 2)
-			if offset2 == 0 {
-				if let object = father {
-					builder.deferedBindings.append((object: object, cursor: cursor2))
-				}
-			}
-		}
-		if friends.count > 0 {
-			try builder.insert(offset: offset1, toStartedObjectAt: 1)
-		}
-		try builder.insert(offset: offset0, toStartedObjectAt: 0)
-		let myOffset =  try builder.endObject()
-		if builder.options.uniqueTables {
-			builder.cache[ObjectIdentifier(self)] = myOffset
-		}
-		builder.inProgress.remove(ObjectIdentifier(self))
-		return myOffset
-	}
+extension Friend {
+    func insert(_ builder : FlatBuffersBuilder) throws -> Offset {
+        if builder.options.uniqueTables {
+            if let myOffset = builder.cache[ObjectIdentifier(self)] {
+                return myOffset
+            }
+        }
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
+        let name = self.name == nil ? nil : try builder.insert(value: self.name)
+        let friends: Offset?
+        if self.friends.isEmpty {
+            friends = nil
+        } else {
+            let offsets = try self.friends.reversed().map{ try $0.insert(builder) }
+            try builder.startVector(count: self.friends.count, elementSize: MemoryLayout<Offset>.stride)
+            for (index, o) in offsets.enumerated() {
+                let cursor = try builder.insert(offset: o)
+                if o == 0 {
+                    builder.deferedBindings.append((object: self.friends.reversed()[index], cursor: cursor))
+                }
+            }
+            friends = builder.endVector()
+        }
+        let father = try self.father?.insert(builder)
+        let mother = try self.mother?.insert(builder)
+        let lover = try self.lover?.insert(builder)
+        let lover_type = self.lover?.unionCase ?? 0
+        let (myOffset, valueCursors) = try builder.insertFriend(
+            name: name,
+            friends: friends,
+            father: father,
+            mother: mother,
+            lover_type: lover_type,
+            lover: lover
+        )
+        if father == 0,
+           let o = self.father,
+           let cursor = valueCursors[2] {
+            builder.deferedBindings.append((o, cursor))
+        }
+        if mother == 0,
+           let o = self.mother,
+           let cursor = valueCursors[3] {
+            builder.deferedBindings.append((o, cursor))
+        }
+        if lover == 0,
+           let o = self.lover,
+           let cursor = valueCursors[5] {
+            builder.deferedBindings.append((o.value, cursor))
+        }
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+        builder.inProgress.remove(ObjectIdentifier(self))
+        return myOffset
+    }
+
+}
+public enum Human {
+    case withMale(Male), withFemale(Female)
+    fileprivate static func from(selfReader: Human.Direct<FlatBuffersMemoryReader>?) -> Human? {
+        guard let selfReader = selfReader else {
+            return nil
+        }
+        switch selfReader {
+        case .withMale(let o):
+            guard let o1 = Male.from(selfReader: o) else {
+                return nil
+            }
+            return .withMale(o1)
+        case .withFemale(let o):
+            guard let o1 = Female.from(selfReader: o) else {
+                return nil
+            }
+            return .withFemale(o1)
+        }
+    }
+    public enum Direct<R : FlatBuffersReader> {
+        case withMale(Male.Direct<R>), withFemale(Female.Direct<R>)
+        fileprivate static func from(reader: R, propertyIndex : Int, objectOffset : Offset?) -> Human.Direct<R>? {
+            guard let objectOffset = objectOffset else {
+                return nil
+            }
+            let unionCase : Int8 = reader.get(objectOffset: objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
+            guard let caseObjectOffset : Offset = reader.offset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
+                return nil
+            }
+            switch unionCase {
+            case 1:
+                guard let o = Male.Direct<R>(reader: reader, myOffset: caseObjectOffset) else {
+                    return nil
+            }
+            return Human.Direct.withMale(o)
+            case 2:
+                guard let o = Female.Direct<R>(reader: reader, myOffset: caseObjectOffset) else {
+                    return nil
+            }
+            return Human.Direct.withFemale(o)
+            default:
+                break
+            }
+            return nil
+        }
+        var asMale: Male.Direct<R>? {
+            switch self {
+            case .withMale(let v):
+                return v
+            default:
+                return nil
+            }
+        }
+        var asFemale: Female.Direct<R>? {
+            switch self {
+            case .withFemale(let v):
+                return v
+            default:
+                return nil
+            }
+        }
+    }
+    var unionCase: Int8 {
+        switch self {
+          case .withMale(_): return 1
+          case .withFemale(_): return 2
+        }
+    }
+    func insert(_ builder: FlatBuffersBuilder) throws -> Offset {
+        switch self {
+          case .withMale(let o): return try o.insert(builder)
+          case .withFemale(let o): return try o.insert(builder)
+        }
+    }
+    var asMale: Male? {
+        switch self {
+        case .withMale(let v):
+            return v
+        default:
+            return nil
+        }
+    }
+    var asFemale: Female? {
+        switch self {
+        case .withFemale(let v):
+            return v
+        default:
+            return nil
+        }
+    }
+    var value: AnyObject {
+        switch self {
+        case .withMale(let v): return v
+        case .withFemale(let v): return v
+        }
+    }
 }
 public final class Male {
-	public var ref : Friend? = nil
-	public init(){}
-	public init(ref: Friend?){
-		self.ref = ref
-	}
+    public var ref: Friend?
+    public init(ref: Friend? = nil) {
+        self.ref = ref
+    }
+    public struct Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
+        fileprivate let _reader : T
+        fileprivate let _myOffset : Offset
+    }
 }
-public extension Male {
-	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> Male? {
-		guard let objectOffset = objectOffset else {
-			return nil
-		}
-		if  let cache = reader.cache,
-			let o = cache.objectPool[objectOffset] {
-			return o as? Male
-		}
-		let _result = Male()
-		if let cache = reader.cache {
-			cache.objectPool[objectOffset] = _result
-		}
-		_result.ref = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))
-		return _result
-	}
+extension Male.Direct {
+    public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset? = nil) {
+        guard let reader = reader as? T else {
+            return nil
+        }
+        self._reader = reader
+        if let myOffset = myOffset {
+            self._myOffset = myOffset
+        } else {
+            if let rootOffset = reader.rootObjectOffset {
+                self._myOffset = rootOffset
+            } else {
+                return nil
+            }
+        }
+    }
+    public var hashValue: Int { return Int(_myOffset) }
+    public static func ==<T>(t1 : Male.Direct<T>, t2 : Male.Direct<T>) -> Bool {
+        return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
+    }
+    public var ref: Friend.Direct<T>? {
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
+        return Friend.Direct(reader: _reader, myOffset: offset)
+    }
 }
-public struct Male_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
-	fileprivate let reader : T
-	fileprivate let myOffset : Offset
-	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
-		guard let myOffset = myOffset, let reader = reader as? T else {
-			return nil
-		}
-		self.reader = reader
-		self.myOffset = myOffset
-	}
-	public var ref : Friend_Direct<T>? { get { 
-		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 0) {
-			return Friend_Direct(reader: reader, myOffset: offset)
-		}
-		return nil
-	} }
-	public var hashValue: Int { return Int(myOffset) }
+extension Male {
+
+    fileprivate static func from(selfReader: Direct<FlatBuffersMemoryReader>?) -> Male? {
+        guard let selfReader = selfReader else {
+            return nil
+        }
+        if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? Male {
+            return o
+        }
+        let o = Male()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.ref = Friend.from(selfReader:selfReader.ref)
+
+        return o
+    }
 }
-public func ==<T>(t1 : Male_Direct<T>, t2 : Male_Direct<T>) -> Bool {
-	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
+extension FlatBuffersBuilder {
+    public func insertMale(ref: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 1)
+        try self.startObject(withPropertyCount: 1)
+        if let ref = ref {
+            valueCursors[0] = try self.insert(offset: ref, toStartedObjectAt: 0)
+        }
+        return try (self.endObject(), valueCursors)
+    }
 }
-public extension Male {
-	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.options.uniqueTables {
-			if let myOffset = builder.cache[ObjectIdentifier(self)] {
-				return myOffset
-			}
-		}
-		if builder.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		builder.inProgress.insert(ObjectIdentifier(self))
-		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.startObject(withPropertyCount: 1)
-		if ref != nil {
-			let cursor0 = try builder.insert(offset: offset0, toStartedObjectAt: 0)
-			if offset0 == 0 {
-				if let object = ref {
-					builder.deferedBindings.append((object: object, cursor: cursor0))
-				}
-			}
-		}
-		let myOffset =  try builder.endObject()
-		if builder.options.uniqueTables {
-			builder.cache[ObjectIdentifier(self)] = myOffset
-		}
-		builder.inProgress.remove(ObjectIdentifier(self))
-		return myOffset
-	}
+extension Male {
+    func insert(_ builder : FlatBuffersBuilder) throws -> Offset {
+        if builder.options.uniqueTables {
+            if let myOffset = builder.cache[ObjectIdentifier(self)] {
+                return myOffset
+            }
+        }
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
+        let ref = try self.ref?.insert(builder)
+        let (myOffset, valueCursors) = try builder.insertMale(
+            ref: ref
+        )
+        if ref == 0,
+           let o = self.ref,
+           let cursor = valueCursors[0] {
+            builder.deferedBindings.append((o, cursor))
+        }
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+        builder.inProgress.remove(ObjectIdentifier(self))
+        return myOffset
+    }
+
 }
 public final class Female {
-	public var ref : Friend? = nil
-	public init(){}
-	public init(ref: Friend?){
-		self.ref = ref
-	}
+    public var ref: Friend?
+    public init(ref: Friend? = nil) {
+        self.ref = ref
+    }
+    public struct Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
+        fileprivate let _reader : T
+        fileprivate let _myOffset : Offset
+    }
 }
-public extension Female {
-	fileprivate static func create(_ reader : FlatBuffersReader, objectOffset : Offset?) -> Female? {
-		guard let objectOffset = objectOffset else {
-			return nil
-		}
-		if  let cache = reader.cache,
-			let o = cache.objectPool[objectOffset] {
-			return o as? Female
-		}
-		let _result = Female()
-		if let cache = reader.cache {
-			cache.objectPool[objectOffset] = _result
-		}
-		_result.ref = Friend.create(reader, objectOffset: reader.offset(objectOffset: objectOffset, propertyIndex: 0))
-		return _result
-	}
+extension Female.Direct {
+    public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset? = nil) {
+        guard let reader = reader as? T else {
+            return nil
+        }
+        self._reader = reader
+        if let myOffset = myOffset {
+            self._myOffset = myOffset
+        } else {
+            if let rootOffset = reader.rootObjectOffset {
+                self._myOffset = rootOffset
+            } else {
+                return nil
+            }
+        }
+    }
+    public var hashValue: Int { return Int(_myOffset) }
+    public static func ==<T>(t1 : Female.Direct<T>, t2 : Female.Direct<T>) -> Bool {
+        return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
+    }
+    public var ref: Friend.Direct<T>? {
+        guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
+        return Friend.Direct(reader: _reader, myOffset: offset)
+    }
 }
-public struct Female_Direct<T : FlatBuffersReader> : Hashable, FlatBuffersDirectAccess {
-	fileprivate let reader : T
-	fileprivate let myOffset : Offset
-	public init?<R : FlatBuffersReader>(reader: R, myOffset: Offset?) {
-		guard let myOffset = myOffset, let reader = reader as? T else {
-			return nil
-		}
-		self.reader = reader
-		self.myOffset = myOffset
-	}
-	public var ref : Friend_Direct<T>? { get { 
-		if let offset = reader.offset(objectOffset: myOffset, propertyIndex: 0) {
-			return Friend_Direct(reader: reader, myOffset: offset)
-		}
-		return nil
-	} }
-	public var hashValue: Int { return Int(myOffset) }
-}
-public func ==<T>(t1 : Female_Direct<T>, t2 : Female_Direct<T>) -> Bool {
-	return t1.reader.isEqual(other: t2.reader) && t1.myOffset == t2.myOffset
-}
-public extension Female {
-	fileprivate func addToByteArray(_ builder : FlatBuffersBuilder) throws -> Offset {
-		if builder.options.uniqueTables {
-			if let myOffset = builder.cache[ObjectIdentifier(self)] {
-				return myOffset
-			}
-		}
-		if builder.inProgress.contains(ObjectIdentifier(self)){
-			return 0
-		}
-		builder.inProgress.insert(ObjectIdentifier(self))
-		let offset0 = try ref?.addToByteArray(builder) ?? 0
-		try builder.startObject(withPropertyCount: 1)
-		if ref != nil {
-			let cursor0 = try builder.insert(offset: offset0, toStartedObjectAt: 0)
-			if offset0 == 0 {
-				if let object = ref {
-					builder.deferedBindings.append((object: object, cursor: cursor0))
-				}
-			}
-		}
-		let myOffset =  try builder.endObject()
-		if builder.options.uniqueTables {
-			builder.cache[ObjectIdentifier(self)] = myOffset
-		}
-		builder.inProgress.remove(ObjectIdentifier(self))
-		return myOffset
-	}
-}
-public protocol Human{}
-public protocol Human_Direct{}
-extension Male : Human {}
-extension Male_Direct : Human_Direct {}
-extension Female : Human {}
-extension Female_Direct : Human_Direct {}
-fileprivate func create_Human(_ reader : FlatBuffersReader, propertyIndex : Int, objectOffset : Offset?) -> Human? {
-	guard let objectOffset = objectOffset else {
-		return nil
-	}
-	let unionCase : Int8 = reader.get(objectOffset: objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
-	guard let caseObjectOffset : Offset = reader.offset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
-		return nil
-	}
-	switch unionCase {
-	case 1 : return Male.create(reader, objectOffset: caseObjectOffset)
-	case 2 : return Female.create(reader, objectOffset: caseObjectOffset)
-	default : return nil
-	}
-}
+extension Female {
 
-fileprivate func create_Human_Direct<T : FlatBuffersReader>(_ reader : T, propertyIndex : Int, objectOffset : Offset?) -> Human_Direct? {
-	guard let objectOffset = objectOffset else {
-		return nil
-	}
-	let unionCase : Int8 = reader.get(objectOffset: objectOffset, propertyIndex: propertyIndex, defaultValue: 0)
-	guard let caseObjectOffset : Offset = reader.offset(objectOffset: objectOffset, propertyIndex:propertyIndex + 1) else {
-		return nil
-	}
-	switch unionCase {
-	case 1 : return Male_Direct<T>(reader: reader, myOffset: caseObjectOffset)
-	case 2 : return Female_Direct<T>(reader: reader, myOffset: caseObjectOffset)
-	default : return nil
-	}
+    fileprivate static func from(selfReader: Direct<FlatBuffersMemoryReader>?) -> Female? {
+        guard let selfReader = selfReader else {
+            return nil
+        }
+        if let o = selfReader._reader.cache?.objectPool[selfReader._myOffset] as? Female {
+            return o
+        }
+        let o = Female()
+        selfReader._reader.cache?.objectPool[selfReader._myOffset] = o
+        o.ref = Friend.from(selfReader:selfReader.ref)
+
+        return o
+    }
 }
-private func unionCase_Human(_ union : Human?) -> Int8 {
-	switch union {
-	case is Male : return 1
-	case is Female : return 2
-	default : return 0
-	}
+extension FlatBuffersBuilder {
+    public func insertFemale(ref: Offset? = nil) throws -> (Offset, [Int?]) {
+        var valueCursors = [Int?](repeating: nil, count: 1)
+        try self.startObject(withPropertyCount: 1)
+        if let ref = ref {
+            valueCursors[0] = try self.insert(offset: ref, toStartedObjectAt: 0)
+        }
+        return try (self.endObject(), valueCursors)
+    }
 }
-fileprivate func addToByteArray_Human(_ builder : FlatBuffersBuilder, union : Human?) throws -> Offset {
-	switch union {
-	case let u as Male : return try u.addToByteArray(builder)
-	case let u as Female : return try u.addToByteArray(builder)
-	default : return 0
-	}
+extension Female {
+    func insert(_ builder : FlatBuffersBuilder) throws -> Offset {
+        if builder.options.uniqueTables {
+            if let myOffset = builder.cache[ObjectIdentifier(self)] {
+                return myOffset
+            }
+        }
+        if builder.inProgress.contains(ObjectIdentifier(self)){
+            return 0
+        }
+        builder.inProgress.insert(ObjectIdentifier(self))
+        let ref = try self.ref?.insert(builder)
+        let (myOffset, valueCursors) = try builder.insertFemale(
+            ref: ref
+        )
+        if ref == 0,
+           let o = self.ref,
+           let cursor = valueCursors[0] {
+            builder.deferedBindings.append((o, cursor))
+        }
+        if builder.options.uniqueTables {
+            builder.cache[ObjectIdentifier(self)] = myOffset
+        }
+        builder.inProgress.remove(ObjectIdentifier(self))
+        return myOffset
+    }
+
 }
-private func performLateBindings(_ builder : FlatBuffersBuilder) throws {
-	for binding in builder.deferedBindings {
-		switch binding.object {
-		case let object as PeopleList: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Friend: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Male: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		case let object as Female: try builder.update(offset: object.addToByteArray(builder), atCursor: binding.cursor)
-		default: continue
-		}
-	}
+fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
+    for binding in builder.deferedBindings {
+        if let offset = builder.cache[ObjectIdentifier(binding.object)] {
+            try builder.update(offset: offset, atCursor: binding.cursor)
+        } else {
+            throw FlatBuffersBuildError.couldNotPerformLateBinding
+        }
+    }
+    builder.deferedBindings.removeAll()
 }

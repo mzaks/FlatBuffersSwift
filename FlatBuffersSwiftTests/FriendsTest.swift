@@ -20,7 +20,7 @@ class FriendsTest: XCTestCase {
         list.people = [f1]
         let data = try!list.makeData()
         
-        let newList = PeopleList.makePeopleList(data: data)
+        let newList = PeopleList.from(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -36,7 +36,7 @@ class FriendsTest: XCTestCase {
         list.people = [f1]
         let data = try!list.makeData()
         
-        let newList = PeopleList.makePeopleList(data: data)
+        let newList = PeopleList.from(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -54,7 +54,7 @@ class FriendsTest: XCTestCase {
         list.people = [f1]
         let data = try!list.makeData()
         
-        let newList = PeopleList.makePeopleList(data: data)
+        let newList = PeopleList.from(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
@@ -66,18 +66,18 @@ class FriendsTest: XCTestCase {
     func testListWithOneEntryWithRecursionThrougUnion() {
         let f1 = Friend()
         f1.name = "Maxim"
-        f1.lover = Male(ref:f1)
+        f1.lover = .withMale(Male(ref:f1))
         
         let list = PeopleList()
         list.people = [f1]
         let data = try!list.makeData()
         
-        let newList = PeopleList.makePeopleList(data: data)
+        let newList = PeopleList.from(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
         XCTAssertEqual(newList?.people[0].name, "Maxim")
-        let male = (newList?.people[0].lover as? Male)
+        let male = (newList?.people[0].lover?.asMale)
         XCTAssertEqual(male?.ref?.name, "Maxim")
         XCTAssertTrue(newList?.people[0] === male?.ref)
     }
@@ -87,21 +87,21 @@ class FriendsTest: XCTestCase {
         f1.name = "Maxim"
         let f2 = Friend()
         f2.name = "Daria"
-        f1.lover = Female(ref: f2)
-        f2.lover = Male(ref:f1)
+        f1.lover = .withFemale(Female(ref: f2))
+        f2.lover = .withMale(Male(ref:f1))
         
         let list = PeopleList()
         list.people = [f1]
         let data = try!list.makeData()
         
-        let newList = PeopleList.makePeopleList(data: data)
+        let newList = PeopleList.from(data: data)
         
         XCTAssertEqual(newList?.people.count, 1)
         
         XCTAssertEqual(newList?.people[0].name, "Maxim")
-        let female = (newList?.people[0].lover as? Female)
+        let female = (newList?.people[0].lover?.asFemale)
         XCTAssertEqual(female?.ref?.name, "Daria")
-        let male = female?.ref?.lover as? Male
+        let male = female?.ref?.lover?.asMale
         XCTAssertEqual(male?.ref?.name, "Maxim")
         XCTAssertTrue(newList?.people[0] === male?.ref)
     }
@@ -110,7 +110,7 @@ class FriendsTest: XCTestCase {
         
         let data = try!complexList().makeData()
         
-        let newList = PeopleList.makePeopleList(data: data)
+        let newList = PeopleList.from(data: data)
         
         XCTAssertEqual(newList?.people.count, 5)
         
@@ -141,7 +141,7 @@ class FriendsTest: XCTestCase {
         
         let reader = FlatBuffersMemoryReader(data: data)
         
-        let newList = PeopleList_Direct(reader)
+        let newList = PeopleList.Direct<FlatBuffersMemoryReader>(reader: reader)
         
         XCTAssertEqual(newList?.people.count, 5)
         
@@ -173,38 +173,6 @@ class FriendsTest: XCTestCase {
         )
     }
     
-    func testComplexGraphFromFile(){
-        
-        let data = try!complexList().makeData()
-        
-        let fileHandle = writeToFileAndReturnHandle(data)
-        let fileReader = FlatBuffersFileReader(fileHandle: fileHandle)
-        
-        let newList = PeopleList.makePeopleList(reader:fileReader)
-        
-        XCTAssertEqual(newList?.people.count, 5)
-        
-        XCTAssertEqual(newList?.people[0].name, "a")
-        XCTAssertEqual(newList?.people[1].name, "b")
-        XCTAssertEqual(newList?.people[2].name, "c")
-        XCTAssertEqual(newList?.people[3].name, "d")
-        XCTAssertEqual(newList?.people[4].name, "e")
-        
-        let friendsA = newList?.people[0].friends
-        XCTAssertEqual(friendsA?.count, 4)
-        XCTAssertEqual(friendsA?[0].name, "b")
-        XCTAssertEqual(friendsA?[1].name, "c")
-        XCTAssertEqual(friendsA?[2].name, "d")
-        XCTAssertEqual(friendsA?[3].name, "a")
-        
-        XCTAssertTrue(newList?.people[1] === friendsA?[0])
-        XCTAssertTrue(newList?.people[3] === friendsA?[0].friends[0])
-        XCTAssertTrue(newList?.people[2] === friendsA?[0].friends[0].friends[0])
-        XCTAssertTrue(newList?.people[0] === friendsA?[0].friends[0].friends[0].friends[0])
-        let friendsC = friendsA?[0].friends[0].friends[0]
-        XCTAssertTrue(newList?.people[1] === friendsC?.friends[1])
-    }
-    
     func testComplexGraphDirectReadFromFile(){
         
         let data = try!complexList().makeData()
@@ -212,7 +180,7 @@ class FriendsTest: XCTestCase {
         let fileHandle = writeToFileAndReturnHandle(data)
         let reader = FlatBuffersFileReader(fileHandle: fileHandle)
         
-        let newList = PeopleList_Direct(reader)
+        let newList = PeopleList.Direct<FlatBuffersFileReader>(reader: reader)
         
         XCTAssertEqual(newList?.people.count, 5)
         
