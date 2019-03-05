@@ -91,6 +91,10 @@ public final class FlatBuffersBuilder {
         _data = UnsafeMutableRawPointer.allocate(byteCount: capacity, alignment: minalign)
     }
 
+    deinit {
+        _data.deallocate()
+    }
+
     /**
      Allocates and returns a Data object initialized from the builder backing store
 
