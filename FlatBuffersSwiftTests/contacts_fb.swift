@@ -111,6 +111,17 @@ extension ContactList {
         return builder.makeData
     }
 }
+extension ContactList {
+    public static func from(jsonObject: [String: Any]?) -> ContactList? {
+        guard let object = jsonObject else { return nil }
+        let lastModified = (object["lastModified"] as? Int).flatMap { Int64(exactly: $0) } ?? 0
+        let entries = ((object["entries"] as? [[String: Any]]) ?? []).compactMap { Contact.from(jsonObject: $0)}
+        return ContactList (
+            lastModified: lastModified,
+            entries: entries
+        )
+    }
+}
 public final class Contact {
     public var name: String?
     public var birthday: Date?
@@ -333,6 +344,31 @@ extension Contact {
     }
 
 }
+extension Contact {
+    public static func from(jsonObject: [String: Any]?) -> Contact? {
+        guard let object = jsonObject else { return nil }
+        let name = object["name"] as? String
+        let birthday = Date.from(jsonObject: object["birthday"] as? [String: Any])
+        let gender = Gender.from(jsonValue: object["gender"])
+        let tags = object["tags"] as? [String] ?? []
+        let addressEntries = ((object["addressEntries"] as? [[String: Any]]) ?? []).compactMap { AddressEntry.from(jsonObject: $0)}
+        let currentLoccation = GeoLocation.from(jsonObject: object["currentLoccation"] as? [String: Any])
+        let previousLocations = ((object["previousLocations"] as? [[String: Any]]) ?? []).compactMap { GeoLocation.from(jsonObject: $0)}
+        let moods = ((object["moods"] as? [Any]) ?? []).compactMap { Mood.from(jsonValue: $0)}
+        let luckyNumbers = (object["luckyNumbers"] as? [Int] ?? []).compactMap { Int32(exactly: $0) }
+        return Contact (
+            name: name,
+            birthday: birthday,
+            gender: gender,
+            tags: tags,
+            addressEntries: addressEntries,
+            currentLoccation: currentLoccation,
+            previousLocations: previousLocations,
+            moods: moods,
+            luckyNumbers: luckyNumbers
+        )
+    }
+}
 public final class Date {
     public var day: Int8
     public var month: Int8
@@ -431,6 +467,19 @@ extension Date {
     }
 
 }
+extension Date {
+    public static func from(jsonObject: [String: Any]?) -> Date? {
+        guard let object = jsonObject else { return nil }
+        let day = (object["day"] as? Int).flatMap { Int8(exactly: $0) } ?? 0
+        let month = (object["month"] as? Int).flatMap { Int8(exactly: $0) } ?? 0
+        let year = (object["year"] as? Int).flatMap { Int16(exactly: $0) } ?? 0
+        return Date (
+            day: day,
+            month: month,
+            year: year
+        )
+    }
+}
 public enum Gender: Int8, FlatBuffersEnum {
     case Male, Female
     public static func fromScalar<T>(_ scalar: T) -> Gender? where T : Scalar {
@@ -438,6 +487,23 @@ public enum Gender: Int8, FlatBuffersEnum {
             return nil
         }
         return Gender(rawValue: value)
+    }
+}
+extension Gender {
+    static func from(jsonValue: Any?) -> Gender? {
+        if let string = jsonValue as? String {
+            if string == "Male" {
+                return .Male
+            }
+            if string == "Female" {
+                return .Female
+            }
+        }
+        if let int = jsonValue as? Int,
+            let rawValue = Int8(exactly: int) {
+            return Gender.init(rawValue: rawValue)
+        }
+        return nil
     }
 }
 public final class AddressEntry {
@@ -534,6 +600,17 @@ extension AddressEntry {
     }
 
 }
+extension AddressEntry {
+    public static func from(jsonObject: [String: Any]?) -> AddressEntry? {
+        guard let object = jsonObject else { return nil }
+        let order = (object["order"] as? Int).flatMap { Int32(exactly: $0) } ?? 0
+        let address = Address.from(type:object["address_type"] as? String, jsonObject: object["address"] as? [String: Any])
+        return AddressEntry (
+            order: order,
+            address: address
+        )
+    }
+}
 public enum Address {
     case withPostalAddress(PostalAddress), withEmailAddress(EmailAddress), withWebAddress(WebAddress), withTelephoneNumber(TelephoneNumber)
     fileprivate static func from(selfReader: Address.Direct<FlatBuffersMemoryReader>?) -> Address? {
@@ -599,7 +676,7 @@ public enum Address {
             }
             return nil
         }
-        var asPostalAddress: PostalAddress.Direct<R>? {
+        public var asPostalAddress: PostalAddress.Direct<R>? {
             switch self {
             case .withPostalAddress(let v):
                 return v
@@ -607,7 +684,7 @@ public enum Address {
                 return nil
             }
         }
-        var asEmailAddress: EmailAddress.Direct<R>? {
+        public var asEmailAddress: EmailAddress.Direct<R>? {
             switch self {
             case .withEmailAddress(let v):
                 return v
@@ -615,7 +692,7 @@ public enum Address {
                 return nil
             }
         }
-        var asWebAddress: WebAddress.Direct<R>? {
+        public var asWebAddress: WebAddress.Direct<R>? {
             switch self {
             case .withWebAddress(let v):
                 return v
@@ -623,7 +700,7 @@ public enum Address {
                 return nil
             }
         }
-        var asTelephoneNumber: TelephoneNumber.Direct<R>? {
+        public var asTelephoneNumber: TelephoneNumber.Direct<R>? {
             switch self {
             case .withTelephoneNumber(let v):
                 return v
@@ -648,7 +725,7 @@ public enum Address {
           case .withTelephoneNumber(let o): return try o.insert(builder)
         }
     }
-    var asPostalAddress: PostalAddress? {
+    public var asPostalAddress: PostalAddress? {
         switch self {
         case .withPostalAddress(let v):
             return v
@@ -656,7 +733,7 @@ public enum Address {
             return nil
         }
     }
-    var asEmailAddress: EmailAddress? {
+    public var asEmailAddress: EmailAddress? {
         switch self {
         case .withEmailAddress(let v):
             return v
@@ -664,7 +741,7 @@ public enum Address {
             return nil
         }
     }
-    var asWebAddress: WebAddress? {
+    public var asWebAddress: WebAddress? {
         switch self {
         case .withWebAddress(let v):
             return v
@@ -672,7 +749,7 @@ public enum Address {
             return nil
         }
     }
-    var asTelephoneNumber: TelephoneNumber? {
+    public var asTelephoneNumber: TelephoneNumber? {
         switch self {
         case .withTelephoneNumber(let v):
             return v
@@ -680,12 +757,33 @@ public enum Address {
             return nil
         }
     }
-    var value: AnyObject {
+    public var value: AnyObject {
         switch self {
         case .withPostalAddress(let v): return v
         case .withEmailAddress(let v): return v
         case .withWebAddress(let v): return v
         case .withTelephoneNumber(let v): return v
+        }
+    }
+}
+extension Address {
+    static func from(type: String?, jsonObject: [String: Any]?) -> Address? {
+        guard let type = type, let object = jsonObject else { return nil }
+        switch type {
+        case "PostalAddress":
+            guard let o = PostalAddress.from(jsonObject: object) else { return nil }
+            return Address.withPostalAddress(o)
+        case "EmailAddress":
+            guard let o = EmailAddress.from(jsonObject: object) else { return nil }
+            return Address.withEmailAddress(o)
+        case "WebAddress":
+            guard let o = WebAddress.from(jsonObject: object) else { return nil }
+            return Address.withWebAddress(o)
+        case "TelephoneNumber":
+            guard let o = TelephoneNumber.from(jsonObject: object) else { return nil }
+            return Address.withTelephoneNumber(o)
+        default:
+            return nil
         }
     }
 }
@@ -804,6 +902,21 @@ extension PostalAddress {
     }
 
 }
+extension PostalAddress {
+    public static func from(jsonObject: [String: Any]?) -> PostalAddress? {
+        guard let object = jsonObject else { return nil }
+        let country = object["country"] as? String
+        let city = object["city"] as? String
+        let postalCode = (object["postalCode"] as? Int).flatMap { Int32(exactly: $0) } ?? 0
+        let streetAndNumber = object["streetAndNumber"] as? String
+        return PostalAddress (
+            country: country,
+            city: city,
+            postalCode: postalCode,
+            streetAndNumber: streetAndNumber
+        )
+    }
+}
 public final class EmailAddress {
     public var mailto: String?
     public init(mailto: String? = nil) {
@@ -885,6 +998,15 @@ extension EmailAddress {
         return myOffset
     }
 
+}
+extension EmailAddress {
+    public static func from(jsonObject: [String: Any]?) -> EmailAddress? {
+        guard let object = jsonObject else { return nil }
+        let mailto = object["mailto"] as? String
+        return EmailAddress (
+            mailto: mailto
+        )
+    }
 }
 public final class WebAddress {
     public var url: String?
@@ -968,6 +1090,15 @@ extension WebAddress {
     }
 
 }
+extension WebAddress {
+    public static func from(jsonObject: [String: Any]?) -> WebAddress? {
+        guard let object = jsonObject else { return nil }
+        let url = object["url"] as? String
+        return WebAddress (
+            url: url
+        )
+    }
+}
 public final class TelephoneNumber {
     public var number: String?
     public init(number: String? = nil) {
@@ -1050,12 +1181,34 @@ extension TelephoneNumber {
     }
 
 }
+extension TelephoneNumber {
+    public static func from(jsonObject: [String: Any]?) -> TelephoneNumber? {
+        guard let object = jsonObject else { return nil }
+        let number = object["number"] as? String
+        return TelephoneNumber (
+            number: number
+        )
+    }
+}
 public struct GeoLocation: Scalar {
     public let latitude: Float64
     public let longitude: Float64
     public let elevation: Float32
     public static func ==(v1:GeoLocation, v2:GeoLocation) -> Bool {
         return v1.latitude==v2.latitude && v1.longitude==v2.longitude && v1.elevation==v2.elevation
+    }
+}
+extension GeoLocation {
+    static func from(jsonObject: [String: Any]?) -> GeoLocation? {
+        guard let object = jsonObject else { return nil }
+       guard let latitude = object["latitude"] as? Double else { return nil }
+       guard let longitude = object["longitude"] as? Double else { return nil }
+       guard let elevationDouble = object["elevation"] as? Double, let elevation = Optional.some(Float32(elevationDouble)) else { return nil }
+        return GeoLocation(
+            latitude: latitude,
+            longitude: longitude,
+            elevation: elevation
+        )
     }
 }
 public enum Mood: Int8, FlatBuffersEnum {
@@ -1065,5 +1218,28 @@ public enum Mood: Int8, FlatBuffersEnum {
             return nil
         }
         return Mood(rawValue: value)
+    }
+}
+extension Mood {
+    static func from(jsonValue: Any?) -> Mood? {
+        if let string = jsonValue as? String {
+            if string == "Funny" {
+                return .Funny
+            }
+            if string == "Serious" {
+                return .Serious
+            }
+            if string == "Angry" {
+                return .Angry
+            }
+            if string == "Humble" {
+                return .Humble
+            }
+        }
+        if let int = jsonValue as? Int,
+            let rawValue = Int8(exactly: int) {
+            return Mood.init(rawValue: rawValue)
+        }
+        return nil
     }
 }

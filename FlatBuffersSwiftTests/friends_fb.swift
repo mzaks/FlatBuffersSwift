@@ -108,6 +108,15 @@ extension PeopleList {
         return builder.makeData
     }
 }
+extension PeopleList {
+    public static func from(jsonObject: [String: Any]?) -> PeopleList? {
+        guard let object = jsonObject else { return nil }
+        let people = ((object["people"] as? [[String: Any]]) ?? []).compactMap { Friend.from(jsonObject: $0)}
+        return PeopleList (
+            people: people
+        )
+    }
+}
 public final class Friend {
     public var name: String?
     public var friends: [Friend]
@@ -271,6 +280,23 @@ extension Friend {
     }
 
 }
+extension Friend {
+    public static func from(jsonObject: [String: Any]?) -> Friend? {
+        guard let object = jsonObject else { return nil }
+        let name = object["name"] as? String
+        let friends = ((object["friends"] as? [[String: Any]]) ?? []).compactMap { Friend.from(jsonObject: $0)}
+        let father = Friend.from(jsonObject: object["father"] as? [String: Any])
+        let mother = Friend.from(jsonObject: object["mother"] as? [String: Any])
+        let lover = Human.from(type:object["lover_type"] as? String, jsonObject: object["lover"] as? [String: Any])
+        return Friend (
+            name: name,
+            friends: friends,
+            father: father,
+            mother: mother,
+            lover: lover
+        )
+    }
+}
 public enum Human {
     case withMale(Male), withFemale(Female)
     fileprivate static func from(selfReader: Human.Direct<FlatBuffersMemoryReader>?) -> Human? {
@@ -316,7 +342,7 @@ public enum Human {
             }
             return nil
         }
-        var asMale: Male.Direct<R>? {
+        public var asMale: Male.Direct<R>? {
             switch self {
             case .withMale(let v):
                 return v
@@ -324,7 +350,7 @@ public enum Human {
                 return nil
             }
         }
-        var asFemale: Female.Direct<R>? {
+        public var asFemale: Female.Direct<R>? {
             switch self {
             case .withFemale(let v):
                 return v
@@ -345,7 +371,7 @@ public enum Human {
           case .withFemale(let o): return try o.insert(builder)
         }
     }
-    var asMale: Male? {
+    public var asMale: Male? {
         switch self {
         case .withMale(let v):
             return v
@@ -353,7 +379,7 @@ public enum Human {
             return nil
         }
     }
-    var asFemale: Female? {
+    public var asFemale: Female? {
         switch self {
         case .withFemale(let v):
             return v
@@ -361,10 +387,25 @@ public enum Human {
             return nil
         }
     }
-    var value: AnyObject {
+    public var value: AnyObject {
         switch self {
         case .withMale(let v): return v
         case .withFemale(let v): return v
+        }
+    }
+}
+extension Human {
+    static func from(type: String?, jsonObject: [String: Any]?) -> Human? {
+        guard let type = type, let object = jsonObject else { return nil }
+        switch type {
+        case "Male":
+            guard let o = Male.from(jsonObject: object) else { return nil }
+            return Human.withMale(o)
+        case "Female":
+            guard let o = Female.from(jsonObject: object) else { return nil }
+            return Human.withFemale(o)
+        default:
+            return nil
         }
     }
 }
@@ -457,6 +498,15 @@ extension Male {
     }
 
 }
+extension Male {
+    public static func from(jsonObject: [String: Any]?) -> Male? {
+        guard let object = jsonObject else { return nil }
+        let ref = Friend.from(jsonObject: object["ref"] as? [String: Any])
+        return Male (
+            ref: ref
+        )
+    }
+}
 public final class Female {
     public var ref: Friend?
     public init(ref: Friend? = nil) {
@@ -545,6 +595,15 @@ extension Female {
         return myOffset
     }
 
+}
+extension Female {
+    public static func from(jsonObject: [String: Any]?) -> Female? {
+        guard let object = jsonObject else { return nil }
+        let ref = Friend.from(jsonObject: object["ref"] as? [String: Any])
+        return Female (
+            ref: ref
+        )
+    }
 }
 fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
     for binding in builder.deferedBindings {
